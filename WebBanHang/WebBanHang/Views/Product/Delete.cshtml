@@ -1,0 +1,13 @@
+﻿@model WebBanHang.Models.Product
+<div class="card mt-4">
+    <div class="card-body">
+        <h4>Delete Product</h4>
+        <form asp-action="Delete" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <p>Are you sure you want to delete <strong>@Model.Name</strong>?</p>
+            <button type="submit" class="btn btn-danger">Delete</button>
+            <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+        </form>
+    </div>
+</div>

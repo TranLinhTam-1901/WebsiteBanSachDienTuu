@@ -1,0 +1,164 @@
+﻿@model WebBanHang.Models.Product
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Add New Book";
+}
+
+<div class="container mt-4 mb-5" id="AddProductForm">
+    <h2 class="mb-4">Create a New eBook</h2>
+
+    <form asp-action="Add" method="post" enctype="multipart/form-data">
+
+        <!-- ================= SECTION 1: Book Information ================= -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Book Information</h5>
+            </div>
+            <div class="card-body">
+                <!-- Book Title -->
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">Title</label>
+                    <input asp-for="Name" class="form-control" placeholder="Enter book title" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <!-- Book Description -->
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label">Description</label>
+                    <textarea asp-for="Description" class="form-control" id="description" rows="6" placeholder="Enter book description..."></textarea>
+                    <div class="form-text" id="char-count">0 / 3000 characters</div>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <script>
+                    const textarea = document.getElementById('description');
+                    const charCount = document.getElementById('char-count');
+                    const maxChars = 3000;
+
+                    function updateCharCount() {
+                        let text = textarea.value;
+                        if (text.length > maxChars) {
+                            textarea.value = text.substring(0, maxChars);
+                            text = textarea.value;
+                        }
+                        charCount.textContent = `${text.length} / ${maxChars} characters`;
+                    }
+
+                    textarea.addEventListener('input', updateCharCount);
+                    updateCharCount();
+                </script>
+
+                <!-- Category -->
+                <div class="mb-3">
+                    <label asp-for="CategoryId" class="form-label">Category</label>
+                    <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-control category-dropdown"></select>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SECTION 2: Content (Cover) ================= -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Content</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="mb-3">EBook Cover</h6>
+                <p class="text-muted">
+                    Upload your own cover (JPG/PNG).
+                </p>
+
+                <div class="border rounded p-3">
+                    <div class="form-check">
+                        <label class="form-check-label fw-bold" for="uploadCover">
+                            Upload an existing cover (JPG/PNG)
+                        </label>
+
+                        <div id="uploadCoverContent" class="toggle-box mt-2 ms-4 show">
+                            <div class="d-flex align-items-center">
+                                <!-- Preview Box -->
+                                <div id="previewBox" class="cover-box">
+                                    No cover selected
+                                </div>
+                                <div class="ms-3">
+                                    <label for="coverInput" class="btn btn-warning">Choose Cover</label>
+                                    <!-- Quan trọng: name="imageFile" để map đúng với controller -->
+                                    <input type="file" id="coverInput" name="imageFile" class="form-control d-none" accept="image/*" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= SECTION 3: Pricing ================= -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Price</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="Price" class="form-label">Price</label>
+                    <input asp-for="Price" class="form-control" placeholder="9.99" />
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="text-end mt-4">
+            <button type="submit" class="btn btn-lg btn-primary px-4">Publish</button>
+        </div>
+    </form>
+</div>
+
+
+
+<!-- ================= SCRIPT ================= -->
+<script>
+    const coverInput = document.getElementById("coverInput");
+    const previewBox = document.getElementById("previewBox");
+
+    coverInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewBox.innerHTML = `<img src="${e.target.result}" alt="Cover preview"
+                                         style="width:100%; height:100%; object-fit:cover; border-radius:4px;">`;
+            }
+            reader.readAsDataURL(file);
+        } else {
+            previewBox.innerHTML = "No cover selected";
+        }
+    });
+</script>
+
+
+<style>
+    #AddProductForm .toggle-box {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.4s ease;
+}
+
+        #AddProductForm .toggle-box.show {
+    max-height: 500px;
+    opacity: 1;
+}
+
+    #AddProductForm.cover-box {
+    width: 120px;
+    height: 160px;
+    border: 2px dashed #999;
+    color: #999;
+    font-size: 14px;
+    text-align: center;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+</style>
