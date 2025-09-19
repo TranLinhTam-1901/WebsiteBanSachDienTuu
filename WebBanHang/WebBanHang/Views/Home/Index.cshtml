@@ -1,4 +1,381 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    var books = new List<dynamic> {
+        new { Title="Becoming", Author="Michelle Obama", Price=30.88, OldPrice=32.50, Img="https://m.media-amazon.com/images/I/810isiedBkL._UF894,1000_QL80_.jpg" },
+        new { Title="Life Below Water", Author="Jordan Patterson", Price=17.34, OldPrice=(double?)null, Img="https://pictures.abebooks.com/isbn/9780976645047-us.jpg" },
+        new { Title="Five Feet Apart", Author="Rachael Lippincott", Price=17.09, OldPrice=18.99, Img="https://m.media-amazon.com/images/I/618hyLCek8L._UF1000,1000_QL80_.jpg" },
+        new { Title="One of Us is Lying", Author="Karen M. McManus", Price=17.99, OldPrice=(double?)null, Img="https://m.media-amazon.com/images/I/71HEIfxg0xL._UF1000,1000_QL80_.jpg" },
+        new { Title="How to Stop Time", Author="Matt Haig", Price=11.68, OldPrice=(double?)null, Img="https://m.media-amazon.com/images/I/817xUFQJhQL._UF1000,1000_QL80_.jpg" }
+    };
 }
+
+<style>
+        /* Banner layout fix */
+        .hero-banner .banner-item {
+            height: 100%; /* để các ảnh full chiều cao cột */
+            overflow: hidden;
+            border-radius: 10px;
+
+        }
+        .hero-banner {
+        padding-left: 0;
+        padding-right: 0;
+    }
+        .hero-banner .banner-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* ảnh full mà không méo */
+            border-radius: 10px;
+        }
+
+        .hero-banner .banner-content {
+            z-index: 2;
+        }
+
+        /* Đặt chiều cao đồng bộ */
+        .hero-banner .col-lg-6:first-child .banner-item {
+            height: 400px; /* banner lớn bên trái */
+        }
+
+        .hero-banner .col-lg-6 .col-12 .banner-item {
+            height: 190px; /* banner trên bên phải */
+        }
+
+        .hero-banner .col-lg-6 .col-6 .banner-item {
+            height: 190px; /* 2 banner dưới bên phải */
+        }
+
+        /* Nền mờ cho text */
+        .hero-banner .banner-content {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 0 0 10px 10px;
+            width: 100%;
+        }
+</style>
+
+<div class="container-fluid mt-4 hero-banner">
+    <div class="row g-3">
+        <!-- Banner trái (chiếm nửa màn hình) -->
+        <div class="col-lg-6">
+            <div class="banner-item position-relative">
+                <img src="https://images.csmonitor.com/csm/2021/03/1116885_1_0304-readers-rec_standard.jpg?alias=standard_900x600"
+                     alt="Travel Books" />
+                <div class="banner-content position-absolute bottom-0 start-0 p-4 text-white">
+                    <h5>Your Guide To The World</h5>
+                    <h2 class="fw-bold">Nên đọc<br />Sách hành trình</h2>
+                    <a href="#" class="btn btn-light mt-2">Tìm hiểu ngay →</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Banner phải (chia thành 1 + 2) -->
+        <div class="col-lg-6">
+            <div class="row g-3">
+                <!-- Banner trên -->
+                <div class="col-12">
+                    <div class="banner-item position-relative">
+                        <img src="https://www.telegraph.co.uk/content/dam/books/2025/03/27/TELEMMGLPICT000417904878_17430757074830_trans_NvBQzQNjv4BqqVzuuqpFlyLIwiB6NTmJwfSVWeZ_vEN7c6bHu2jJnT8.jpeg?imwidth=640"
+                             alt="Romance Books" />
+                        <div class="banner-content position-absolute bottom-0 start-0 p-3 text-white">
+                            <span class="small">Sách mới trong tuần</span>
+                            <h5 class="fw-bold">Discover Our<br />Best Romance Books</h5>
+                            <a href="#" class="btn btn-outline-light btn-sm mt-2">Discover Now</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Banner dưới chia đôi -->
+                <div class="col-6">
+                    <div class="banner-item position-relative">
+                        <img src="https://i.etsystatic.com/25506687/r/il/a4a078/3690325814/il_fullxfull.3690325814_28h9.jpg"
+                             alt="Sale" />
+                        <div class="banner-content position-absolute bottom-0 start-0 text-white p-2">
+                            <span class="small">Ưu đãi ngày hôm nay</span>
+                            <h6>Giảm giá 20% <br />sử dụng mã: TTT</h6>
+                            <a href="#" class="btn btn-light btn-sm mt-1">Shop Now</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6">
+                    <div class="banner-item position-relative">
+                        <img src="https://d1imjpjik7kc4g.cloudfront.net/images/BCG-Attorney-Searchs-Guide-to-Corporate-and-Finance-Practice-Areas-new.jpg"
+                             alt="Business" />
+                        <div class="banner-content position-absolute bottom-0 start-0 text-white p-2">
+                            <span class="small">New Arrivals</span>
+                            <h6>Business Economics</h6>
+                            <a href="#" class="btn btn-outline-light btn-sm mt-1">Discover Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- CSS custom -->
+<style>
+    .card-book {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card-book:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    .card-book img {
+        transition: transform 0.3s;
+    }
+    .card-book:hover img {
+        transform: scale(1.05);
+    }
+</style>
+
+
+<!-- Bán chạy -->
+<section class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold text-success">🔥 Sách bán chạy</h3>
+        <a href="#" class="text-decoration-none fw-bold text-success">Xem thêm →</a>
+    </div>
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-4">
+        @foreach (var book in books)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 card-book">
+                    <img src="@book.Img" class="card-img-top" alt="@book.Title" />
+                    <div class="card-body d-flex flex-column">
+                        <h6 class="card-title text-truncate">@book.Title</h6>
+                        <p class="text-muted small mb-1">by @book.Author</p>
+                        <p class="mb-2">
+                            <span class="fw-bold text-danger">$@book.Price</span>
+                            @if (book.OldPrice != null)
+                            {
+                                <span class="text-muted text-decoration-line-through ms-1">
+                                    $@book.OldPrice
+                                </span>
+                            }
+                        </p>
+                        <div class="mt-auto">
+                            <a href="#" class="btn btn-success btn-sm w-100">Thêm vào giỏ hàng</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+
+<section class="new-release">
+    <div class="section-header">
+        <h2>📚 Sách mới phát hành</h2>
+        <a href="#" class="view-more">Xem thêm →</a>
+    </div>
+
+    <div class="release-container">
+        <!-- Sách mơi phát hành -->
+        <div class="featured-book">
+            <img src="https://i.ytimg.com/vi/XH--qEBZFRE/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLDe70t4_Ajrx22ABaSDt8EQUTLb6Q" alt="Secret of Tropics" />
+            <div class="book-info">
+                <h3>Secret of Tropics</h3>
+                <p class="author">by Becky Albertalli & Adam Silvera</p>
+                <p class="price">$18.99</p>
+                <button class="btn-buy">Mua ngay</button>
+            </div>
+        </div>
+
+        <!-- Sách khác -->
+        <div class="book-list">
+            <div class="book-item">
+                <img src="https://api.time.com/wp-content/uploads/2024/07/Love-Theoretically-Ali-Hazelwood.png?w=1000" alt="Life Below Water" />
+                <h4>Life Below Water</h4>
+                <p class="author">John Green</p>
+                <p class="price">$11.00</p>
+                <button class="btn-buy">Mua ngay</button>
+            </div>
+
+            <div class="book-item">
+                <img src="https://m.media-amazon.com/images/I/81-v0NHFZNL._UF1000,1000_QL80_.jpg" alt="I Am Amsterdam" />
+                <h4>I Am Amsterdam</h4>
+                <p class="author">John Stein</p>
+                <p class="price">$12.00</p>
+                <button class="btn-buy">Mua ngay</button>
+            </div>
+
+            <div class="book-item">
+                <img src="https://m.media-amazon.com/images/I/71oRBYyIT9L._UF894,1000_QL80_.jpg" alt="The Horizon of Auschwitz" />
+                <h4>The Horizon </h4>
+                <p class="author">John Stein</p>
+                <p class="price">$19.98</p>
+                <button class="btn-buy">Mua ngay</button>
+            </div>
+
+            <div class="book-item">
+                <img src="https://i.pinimg.com/564x/6c/8e/64/6c8e642535ba6aef5acdd330886c413c.jpg" alt="Morbi in Sem Quis" />
+                <h4>Morbi in Sem Quis</h4>
+                <p class="author">John Stein</p>
+                <p class="price">$17.99</p>
+                <button class="btn-buy">Mua ngay</button>
+            </div>
+
+            <div class="book-list">
+                <div class="book-item">
+                    <img src="https://upload.wikimedia.org/wikipedia/vi/thumb/f/f2/Muado_sach.webp/250px-Muado_sach.webp.png" alt="Red Rain" />
+                    <h4>Life Below Water</h4>
+                    <p class="author">Chu Lai</p>
+                    <p class="price">$11.00</p>
+                    <button class="btn-buy">Mua ngay</button>
+                </div>
+
+            </div>
+        </div>
+
+
+</section>
+
+<style>
+        .new-release {
+      padding: 40px 0;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .section-header h2 {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .section-header .view-more {
+      color: #007b5e;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .release-container {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px;
+    }
+
+    .featured-book {
+      background: #ffe9d6;
+      padding: 20px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .featured-book img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      object-fit: cover;
+    }
+
+    .featured-book .book-info h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .featured-book .author {
+      color: #555;
+      font-size: 14px;
+    }
+
+    .featured-book .price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #e67e22;
+      margin: 10px 0;
+    }
+
+    .featured-book .btn-buy {
+      background: #007b5e;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .book-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 15px;
+    }
+
+    .book-item {
+      text-align: center;
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px;
+      transition: 0.3s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .book-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .book-item img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .book-item h4 {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    .book-item .author {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .book-item .price {
+      font-weight: bold;
+      color: #007b5e;
+      margin-top: 5px;
+    }
+</style>
+
+<!-- Gợi ý từ chuyên gia -->
+<section class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold text-success">✨ Gợi ý từ chuyên gia</h3>
+        <a href="#" class="text-decoration-none fw-bold text-success">Xem thêm →</a>
+    </div>
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+        <div class="col">
+            <div class="card border-0 shadow-sm card-book">
+                <img src="https://m.media-amazon.com/images/I/71AzF6DlZTL.jpg" class="card-img-top" />
+                <div class="card-body text-center">
+                    <h6 class="fw-bold">Self-Help For Your Future</h6>
+                    <a href="#" class="btn btn-sm btn-outline-success mt-2">Khám phá ngay</a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-0 shadow-sm card-book">
+                <img src="https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1389990493i/18505844.jpg" class="card-img-top" />
+                <div class="card-body text-center">
+                    <h6 class="fw-bold">The Secret World Facts</h6>
+                    <a href="#" class="btn btn-sm btn-outline-success mt-2">Khám phá ngay</a>
+                </div>
+            </div>
+        </div>
+        <!-- Thêm các col khác -->
+    </div>
+</section>
 

@@ -1,65 +1,257 @@
-﻿@{
-    Layout = null;
-    var title = ViewData["Title"] ?? "Web Bán Hàng";
-}
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
 
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@title - Web Bán Hàng</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" /> 
-    
+    <title>@ViewData["Title"] - 3T-books</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="~/css/site.css" rel="stylesheet" />
 </head>
 <body>
-    <!-- Header -->
-    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+    <!-- Top Bar -->
+    <div class="top-bar bg-dark text-white py-1">
+        <div class="container d-flex justify-content-between align-items-center small">
+            <div>
+                📞 Hotline: <a href="tel:0123456789" class="text-white text-decoration-none">0123 456 789</a> | ✉️ Email: <a href="mailto:support@3tbooks.com" class="text-white text-decoration-none">support@3tbooks.com</a>
+            </div>
+            <div>
+                <a href="#" class="text-white me-2">Facebook</a>
+                <a href="#" class="text-white me-2">Instagram</a>
+                <a href="#" class="text-white">YouTube</a>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm sticky-top">
         <div class="container">
-            <a class="navbar-brand" asp-controller="Home" asp-action="Index"> 📚 EBookStore </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <!-- Logo -->
+            <a class="navbar-brand fw-bold fs-4 text-white" href="/">📚 3T-Books</a>
+
+            <!-- Toggle button (mobile) -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
+            <!-- Nội dung navbar -->
             <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="Index"> Home  </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Product" asp-action="Index">Product</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link"  asp-area="Admin" asp-controller="Product" asp-action="Add" >Create Book</a>
-                    </li>
+                <!-- Menu chính -->
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item"><a class="nav-link active text-white" href="/">Trang Chủ</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">Cửa Hàng</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">Sản Phẩm</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">Trang</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">Blog</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">Khác</a></li>
                 </ul>
-                <ul class=" tnavbar-nav ms-auto text-bg-light">
-                    <partial name="_LoginPartial" />
-                </ul>
+
+                <!-- Search + Giỏ hàng + User/Login/Register -->
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Search -->
+                    <form class="d-flex search-box">
+                        <input class="form-control rounded-pill" type="search" placeholder="Tìm sách...">
+                        <button class="btn btn-warning ms-2 rounded-pill"><i class="bi bi-search"></i></button>
+                    </form>
+
+                    <!-- Giỏ hàng -->
+                    <a href="#" class="btn btn-outline-light position-relative">
+                        <i class="bi bi-cart3"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"></span>
+                    </a>
+
+                    <!-- Đăng nhập / Đăng ký hoặc User -->
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <!-- Avatar dropdown -->
+                        <div class="dropdown">
+                            <button class="btn btn-light rounded-circle dropdown-toggle d-flex align-items-center justify-content-center"
+                                    type="button" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false"
+                                    style="width:40px; height:40px;">
+                                <i class="bi bi-person-circle"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                <li class="dropdown-header">👋 Xin chào, @UserManager.GetUserName(User)</li>
+                                <li><a class="dropdown-item" href="/Identity/Account/Manage">Tài khoản của tôi</a></li>
+                                <li>
+                                    <form method="post" asp-area="Identity" asp-page="/Account/Logout" class="m-0">
+                                        <button type="submit" class="dropdown-item text-danger">Đăng xuất</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-light rounded-pill px-2">
+                            Đăng nhập
+                        </a>
+                        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-warning rounded-pill px-2">
+                            Đăng ký
+                        </a>
+                    }
+                </div>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <!-- Main Content -->
-    <main class="container mt-4">
+
+
+
+    <style>
+        /* Top bar */
+        .top-bar {
+            font-size: 14px;
+        }
+
+        /* Navbar links */
+        .navbar-nav .nav-link {
+            font-size: 16px;
+            font-weight: 500;
+            padding: 8px 14px;
+            transition: 0.3s;
+        }
+
+            .navbar-nav .nav-link:hover {
+                color: #ffd700 !important;
+                border-bottom: 2px solid #ffd700;
+            }
+
+        /* Dropdown */
+        .dropdown-menu-dark {
+            background-color: #2d2d2d;
+            border-radius: 8px;
+        }
+
+            .dropdown-menu-dark .dropdown-item:hover {
+                background-color: #444;
+                color: #ffd700;
+            }
+
+        /* Search box */
+        .search-box input {
+            border-radius: 20px 0 0 20px;
+            border: none;
+            padding-left: 12px;
+        }
+
+        .search-box button {
+            border-radius: 0 20px 20px 0;
+            border: none;
+        }
+
+        /* Navbar link hover */
+        .navbar-nav .nav-link:hover {
+            color: #ffd700 !important;
+        }
+        .navbar .btn {
+    font-size: 14px;
+    font-weight: 500;
+    padding: 6px 16px;
+    transition: 0.3s;
+}
+
+.navbar .btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+    </style>
+
+
+
+    <div class="container">
         @RenderBody()
-    </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white text-center py-3 mt-5">
-        <p class="mb-0">
-            &copy; @DateTime.Now.Year - eBookStore | Designed by
-            <a href="#" class="text-info text-decoration-none">Darius</a>
-        </p>
-    </footer>
+    <footer class="bg-light text-dark pt-5 border-top mt-5">
+        <div class="container">
+            <div class="row gy-4">
+                <!-- Logo + Info -->
+                <div class="col-lg-4 col-md-6">
+                    <h4 class="fw-bold mb-3">
+                        <i class="bi bi-book-half text-success me-2"></i>3T-Books
+                    </h4>
+                    <p class="small text-muted">
+                        Mang đến cho bạn những trải nghiệm mua sắm trực tuyến tiện lợi, an toàn và nhanh chóng.
+                    </p>
+                    <p class="fw-bold mb-1"><i class="bi bi-telephone me-2 text-success"></i>Cần hỗ trợ? Gọi ngay </p>
+                    <h5 class="text-success">+0123 456 789</h5>
+                    <div class="mt-3">
+                        <span class="small"><i class="bi bi-credit-card-2-front me-1"></i> Phương thức thanh toán</span><br />
+                        <img src="https://i.ibb.co/0jqHpnp/payment.png" alt="Payment Methods" style="max-height:30px;">
+                    </div>
+                </div>
 
-    <!-- Scripts -->
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js"></script>
-    @RenderSection("Scripts", required: false)
-    
-    
+                <!-- Thông tin -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Thông tin</h6>
+                    <ul class="list-unstyled small text-muted">
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Giới thiệu</a></li>
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Câu hỏi thường gặp</a></li>
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Hướng dẫn mua hàng</a></li>
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Thanh toán an toàn</a></li>
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Phương thức thanh toán</a></li>
+                    </ul>
+                </div>
+
+                <!-- Dịch vụ khách hàng -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-headset me-2"></i>Dịch vụ khách hàng</h6>
+                    <ul class="list-unstyled small text-muted">
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Điều khoản & điều kiện</a></li>
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Hình thức thanh toán</a></li>
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Cam kết hoàn tiền</a></li>
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Chính sách đổi trả</a></li>
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Giao hàng</a></li>
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Chính sách bảo mật</a></li>
+                    </ul>
+                </div>
+
+                <!-- Tài khoản của tôi -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-person-circle me-2"></i>Tài khoản của tôi</h6>
+                    <ul class="list-unstyled small text-muted">
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Sơ đồ website</a></li>
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Hệ thống cửa hàng</a></li>
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Liên hệ</a></li>
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Đăng nhập</a></li>
+                        <li><a href="#" class="text-decoration-none text-dark"><i class="bi bi-chevron-right me-1"></i> Tài khoản của tôi</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom bar -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-4 pt-3 border-top">
+                <p class="small text-muted mb-0">© 2025 3T-Books | <a href="#" class="text-decoration-none">Chính sách bảo mật</a></p>
+                <div class="social-links mt-2 mt-md-0">
+                    <a href="#" class="text-dark me-3"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-dark me-3"><i class="bi bi-twitter"></i></a>
+                    <a href="#" class="text-dark me-3"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-dark me-3"><i class="bi bi-youtube"></i></a>
+                    <a href="#" class="text-dark"><i class="bi bi-pinterest"></i></a>
+                </div>
+            </div>
+        </div>
+        </
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/js/site.js"></script>
+
+        @RenderSection("Scripts", required: false)
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
+
+
+
