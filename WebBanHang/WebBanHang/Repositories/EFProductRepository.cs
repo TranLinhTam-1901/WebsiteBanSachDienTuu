@@ -43,5 +43,21 @@ namespace WebBanHang.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+        public IEnumerable<Product> GetAllProducts()
+        {
+            return _context.Products.Include(p => p.Category).ToList();
+        }
+
+        public Product GetProductById(int id)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.Id == id);
+            if (product == null)
+            {
+                throw new Exception("Product not found");
+            }
+            return product;
+        }
+
+
     }
 }
