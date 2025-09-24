@@ -18,12 +18,20 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = $"/Identity/Account/Login";
     options.LogoutPath = $"/Identity/Account/Logout";
-    options.LoginPath = $"/Identity/Account/AccessDenied";
+    options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Hết hạn sau 30 phút
+    options.SlidingExpiration = true;
+    options.Cookie.IsEssential = true;
+
+    // Quan trọng: không set ExpireTimeSpan cố định -> nó thành session cookie
+    options.Cookie.Expiration = null;
 });
 
-builder.Services.AddRazorPages();   
+builder.Services.AddRazorPages();
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddRazorRuntimeCompilation();
 
 builder.Services.AddScoped<IProductRepository, EFProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, EFCategoryRepository>();
@@ -38,6 +46,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 
 // Đặt sau app.UseRouting()
@@ -57,6 +66,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-app.MapRazorPages();
+
 
 app.Run();

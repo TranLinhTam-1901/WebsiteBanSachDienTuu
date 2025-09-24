@@ -1,0 +1,79 @@
+﻿@model IEnumerable<WebBanHang.Models.Product>
+
+@{
+    ViewData["Title"] = "Danh sách sản phẩm";
+    Layout = "_Layout";
+}
+
+<h2>📚 Danh sách sản phẩm</h2>
+
+<a href="@Url.Action("Add", "Product", new { area = "Admin" })" class="btn btn-success mb-3">
+    + Thêm sản phẩm
+</a>
+
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Ảnh bìa</th>
+            <th>Tên sách</th>
+            <th>Tác giả</th>
+            <th>Giá</th>
+            <th>Mô tả</th>
+            <th>Danh mục</th>
+            <th>File PDF</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <img src="@item.ImageUrl" alt="Ảnh bìa" width="80" />
+                    }
+                </td>
+                <td>@item.Name</td>
+                <td>@item.Author</td>
+                <td>@item.Price.ToString("N0") đ</td>
+                <td>@item.Description</td>
+                <td>@item.Category?.Name</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.BookContentUrl))
+                    {
+                        <a href="@item.BookContentUrl" target="_blank">Xem PDF</a>
+                    }
+                </td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a href="@Url.Action("Update", "Product", new { area = "Admin", id = item.Id })" class="btn btn-warning">
+                            Sửa
+                        </a>
+                        <a href="javascript:void(0);"
+                           onclick="deleteProduct(@item.Id)"
+                           class="btn btn-danger btn-sm">
+                            Xóa
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script>
+    function deleteProduct(id) {
+        if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
+            fetch(`/Admin/Product/Delete/${id}`, {
+                method: "POST",
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() // nếu có AntiForgery
+                }
+            })
+            .then(res => {
+                if (res.ok) location.reload(); // xóa xong reload danh sách
+                else alert("Xóa thất bại");
+            });
+        }
+    }
+</script>

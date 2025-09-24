@@ -1,0 +1,77 @@
+﻿@model WebBanHang.Models.Product
+@{
+    ViewData["Title"] = "Cập nhật sản phẩm";
+    Layout = "_Layout";
+}
+
+<h2 class="mb-4">📝 Cập nhật sản phẩm</h2>
+
+@using (Html.BeginForm("Update", "Product", FormMethod.Post, new { enctype = "multipart/form-data", @class = "p-3 border rounded shadow-sm bg-light" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+    @Html.HiddenFor(m => m.ImageUrl)
+    @Html.HiddenFor(m => m.BookContentUrl)
+    
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.Name, "📖 Tên sách", new { @class = "form-label fw-bold" })
+        @Html.TextBoxFor(m => m.Name, new { @class = "form-control", placeholder = "Nhập tên sách..." })
+        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.Author, "✍️ Tác giả", new { @class = "form-label fw-bold" })
+        @Html.TextBoxFor(m => m.Author, new { @class = "form-control", placeholder = "Tên tác giả..." })
+        @Html.ValidationMessageFor(m => m.Author, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.Price, "💰 Giá (VNĐ)", new { @class = "form-label fw-bold" })
+        @Html.TextBoxFor(m => m.Price, new { type = "number", step = "0.01", @class = "form-control", placeholder = "Ví dụ: 120000" })
+        @Html.ValidationMessageFor(m => m.Price, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.Description, "📝 Mô tả", new { @class = "form-label fw-bold" })
+        @Html.TextAreaFor(m => m.Description, new { rows = "4", @class = "form-control", placeholder = "Mô tả ngắn gọn về sách..." })
+        @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group mb-3">
+        @Html.LabelFor(m => m.CategoryId, "📂 Danh mục", new { @class = "form-label fw-bold" })
+        @Html.DropDownListFor(m => m.CategoryId,
+        (SelectList)ViewBag.Categories,
+        "-- Chọn danh mục --",
+        new { @class = "form-control" })
+    @Html.ValidationMessageFor(m => m.CategoryId, "", new { @class = "text-danger" })
+</div>
+
+<div class="mb-3">
+    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <p>Ảnh bìa hiện tại:</p>
+            <img src="@Model.ImageUrl" alt="Ảnh bìa" style="max-width: 200px;" />
+        }
+        <label for="ImageFile" class="form-label fw-bold">🖼️ Tải lên ảnh bìa mới (nếu muốn)</label>
+        <input type="file" name="ImageFile" accept="image/*" class="form-control" />
+        @Html.ValidationMessageFor(m => m.ImageUrl, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="mb-3">
+        @if (!string.IsNullOrEmpty(Model.BookContentUrl))
+        {
+            <p>File PDF hiện tại: <a href="@Model.BookContentUrl" target="_blank">Tải về</a></p>
+        }
+        <label for="PdfFile" class="form-label fw-bold">📂 Tải lên file PDF mới (nếu muốn)</label>
+        <input type="file" name="PdfFile" accept="application/pdf" class="form-control" />
+        @Html.ValidationMessageFor(m => m.BookContentUrl, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
+        <a href="@Url.Action("Index", "Product", new { area = "Admin" })" class="btn btn-secondary">
+            ↩️ Quay lại danh sách
+        </a>
+
+    </div>
+}

@@ -20,8 +20,7 @@ namespace WebBanHang.Repositories
         }
         public async Task<Product> GetByIdAsync(int id)
         {
-            // return await _context.Products.FindAsync(id);
-            // lấy thông tin kèm theo category
+            
             return await _context.Products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == id);
         }
         public async Task AddAsync(Product product)
