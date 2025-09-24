@@ -46,7 +46,10 @@
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item"><a class="nav-link active text-white" href="/">Trang Chủ</a></li>
                     <li class="nav-item"><a class="nav-link text-white" href="#">Cửa Hàng</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="#">Sản Phẩm</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Product" asp-action="Index">Sản Phẩm</a>
+                    </li>
+
                     <li class="nav-item"><a class="nav-link text-white" href="#">Trang</a></li>
                     <li class="nav-item"><a class="nav-link text-white" href="#">Blog</a></li>
                     <li class="nav-item"><a class="nav-link text-white" href="#">Khác</a></li>
@@ -80,9 +83,10 @@
                                 <li class="dropdown-header">👋 Xin chào, @UserManager.GetUserName(User)</li>
                                 <li><a class="dropdown-item" href="/Identity/Account/Manage">Tài khoản của tôi</a></li>
                                 <li>
-                                    <form method="post" asp-area="Identity" asp-page="/Account/Logout" class="m-0">
-                                        <button type="submit" class="dropdown-item text-danger">Đăng xuất</button>
-                                    </form>
+                             <form method="post" asp-area="Identity" asp-page="/Account/Logout" 
+                                      asp-route-returnUrl="/" class="m-0">
+                                    <button type="submit" class="dropdown-item text-danger">Đăng xuất</button>
+                                </form>
                                 </li>
                             </ul>
                         </div>
