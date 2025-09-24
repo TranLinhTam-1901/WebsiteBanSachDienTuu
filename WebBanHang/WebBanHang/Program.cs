@@ -14,6 +14,16 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                  .AddDefaultTokenProviders()
                  .AddDefaultUI()
                  .AddEntityFrameworkStores<ApplicationDbContext>();
+// Nới lỏng quy tắc mật khẩu để người dùng tự do đặt mật khẩu
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequiredLength = 1;
+    options.Password.RequiredUniqueChars = 0;
+});
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = $"/Identity/Account/Login";
