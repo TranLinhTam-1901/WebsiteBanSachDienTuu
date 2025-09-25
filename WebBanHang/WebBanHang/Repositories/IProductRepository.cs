@@ -10,5 +10,8 @@ namespace WebBanHang.Repositories
         Task AddAsync(Product product);
         Task UpdateAsync(Product product);
         Task DeleteAsync(int id);
+        IEnumerable<Product> GetAllProducts();
+        Product GetProductById(int id);
+
     }
 }
