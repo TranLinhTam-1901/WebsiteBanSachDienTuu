@@ -2,12 +2,12 @@
 
 @{
     ViewData["Title"] = "Danh sách sản phẩm";
-    Layout = "_Layout";
+    Layout = "_LayoutAdmin";
 }
 
 <h2>📚 Danh sách sản phẩm</h2>
 
-<a href="@Url.Action("Add", "Product", new { area = "Admin" })" class="btn btn-success mb-3">
+<a asp-action="Add" asp-area="Admin" asp-controller="Product" class="btn btn-success mb-3">
     + Thêm sản phẩm
 </a>
 
@@ -47,7 +47,7 @@
                 </td>
                 <td>
                     <div class="btn-group" role="group">
-                        <a href="@Url.Action("Update", "Product", new { area = "Admin", id = item.Id })" class="btn btn-warning">
+                        <a asp-action="Update" asp-controller="Product" asp-area="Admin" asp-route-id="@item.Id" class="btn btn-warning">
                             Sửa
                         </a>
                         <a href="javascript:void(0);"
@@ -62,18 +62,26 @@
     </tbody>
 </table>
 <script>
-    function deleteProduct(id) {
+        function deleteProduct(id) {
         if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
+            // Lấy token bằng JavaScript thuần
+            // let token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
             fetch(`/Admin/Product/Delete/${id}`, {
                 method: "POST",
-                headers: {
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() // nếu có AntiForgery
-                }
+                // headers: {
+                //     Sử dụng token đã lấy
+                //     'RequestVerificationToken': token
+                // }
             })
             .then(res => {
-                if (res.ok) location.reload(); // xóa xong reload danh sách
+                if (res.ok){
+                    alert("Xóa thành công");
+                    location.reload();
+                } 
                 else alert("Xóa thất bại");
             });
+            
         }
     }
 </script>

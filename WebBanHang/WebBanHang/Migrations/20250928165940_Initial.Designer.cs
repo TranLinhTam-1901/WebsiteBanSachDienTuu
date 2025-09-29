@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace WebBanHang.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250922160643_Initial")]
+    [Migration("20250928165940_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

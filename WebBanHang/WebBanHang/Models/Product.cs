@@ -28,13 +28,13 @@ namespace WebBanHang.Models
 
         public int CategoryId { get; set; }
         public Category? Category { get; set; }
-<<<<<<< HEAD
+
         public string? UserId { get; set; }
         
         [ForeignKey("UserId")]
         public ApplicationUser? User { get; set; }
-=======
 
->>>>>>> c46201368a1afaf52e5d20910173e7e7bd246cf7
+
+
     }
 }
