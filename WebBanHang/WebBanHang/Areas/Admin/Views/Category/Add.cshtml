@@ -1,0 +1,30 @@
+﻿@model WebBanHang.Models.Category
+
+@{
+    ViewData["Title"] = "Thêm Danh mục mới";
+    Layout = "_LayoutAdmin";
+}
+
+<h2 class="mb-4">➕ Thêm Danh mục mới</h2>
+
+<form asp-action="Add"
+      asp-controller="Category"
+      asp-area="Admin"
+      method="post"
+      class="p-3 border rounded shadow-sm bg-light">
+
+    @Html.AntiForgeryToken()
+
+    <div class="form-group mb-3">
+        <label asp-for="Name" class="form-label fw-bold">Tên Danh mục</label>
+        <input asp-for="Name" type="text" class="form-control" placeholder="Nhập tên danh mục..." />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">💾 Thêm Danh mục</button>
+        <a asp-action="Index" asp-controller="Category" asp-area="Admin" class="btn btn-secondary">
+            ↩️ Quay lại
+        </a>
+    </div>
+</form>

@@ -1,87 +1,28 @@
 ﻿@model WebBanHang.Models.Product
 @{
     ViewData["Title"] = "Thêm sản phẩm";
-    Layout = "_Layout";
+    Layout = "_LayoutAdmin";
 }
 
-<h2 class="mb-4">📝 Thêm sản phẩm mới</h2>
-
-@using (Html.BeginForm("Add", "Product", FormMethod.Post, new { enctype = "multipart/form-data", @class = "p-3 border rounded shadow-sm bg-light" }))
-{
-    <div class="form-group mb-3">
-        <label for="Name" class="form-label fw-bold">📖 Tên sách</label>
-        <input type="text" id="Name" name="Name" class="form-control" value="@Model.Name" placeholder="Nhập tên sách..." />
-        @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
-    </div>
-
-    <div class="form-group mb-3">
-        <label for="Author" class="form-label fw-bold">✍️ Tác giả</label>
-        <input type="text" id="Author" name="Author" class="form-control" value="@Model.Author" placeholder="Tên tác giả..." />
-        @Html.ValidationMessageFor(m => m.Author, "", new { @class = "text-danger" })
-    </div>
-
-    <div class="form-group mb-3">
-        <label for="Price" class="form-label fw-bold">💰 Giá (VNĐ)</label>
-        <input type="number" id="Price" name="Price" step="0.01" class="form-control" value="@Model.Price" placeholder="Ví dụ: 120000" />
-        @Html.ValidationMessageFor(m => m.Price, "", new { @class = "text-danger" })
-    </div>
-
-    <div class="form-group mb-3">
-        <label for="Description" class="form-label fw-bold">📝 Mô tả</label>
-        <textarea id="Description" name="Description" rows="4" class="form-control" placeholder="Mô tả ngắn gọn về sách...">@Model.Description</textarea>
-        @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
-    </div>
-
-    <div class="form-group mb-3">
-        <label for="CategoryId" class="form-label fw-bold">📂 Danh mục</label>
-        @Html.DropDownListFor(m => m.CategoryId,
-        (SelectList)ViewBag.Categories,
-                "-- Chọn danh mục --",
-                new { @class = "form-control" })
-        @Html.ValidationMessageFor(m => m.CategoryId, "", new { @class = "text-danger" })
-    </div>
-
-    <div class="form-group mb-3">
-        <label for="ImageFile" class="form-label fw-bold">🖼️ Ảnh bìa sách</label>
-        <input type="file" name="ImageFile" accept="image/*" class="form-control" />
-        @Html.ValidationMessageFor(m => m.ImageUrl, "", new { @class = "text-danger" })
-    </div>
-
-    <div class="form-group mb-3">
-        <label for="PdfFile" class="form-label fw-bold">📂 File PDF nội dung sách</label>
-        <input type="file" name="PdfFile" accept="application/pdf" class="form-control" />
-        @Html.ValidationMessageFor(m => m.BookContentUrl, "", new { @class = "text-danger" })
-    </div>
-
-    <div class="mt-4">
-        <button type="submit" class="btn btn-primary">💾 Lưu sản phẩm</button>
-    <a href="@Url.Action("Index", "Product", new { area = "Admin" })" class="btn btn-secondary">
-        ❌ Quay lại 
-    </a>
-
-    </div>
-}
-
-@* 
 <h2 class="mb-4">📝 Thêm sản phẩm mới</h2>
 
 <form asp-action="Add" asp-controller="Product" method="post" enctype="multipart/form-data" class="p-3 border rounded shadow-sm bg-light">
 
     <div class="form-group mb-3">
         <label asp-for="Name" class="form-label fw-bold">📖 Tên sách</label>
-        <input asp-for="Name" class="form-control" placeholder="Nhập tên sách..." />
+        <input asp-for="Name" type="text" class="form-control" placeholder="Nhập tên sách..." />
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
         <label asp-for="Author" class="form-label fw-bold">✍️ Tác giả</label>
-        <input asp-for="Author" class="form-control" placeholder="Tên tác giả..." />
+        <input asp-for="Author" type="text" class="form-control" placeholder="Tên tác giả..." />
         <span asp-validation-for="Author" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
         <label asp-for="Price" class="form-label fw-bold">💰 Giá (VNĐ)</label>
-        <input asp-for="Price" class="form-control" type="number" step="0.01" placeholder="Ví dụ: 120000" />
+        <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="Ví dụ: 120000" />
         <span asp-validation-for="Price" class="text-danger"></span>
     </div>
 
@@ -93,10 +34,9 @@
 
     <div class="form-group mb-3">
         <label asp-for="CategoryId" class="form-label fw-bold">📂 Danh mục</label>
-        @Html.DropDownListFor(m => m.CategoryId,
-        (SelectList)ViewBag.Categories,
-                "-- Chọn danh mục --",
-                new { @class = "form-control" })
+        <select asp-for="CategoryId" asp-items="@(ViewBag.Categories as SelectList)" class="form-control">
+            <option value="">-- Chọn danh mục --</option>
+        </select>
         <span asp-validation-for="CategoryId" class="text-danger"></span>
     </div>
 
@@ -113,22 +53,9 @@
     </div>
 
     <div class="mt-4">
-        <input type="submit" value="💾 Lưu sản phẩm" class="btn btn-primary" />
-        <a asp-action="Index" class="btn btn-secondary">❌ Hủy</a>
+        <button type="submit" class="btn btn-primary">💾 Lưu sản phẩm</button>
+        <a asp-action="Index" asp-controller="Product" asp-area="Admin" class="btn btn-secondary">
+            ❌ Quay lại
+        </a>
     </div>
 </form>
-@section Scripts {
-    <script>
-        document.querySelector('form').addEventListener('submit', function(event) {
-            const nameInput = document.querySelector('[name="Name"]');
-            const authorInput = document.querySelector('[name="Author"]');
-            const priceInput = document.querySelector('[name="Price"]');
-
-            if (!nameInput.value || !authorInput.value || !priceInput.value) {
-                event.preventDefault();
-                alert('Vui lòng điền đầy đủ thông tin vào các trường bắt buộc.');
-                return;
-            }
-        });
-    </script>
-} *@

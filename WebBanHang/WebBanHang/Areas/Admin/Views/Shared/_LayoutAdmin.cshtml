@@ -5,10 +5,16 @@
     <title>@ViewData["Title"] - Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <style>
+        /* CSS tùy chỉnh để làm nổi bật menu con */
+        .submenu-item {
+            padding-left: 30px !important; /* Thụt lề cho mục con */
+            font-size: 0.95rem;
+        }
+    </style>
 </head>
 <body>
     <div class="d-flex">
-        <!-- Sidebar -->
         <nav class="bg-dark text-white p-3 vh-100" style="width:250px;">
             <h4 class="text-center mb-4">Admin Panel</h4>
             <ul class="nav flex-column">
@@ -17,27 +23,42 @@
                         <i class="fa fa-home"></i> Dashboard
                     </a>
                 </li>
+
                 <li class="nav-item">
-                    <a class="nav-link text-white" asp-area="Admin" asp-controller="Product" asp-action="Index">
-                        <i class="fa fa-box"></i> Quản lý sản phẩm
+                    <a class="nav-link text-white d-flex justify-content-between align-items-center"
+                       data-bs-toggle="collapse"
+                       href="#productSubmenu"
+                       role="button"
+                       aria-expanded="false"
+                       aria-controls="productSubmenu">
+                        <div><i class="fa fa-box"></i> Quản lý sản phẩm</div>
+                        <i class="fas fa-chevron-down fa-xs"></i>
                     </a>
+
+                    <div class="collapse" id="productSubmenu">
+                        <ul class="nav flex-column ps-3">
+                            <li class="nav-item">
+                                <a class="nav-link text-white submenu-item" asp-area="Admin" asp-controller="Product" asp-action="Index">
+                                    <i class="fa fa-book"></i> Quản lý Sách
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white submenu-item" asp-area="Admin" asp-controller="Category" asp-action="Index">
+                                    <i class="fa fa-tags"></i> Quản lý Thể loại
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
             </ul>
         </nav>
 
-        <!-- Main content -->
         <div class="flex-grow-1 p-4">
             @RenderBody()
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("Scripts", required: false)
-        </main>
-    </div>
-    
 </body>
 </html>
-
-      
-
-  
