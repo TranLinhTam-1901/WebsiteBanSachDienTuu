@@ -44,7 +44,7 @@ else
                                         @Html.AntiForgeryToken()
                                     </form>
                                 </td>
-                                <td>@(item.UnitPrice * item.Quantity).ToString("N0") đ</td>
+                                <td>@((item.UnitPrice * item.Quantity).ToString("N0")) đ</td>
                                 <td>
                                     <form asp-action="Remove" method="post">
                                         <input type="hidden" name="itemId" value="@item.Id" />
