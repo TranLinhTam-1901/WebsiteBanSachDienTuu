@@ -8,9 +8,13 @@
 
   <ItemGroup>
     <Compile Remove="Areas\Admin\Views\NewFolder1\**" />
+    <Compile Remove="wwwroot\pdfs\**" />
     <Content Remove="Areas\Admin\Views\NewFolder1\**" />
+    <Content Remove="wwwroot\pdfs\**" />
     <EmbeddedResource Remove="Areas\Admin\Views\NewFolder1\**" />
+    <EmbeddedResource Remove="wwwroot\pdfs\**" />
     <None Remove="Areas\Admin\Views\NewFolder1\**" />
+    <None Remove="wwwroot\pdfs\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,7 +34,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\images\" />
-    <Folder Include="wwwroot\pdfs\" />
+    <Folder Include="wwwroot\previews\" />
   </ItemGroup>
 
 </Project>

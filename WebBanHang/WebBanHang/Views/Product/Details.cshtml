@@ -22,3 +22,43 @@
         </div>
     </div>
 </div>
+
+@if (User.Identity.IsAuthenticated)
+{
+    <form asp-action="AddReview" method="post">
+        <input type="hidden" name="productId" value="@Model.Id" />
+
+        <label>Đánh giá (1-5⭐):</label>
+        <select name="rating" class="form-control">
+            <option value="1">1⭐</option>
+            <option value="2">2⭐</option>
+            <option value="3">3⭐</option>
+            <option value="4">4⭐</option>
+            <option value="5">5⭐</option>
+        </select>
+
+        <label>Bình luận:</label>
+        <textarea name="comment" class="form-control"></textarea>
+
+        <button type="submit" class="btn btn-primary mt-2">Gửi đánh giá</button>
+    </form>
+}
+else
+{
+    <p><a href="/Account/Login">Đăng nhập</a> để viết đánh giá.</p>
+}
+
+<h3>Đánh giá của khách hàng</h3>
+@foreach (var review in Model.Reviews)
+{
+    <div class="border p-2 mb-2">
+        <strong>@review.User?.UserName</strong> 
+        - @for (int i = 0; i < review.Rating; i++) { <span>⭐</span> }
+        <br />
+        <p>@review.Comment</p>
+        <small>@review.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+    </div>
+}
+
+
+                 

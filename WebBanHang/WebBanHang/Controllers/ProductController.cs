@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,7 +27,30 @@ namespace WebBanHang.Controllers
             if (product == null) return NotFound();
             return View(product);
         }
+
+
+        public async Task<IActionResult> AddReview(int productId, int rating, string comment)
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var review = new Review
+            {
+                ProductId = productId,
+                Rating = rating,
+                Comment = comment,
+                UserId = userId,
+                CreatedAt = DateTime.Now
+            };
+
+            _db.Reviews.Add(review);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = productId });
+        }
     }
 }
-
-
