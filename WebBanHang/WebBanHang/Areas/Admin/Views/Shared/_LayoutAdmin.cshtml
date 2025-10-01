@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using WebBanHang.Models   <!-- cần thêm namespace của ApplicationUser -->
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -50,9 +54,31 @@
                         </ul>
                     </div>
                 </li>
+
+
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <li class="nav-item">
+                    <span class="text-muted small d-block mb-2"> User.IsInRole("Admin")</span>
+                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" class="m-0">
+                        <button type="submit" class="btn btn-danger w-100">🚪 Đăng xuất</button>
+                    </form>
+
+                </li>
+            }
+            else
+            {
+                <li class="nav-item">
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary w-100">🔑 Đăng nhập</a>
+                </li>
+            }
             </ul>
         </nav>
 
+       
+   
+
+        <!-- Main content -->
         <div class="flex-grow-1 p-4">
             @RenderBody()
         </div>

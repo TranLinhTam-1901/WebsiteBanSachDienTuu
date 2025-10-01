@@ -11,9 +11,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 //setup Indetity 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                 .AddDefaultTokenProviders()
-                 .AddDefaultUI()
-                 .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders()
+    .AddDefaultUI();
 // Nới lỏng quy tắc mật khẩu để người dùng tự do đặt mật khẩu
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -76,6 +76,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
+app.MapRazorPages();
 
 app.Run();

@@ -14,6 +14,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<CartItem> CartItems { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
+    // Thêm dòng này để ánh xạ tới bảng Books
+    public DbSet<Book> Books { get; set; }
+    public DbSet<Review> Reviews { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

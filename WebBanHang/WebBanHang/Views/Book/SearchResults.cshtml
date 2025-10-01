@@ -1,0 +1,27 @@
+﻿@model IEnumerable<WebBanHang.Models.Book>
+
+<h2>Kết quả tìm kiếm</h2>
+
+@if (!Model.Any())
+{
+    <p>Không tìm thấy sách nào phù hợp.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var book in Model)
+        {
+            <div class="col-md-3 mb-3">
+                <div class="card h-100">
+                    <img src="@book.ImageUrl" class="card-img-top" alt="@book.Title" />
+                    <div class="card-body">
+                        <h5 class="card-title">@book.Title</h5>
+                        <p class="card-text">@book.Author</p>
+                        <p><span class="badge bg-secondary">@book.Category</span></p>
+                        <a href="@Url.Action("Details", "Books", new { id = book.Id })" class="btn btn-primary">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
