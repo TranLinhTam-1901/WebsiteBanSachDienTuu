@@ -1,0 +1,78 @@
+﻿@model IEnumerable<WebBanHang.Models.Category>
+
+@{
+    ViewData["Title"] = "Danh sách Danh mục";
+    Layout = "_LayoutAdmin"; // Hoặc tên layout admin của bạn
+}
+
+@Html.AntiForgeryToken() @* Cần cho thao tác AJAX Delete *@
+
+<h2>📋 Danh sách Danh mục</h2>
+
+<a asp-action="Add" asp-controller="Category" asp-area="Admin" class="btn btn-success mb-3">
+    ➕ Thêm Danh mục
+</a>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tên Danh mục</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Name</td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a asp-action="Update" asp-controller="Category" asp-area="Admin" asp-route-id="@item.Id" class="btn btn-warning btn-sm">
+                            Sửa
+                        </a>
+                        <a href="javascript:void(0);"
+                           onclick="deleteCategory(@item.Id)"
+                           class="btn btn-danger btn-sm">
+                            Xóa
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    function deleteCategory(id) {
+        if (confirm("Bạn có chắc chắn muốn xóa danh mục này không?")) {
+            // Lấy Anti-Forgery Token (đã học ở phần trước)
+            let tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+
+            if (!tokenElement) {
+                alert("Lỗi bảo mật: Không tìm thấy Anti-Forgery Token.");
+                return;
+            }
+            let token = tokenElement.value;
+
+            fetch(`/Admin/Category/Delete/${id}`, {
+                method: "POST",
+                headers: {
+                    'RequestVerificationToken': token
+                }
+            })
+            .then(res => {
+                if (res.ok) {
+                    alert("Xóa danh mục thành công!");
+                    location.reload();
+                } else {
+                    alert("Xóa thất bại. Danh mục có thể đang chứa sản phẩm.");
+                }
+            })
+            .catch(error => {
+                 alert("Đã xảy ra lỗi kết nối: " + error);
+            });
+        }
+    }
+</script>

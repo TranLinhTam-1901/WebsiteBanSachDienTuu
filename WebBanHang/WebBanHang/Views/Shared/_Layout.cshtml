@@ -8,10 +8,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - 3T-books</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="style.css">
-    <link href="~/css/site.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
 
@@ -50,21 +49,27 @@
                         <a class="nav-link text-white" asp-controller="Product" asp-action="Index">Sản Phẩm</a>
                     </li>
 
-                    <li class="nav-item"><a class="nav-link text-white" href="#">Trang</a></li>
+                    @* <li class="nav-item"><a class="nav-link text-white" href="#">Trang</a></li>
                     <li class="nav-item"><a class="nav-link text-white" href="#">Blog</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="#">Khác</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">Khác</a></li> *@
+                    @* <li class="nav-item">
+                        <a class="nav-link text-warning" asp-area="Admin" asp-controller="Product" asp-action="Index">
+                           Quản lý Sách 
+                        </a>
+                    </li> *@
                 </ul>
 
                 <!-- Search + Giỏ hàng + User/Login/Register -->
                 <div class="d-flex align-items-center gap-2">
                     <!-- Search -->
-                    <form class="d-flex search-box">
-                        <input class="form-control rounded-pill" type="search" placeholder="Tìm sách...">
-                        <button class="btn btn-warning ms-2 rounded-pill"><i class="bi bi-search"></i></button>
+                    <form asp-controller="Books" asp-action="Search" method="get" class="d-flex">
+                        <input type="text" name="keyword" class="form-control" placeholder="Tìm sách, tác giả, thể loại..." />
+                        <button type="submit" class="btn btn-success">Tìm</button>
                     </form>
 
+
                     <!-- Giỏ hàng -->
-                    <a href="#" class="btn btn-outline-light position-relative">
+                    <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-light position-relative">
                         <i class="bi bi-cart3"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"></span>
                     </a>
@@ -81,12 +86,13 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
                                 <li class="dropdown-header">👋 Xin chào, @UserManager.GetUserName(User)</li>
+
                                 <li><a class="dropdown-item" href="/Identity/Account/Manage">Tài khoản của tôi</a></li>
                                 <li>
-                             <form method="post" asp-area="Identity" asp-page="/Account/Logout" 
-                                      asp-route-returnUrl="/" class="m-0">
-                                    <button type="submit" class="dropdown-item text-danger">Đăng xuất</button>
-                                </form>
+                                     <form method="post" asp-area="Identity" asp-page="/Account/Logout" 
+                                        asp-route-returnUrl="/" class="m-0">
+                                        <button type="submit" class="dropdown-item text-danger">Đăng xuất</button>
+                                     </form>
                                 </li>
                             </ul>
                         </div>
@@ -105,76 +111,12 @@
         </div>
     </nav>
 
-
-
-
-    <style>
-        /* Top bar */
-        .top-bar {
-            font-size: 14px;
-        }
-
-        /* Navbar links */
-        .navbar-nav .nav-link {
-            font-size: 16px;
-            font-weight: 500;
-            padding: 8px 14px;
-            transition: 0.3s;
-        }
-
-            .navbar-nav .nav-link:hover {
-                color: #ffd700 !important;
-                border-bottom: 2px solid #ffd700;
-            }
-
-        /* Dropdown */
-        .dropdown-menu-dark {
-            background-color: #2d2d2d;
-            border-radius: 8px;
-        }
-
-            .dropdown-menu-dark .dropdown-item:hover {
-                background-color: #444;
-                color: #ffd700;
-            }
-
-        /* Search box */
-        .search-box input {
-            border-radius: 20px 0 0 20px;
-            border: none;
-            padding-left: 12px;
-        }
-
-        .search-box button {
-            border-radius: 0 20px 20px 0;
-            border: none;
-        }
-
-        /* Navbar link hover */
-        .navbar-nav .nav-link:hover {
-            color: #ffd700 !important;
-        }
-        .navbar .btn {
-    font-size: 14px;
-    font-weight: 500;
-    padding: 6px 16px;
-    transition: 0.3s;
-}
-
-.navbar .btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-    </style>
-
-
-
-    <div class="container">
-        @RenderBody()
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+   <main>
+        <div class="container">
+            @RenderBody()
+        </div>
+   </main>
+  
 
     <!-- Footer -->
     <footer class="bg-light text-dark pt-5 border-top mt-5">
@@ -246,16 +188,78 @@
                 </div>
             </div>
         </div>
-        </
+    </footer>
+
         <script src="~/lib/jquery/dist/jquery.min.js"></script>
-        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="~/js/site.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        @* <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script> *@
+        <script src="~/js/site.js" asp-append-version="true"></script>
 
         @RenderSection("Scripts", required: false)
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        @* <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> *@
 
 </body>
 </html>
 
+<style>
+    /* Top bar */
+    .top-bar {
+        font-size: 14px;
+    }
 
+    /* Navbar links */
+    .navbar-nav .nav-link {
+        font-size: 16px;
+        font-weight: 500;
+        padding: 8px 14px;
+        transition: 0.3s;
+    }
 
+        .navbar-nav .nav-link:hover {
+            color: #ffd700 !important;
+            border-bottom: 2px solid #ffd700;
+        }
+
+    /* Dropdown */
+    .dropdown-menu-dark {
+        background-color: #2d2d2d;
+        border-radius: 8px;
+    }
+
+        .dropdown-menu-dark .dropdown-item:hover {
+            background-color: #444;
+            color: #ffd700;
+        }
+
+    /* Search box */
+    .search-box input {
+        border-radius: 20px 0 0 20px;
+        border: none;
+        padding-left: 12px;
+    }
+
+    .search-box button {
+        border-radius: 0 20px 20px 0;
+        border: none;
+    }
+
+    /* Navbar link hover */
+    .navbar-nav .nav-link:hover {
+        color: #ffd700 !important;
+    }
+
+    .navbar .btn {
+        font-size: 14px;
+        font-weight: 500;
+        padding: 6px 16px;
+        transition: 0.3s;
+    }
+
+        .navbar .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+</style>
+
+    

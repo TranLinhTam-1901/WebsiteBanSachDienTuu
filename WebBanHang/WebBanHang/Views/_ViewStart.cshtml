@@ -1,4 +1,19 @@
 ﻿@{
-     Layout = "~/Views/Shared/_Layout.cshtml";
+    var user = Context?.User;
+    if (user?.Identity?.IsAuthenticated == true)
+    {
+        if (user.IsInRole("Admin"))
+        {
+            Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+        }
+        else
+        {
+            Layout = "~/Views/Shared/_Layout.cshtml";
+        }
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml"; // Layout mặc định cho người chưa đăng nhập
+    }
 }
-}
+

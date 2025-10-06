@@ -11,19 +11,37 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 //setup Indetity 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-                 .AddDefaultTokenProviders()
-                 .AddDefaultUI()
-                 .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders()
+    .AddDefaultUI();
+// Nới lỏng quy tắc mật khẩu để người dùng tự do đặt mật khẩu
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequiredLength = 1;
+    options.Password.RequiredUniqueChars = 0;
+});
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = $"/Identity/Account/Login";
     options.LogoutPath = $"/Identity/Account/Logout";
-    options.LoginPath = $"/Identity/Account/AccessDenied";
+    options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // Hết hạn sau 30 phút
+    options.SlidingExpiration = true;
+    options.Cookie.IsEssential = true;
+
+    // Quan trọng: không set ExpireTimeSpan cố định -> nó thành session cookie
+    options.Cookie.Expiration = null;
 });
 
-builder.Services.AddRazorPages();   
+builder.Services.AddRazorPages();
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddRazorRuntimeCompilation();
 
 builder.Services.AddScoped<IProductRepository, EFProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, EFCategoryRepository>();
@@ -38,6 +56,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 
 // Đặt sau app.UseRouting()

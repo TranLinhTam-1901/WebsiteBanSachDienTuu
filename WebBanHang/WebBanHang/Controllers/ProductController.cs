@@ -1,32 +1,56 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebBanHang.Repositories;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 using WebBanHang.Models;
 
-public class ProductController : Controller
+namespace WebBanHang.Controllers
 {
-    private readonly IProductRepository _productRepo;
-
-    public ProductController(IProductRepository productRepo)
+    public class ProductController : Controller
     {
-        _productRepo = productRepo;
-    }
+        private readonly ApplicationDbContext _db;
 
-    public IActionResult Index()
-    {
-        var products = _productRepo.GetAllProducts();
-        return View(products);
-    }
-
-    public IActionResult Details(int id)
-    {
-        var product = _productRepo.GetProductById(id);
-        if (product == null)
+        public ProductController(ApplicationDbContext db)
         {
-            return NotFound();
+            _db = db;
         }
-        return View(product);
+
+        public async Task<IActionResult> Index()
+        {
+            var products = await _db.Products.AsNoTracking().ToListAsync();
+            return View(products);
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var product = await _db.Products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == id);
+            if (product == null) return NotFound();
+            return View(product);
+        }
+
+
+        public async Task<IActionResult> AddReview(int productId, int rating, string comment)
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            var review = new Review
+            {
+                ProductId = productId,
+                Rating = rating,
+                Comment = comment,
+                UserId = userId,
+                CreatedAt = DateTime.Now
+            };
+
+            _db.Reviews.Add(review);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = productId });
+        }
     }
-
-
-
 }

@@ -1,0 +1,32 @@
+﻿@model WebBanHang.Models.Category
+
+@{
+    ViewData["Title"] = "Cập nhật Danh mục: " + Model.Name;
+    Layout = "_LayoutAdmin";
+}
+
+<h2 class="mb-4">✍️ Cập nhật Danh mục</h2>
+
+<form asp-action="Update"
+      asp-controller="Category"
+      asp-area="Admin"
+      method="post"
+      class="p-3 border rounded shadow-sm bg-light">
+
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group mb-3">
+        <label asp-for="Name" class="form-label fw-bold">Tên Danh mục</label>
+        <input asp-for="Name" type="text" class="form-control" placeholder="Nhập tên danh mục..." />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">💾 Lưu Thay đổi</button>
+        <a asp-action="Index" asp-controller="Category" asp-area="Admin" class="btn btn-secondary">
+            ↩️ Quay lại
+        </a>
+    </div>
+</form>

@@ -11,6 +11,12 @@ namespace WebBanHang.Models
         [Required, StringLength(100)]
         public string Name { get; set; } =  string.Empty;
 
+        [Required]
+        public string Author { get; set; } = string.Empty;  
+
+        public string? BookContentUrl  { get; set; } 
+
+
         [Range(0.01, 10000000)]
         [Column(TypeName = "decimal(18,2)")]   // Khai báo rõ precision & scale
         public decimal Price { get; set; }
@@ -23,5 +29,16 @@ namespace WebBanHang.Models
         public int CategoryId { get; set; }
         public Category? Category { get; set; }
 
+        public string? UserId { get; set; }
+        
+        [ForeignKey("UserId")]
+        public ApplicationUser? User { get; set; }
+
+        public string Title { get; set; }
+
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
+
     }
+
 }
+
