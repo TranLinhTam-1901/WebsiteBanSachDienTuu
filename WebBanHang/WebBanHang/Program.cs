@@ -65,7 +65,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapStaticAssets();
 app.MapRazorPages(); // rất quan trọng để Identity chạy
-
+app.UseStaticFiles(); // ✅ Cho phép truy cập wwwroot
 
 app.MapAreaControllerRoute(
     name: "Admin",
