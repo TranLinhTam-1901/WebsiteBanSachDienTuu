@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,14 +23,18 @@ namespace WebBanHang.Controllers
         private async Task<Cart> GetOrCreateCart()
         {
             var user = await _userManager.GetUserAsync(User);
-            var cart = await _db.Carts.Include(c => c.Items).ThenInclude(i => i.Product)
+            var cart = await _db.Carts
+                .Include(c => c.Items)
+                .ThenInclude(i => i.Product)
                 .FirstOrDefaultAsync(c => c.UserId == user.Id);
+
             if (cart == null)
             {
                 cart = new Cart { UserId = user.Id };
                 _db.Carts.Add(cart);
                 await _db.SaveChangesAsync();
             }
+
             return cart;
         }
 
@@ -45,6 +49,7 @@ namespace WebBanHang.Controllers
         public async Task<IActionResult> Add(int productId, int quantity = 1)
         {
             if (quantity < 1) quantity = 1;
+
             var cart = await GetOrCreateCart();
             var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == productId);
             if (product == null) return NotFound();
@@ -63,27 +68,44 @@ namespace WebBanHang.Controllers
             {
                 existing.Quantity += quantity;
             }
+
             await _db.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateQuantity(int itemId, int quantity)
+        public async Task<IActionResult> UpdateQuantityAjax(int itemId, int quantity)
         {
             var cart = await GetOrCreateCart();
             var item = cart.Items.FirstOrDefault(i => i.Id == itemId);
             if (item == null) return NotFound();
+
             if (quantity <= 0)
-            {
                 _db.CartItems.Remove(item);
-            }
             else
-            {
                 item.Quantity = quantity;
-            }
+
             await _db.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            // ✅ Tính tổng (bỏ phí ship, chỉ tính subtotal và total = subtotal)
+            var subtotal = (await _db.CartItems
+                .Where(ci => ci.CartId == cart.Id)
+                .ToListAsync())
+                .Sum(ci => ci.UnitPrice * ci.Quantity);
+
+            var total = subtotal;
+            var lineSubtotal = quantity > 0 ? item.UnitPrice * quantity : 0;
+
+            return Json(new
+            {
+                ok = true,
+                itemId,
+                quantity,
+                lineSubtotal,
+                subtotal,
+                total
+            });
         }
 
         [HttpPost]
@@ -93,6 +115,7 @@ namespace WebBanHang.Controllers
             var cart = await GetOrCreateCart();
             var item = cart.Items.FirstOrDefault(i => i.Id == itemId);
             if (item == null) return NotFound();
+
             _db.CartItems.Remove(item);
             await _db.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -109,5 +132,3 @@ namespace WebBanHang.Controllers
         }
     }
 }
-
-

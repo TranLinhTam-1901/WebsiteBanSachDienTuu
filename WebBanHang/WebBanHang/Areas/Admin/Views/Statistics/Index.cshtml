@@ -1,0 +1,108 @@
+﻿@{
+    ViewData["Title"] = "Thống kê bán hàng";
+    Layout = "_LayoutAdmin";
+
+    var month = (int)ViewBag.Month;
+    var year = (int)ViewBag.Year;
+    var totalRevenueMonth = (decimal)ViewBag.TotalRevenueMonth;
+    var topBooks = ViewBag.TopBooks as IEnumerable<dynamic>;
+    var dailyRevenue = ViewBag.DailyRevenue as IEnumerable<dynamic>;
+}
+
+<div class="container-fluid p-4">
+    <h2 class="mb-4 fw-bold"><i class="bi bi-bar-chart"></i> Thống kê doanh thu theo tháng</h2>
+
+    <div class="row g-3 align-items-stretch">
+        <!-- Bộ lọc tháng -->
+        <div class="col-md-3">
+            <form method="get" asp-action="Index" class="bg-light p-3 rounded shadow-sm text-center">
+                <label class="fw-semibold mb-2">Chọn tháng để xem doanh thu</label>
+                <select name="month" class="form-select mb-3" onchange="this.form.submit()">
+                    @for (int i = 1; i <= 12; i++)
+                    {
+                        <option value="@i" selected="@(i == month)">@($"Tháng {i}")</option>
+                    }
+                </select>
+                <select name="year" class="form-select" onchange="this.form.submit()">
+                    @for (int y = DateTime.Now.Year - 2; y <= DateTime.Now.Year; y++)
+                    {
+                        <option value="@y" selected="@(y == year)">@y</option>
+                    }
+                </select>
+            </form>
+        </div>
+
+        <!-- Tổng doanh thu theo ngày -->
+        <div class="col-md-3">
+            <div class="p-3 bg-light rounded shadow-sm text-center">
+                <label class="fw-semibold mb-2">TỔNG DOANH THU THÁNG</label>
+                <h4 class="text-success fw-bold">@totalRevenueMonth.ToString("N0") đ</h4>
+            </div>
+        </div>
+
+        <!-- Biểu đồ doanh thu -->
+        <div class="col-md-6">
+            <div class="bg-light rounded shadow-sm p-3">
+                <h6 class="text-muted mb-3">Biểu đồ doanh thu theo ngày trong tháng</h6>
+                <canvas id="chart" height="130"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <h5 class="text-center fw-semibold mb-3">Top 5 sách bán nhiều nhất tháng @month/@year</h5>
+    <div class="d-flex justify-content-center flex-wrap gap-4">
+        @foreach (var book in topBooks)
+        {
+            <div class="card shadow-sm" style="width:160px;">
+                <img src="@book.Image" class="card-img-top" style="height:180px; object-fit:cover;" />
+                <div class="card-body text-center">
+                    <div class="fw-bold small text-truncate">@book.BookName</div>
+                    <div class="text-muted small">SL: @book.Quantity</div>
+                    <div class="text-success small fw-bold">@book.Revenue.ToString("N0") đ</div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = [
+        @foreach (var d in dailyRevenue)
+        {
+                @: "@d.Day",
+        }
+    ];
+    const data = [
+        @foreach (var d in dailyRevenue)
+        {
+                @: @d.Total,
+        }
+    ];
+
+    new Chart(document.getElementById('chart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Doanh thu ngày (VNĐ)',
+                data: data,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true, ticks: { callback: value => value.toLocaleString('vi-VN') } }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>

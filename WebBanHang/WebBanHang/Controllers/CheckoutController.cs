@@ -20,43 +20,55 @@ namespace WebBanHang.Controllers
             _userManager = userManager;
         }
 
+        // Hiển thị trang thanh toán
         [HttpGet]
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
-            var cart = await _db.Carts.Include(c => c.Items).ThenInclude(i => i.Product)
+
+            var cart = await _db.Carts
+                .Include(c => c.Items)
+                .ThenInclude(i => i.Product)
                 .FirstOrDefaultAsync(c => c.UserId == user.Id);
+
             if (cart == null || !cart.Items.Any())
-            {
                 return RedirectToAction("Index", "Cart");
-            }
-            ViewBag.Subtotal = cart.Items.Sum(i => i.UnitPrice * i.Quantity);
-            ViewBag.Shipping = 15000m;
-            ViewBag.Total = (decimal)ViewBag.Subtotal + (decimal)ViewBag.Shipping;
+
+            var subtotal = cart.Items.Sum(i => i.UnitPrice * i.Quantity);
+            var total = subtotal; // Không tính phí ship
+
+            ViewBag.Subtotal = subtotal;
+            ViewBag.Total = total;
+
             return View(cart);
         }
 
+        // Xử lý khi người dùng đặt hàng
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PlaceOrder(string fullName, string address, string phone)
         {
-            if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(address) || string.IsNullOrWhiteSpace(phone))
+            if (string.IsNullOrWhiteSpace(fullName) ||
+                string.IsNullOrWhiteSpace(address) ||
+                string.IsNullOrWhiteSpace(phone))
             {
                 ModelState.AddModelError(string.Empty, "Vui lòng nhập đầy đủ thông tin.");
                 return RedirectToAction(nameof(Index));
             }
 
             var user = await _userManager.GetUserAsync(User);
-            var cart = await _db.Carts.Include(c => c.Items).ThenInclude(i => i.Product)
-                .FirstOrDefaultAsync(c => c.UserId == user.Id);
-            if (cart == null || !cart.Items.Any())
-            {
-                return RedirectToAction("Index", "Cart");
-            }
 
+            var cart = await _db.Carts
+                .Include(c => c.Items)
+                .ThenInclude(i => i.Product)
+                .FirstOrDefaultAsync(c => c.UserId == user.Id);
+
+            if (cart == null || !cart.Items.Any())
+                return RedirectToAction("Index", "Cart");
+
+            // ✅ Không tính phí ship nữa
             var subtotal = cart.Items.Sum(i => i.UnitPrice * i.Quantity);
-            var shipping = 15000m;
-            var total = subtotal + shipping;
+            var total = subtotal;
 
             var order = new Order
             {
@@ -65,7 +77,6 @@ namespace WebBanHang.Controllers
                 Address = address,
                 Phone = phone,
                 Subtotal = subtotal,
-                ShippingFee = shipping,
                 Total = total
             };
 
@@ -80,22 +91,29 @@ namespace WebBanHang.Controllers
             }
 
             _db.Orders.Add(order);
+
+            // Sau khi đặt hàng thì xóa sạch giỏ hàng
             _db.CartItems.RemoveRange(cart.Items);
             await _db.SaveChangesAsync();
 
             return RedirectToAction(nameof(Confirmation), new { id = order.Id });
         }
 
+        // Trang xác nhận đơn hàng
         [HttpGet]
         public async Task<IActionResult> Confirmation(int id)
         {
             var user = await _userManager.GetUserAsync(User);
-            var order = await _db.Orders.Include(o => o.Items).ThenInclude(i => i.Product)
+
+            var order = await _db.Orders
+                .Include(o => o.Items)
+                .ThenInclude(i => i.Product)
                 .FirstOrDefaultAsync(o => o.Id == id && o.UserId == user.Id);
-            if (order == null) return NotFound();
+
+            if (order == null)
+                return NotFound();
+
             return View(order);
         }
     }
 }
-
-
