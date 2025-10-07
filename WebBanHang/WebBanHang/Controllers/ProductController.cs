@@ -90,7 +90,7 @@ namespace WebBanHang.Controllers
             await _db.SaveChangesAsync();
 
             return RedirectToAction("Details", new { id = productId });
-        
+
 
             if (imageFile != null && imageFile.Length > 0)
             {
@@ -108,5 +108,28 @@ namespace WebBanHang.Controllers
                 review.ImageUrl = "/uploads/reviews/" + fileName; // ✅ Đường dẫn tương đối để hiển thị
             }
         }
+
+            [HttpGet]
+            public async Task<IActionResult> Search(string keyword)
+            {
+                if (string.IsNullOrWhiteSpace(keyword))
+                {
+                    // Nếu người dùng không nhập gì thì trả về toàn bộ sản phẩm
+                    var allProducts = await _db.Products.AsNoTracking().ToListAsync();
+                    ViewBag.Keyword = "";
+                    return View("SearchResults", allProducts);
+                }
+
+                var results = await _db.Products
+                    .AsNoTracking()
+                    .Where(p =>
+                        p.Name.Contains(keyword) ||
+                        p.Description.Contains(keyword))
+                    .ToListAsync();
+
+                ViewBag.Keyword = keyword;
+                return View("SearchResults", results);
+            }
+
+        }
     }
-}
