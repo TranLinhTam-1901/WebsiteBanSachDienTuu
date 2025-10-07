@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
-using WebBanHang.Models;
-
-namespace YourProjectName.Models
+namespace WebBanHang.Models
 {
     public class ProductDetailViewModel
     {
-        public Product Product { get; set; }      // Thông tin sản phẩm
-        public List<Review> Reviews { get; set; } // Danh sách bình luận
-        public Review NewReview { get; set; }     // Review mới để nhập từ form
+        public Product Product { get; set; }
+        public List<Review> Reviews { get; set; } = new();
+
+        // Dành cho form thêm đánh giá
+        public int Rating { get; set; }
+        public string Comment { get; set; } = string.Empty;
+        public IFormFile? ImageFile { get; set; }
     }
 }

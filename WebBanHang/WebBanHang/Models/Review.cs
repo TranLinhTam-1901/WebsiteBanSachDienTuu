@@ -22,8 +22,8 @@ namespace WebBanHang.Models
 
         public string UserId { get; set; }
         public ApplicationUser User { get; set; }
-       
 
+        public string? ImageUrl { get; set; } // thêm dòng này
 
 
     }
