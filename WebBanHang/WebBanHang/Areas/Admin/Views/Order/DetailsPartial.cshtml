@@ -1,0 +1,66 @@
+﻿@model WebBanHang.Models.Order
+
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    Layout = null; // ⚠️ [CHỈNH 1] Modal partial không cần layout
+}
+
+<div>
+    <p><strong>Mã đơn hàng:</strong> #@Model.Id</p>
+    <p><strong>Khách hàng:</strong> @Model.User?.Email</p>
+    <p><strong>SĐT:</strong> @Model.Phone</p>
+
+    <p>
+        <strong>Trạng thái:</strong>
+        <!-- ⚠️ [CHỈNH 2] Badge trạng thái rõ ràng -->
+        <span class="badge bg-@(Model.Status switch {
+            "Pending" => "warning text-dark",
+            "Confirmed" => "success",
+            "Canceled" => "danger",
+            "Completed" => "primary",
+            _ => "secondary"
+        })">
+            @Model.Status
+        </span>
+    </p>
+
+    <p>
+        <strong>Thanh toán:</strong>
+        <!-- ⚠️ [CHỈNH 3] Hiển thị trạng thái thanh toán riêng -->
+        @if (Model.IsPaid)
+        {
+            <span class="badge bg-success">Đã thanh toán</span>
+        }
+        else
+        {
+            <span class="badge bg-danger">Chưa thanh toán</span>
+        }
+    </p>
+
+    <hr />
+
+    <h6>Danh sách sản phẩm</h6>
+    <table class="table table-bordered table-sm">
+        <thead class="table-light">
+            <tr>
+                <th>Tên sách</th>
+                <th class="text-center">Số lượng</th>
+                <th class="text-end">Đơn giá</th>
+                <th class="text-end">Thành tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.Product?.Name</td>
+                    <td class="text-center">@item.Quantity</td>
+                    <td class="text-end">@item.UnitPrice.ToString("N0") đ</td>
+                    <td class="text-end">@((item.UnitPrice * item.Quantity).ToString("N0")) đ</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <p class="fw-bold text-end">Tổng cộng: @Model.Total.ToString("N0") đ</p>
+</div>

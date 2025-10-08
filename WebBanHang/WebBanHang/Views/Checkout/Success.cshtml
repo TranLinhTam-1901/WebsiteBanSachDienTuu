@@ -1,0 +1,27 @@
+﻿@model WebBanHang.Models.Order
+@{
+    ViewData["Title"] = "Thanh toán thành công";
+}
+
+<div class="alert alert-success mt-3">
+    <h2>✅ Thanh toán thành công!</h2>
+    <p><b>Mã đơn hàng:</b> #@Model.Id</p>
+    <p><b>Mã giao dịch:</b> <code>@Model.TransactionId</code></p>
+</div>
+
+<h4 class="mt-4">📚 Danh sách sách đã mua:</h4>
+<ul class="list-group mb-3">
+    @foreach (var item in Model.Items)
+    {
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><b>@item.Product.Name</b></span>
+            <a href="@item.Product.BookContentUrl" target="_blank" class="btn btn-sm btn-primary">
+                📥 Tải sách
+            </a>
+        </li>
+    }
+</ul>
+
+<a asp-controller="Order" asp-action="Index" class="btn btn-outline-secondary">
+    ← Quay lại danh sách đơn hàng
+</a>

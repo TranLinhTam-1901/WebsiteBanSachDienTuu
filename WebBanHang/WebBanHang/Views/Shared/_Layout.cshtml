@@ -44,9 +44,14 @@
                 <!-- Menu chính -->
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item"><a class="nav-link active text-white" href="/">Trang Chủ</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="#">Cửa Hàng</a></li>
+                    
                     <li class="nav-item">
                         <a class="nav-link text-white" asp-controller="Product" asp-action="Index">Sản Phẩm</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="Order" asp-action="Index">
+                            Lịch sử đặt hàng
+                        </a>
                     </li>
 
                     @* <li class="nav-item"><a class="nav-link text-white" href="#">Trang</a></li>

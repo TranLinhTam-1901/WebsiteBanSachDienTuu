@@ -1,0 +1,100 @@
+﻿@model IEnumerable<WebBanHang.Models.Order>
+
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+}
+
+<h2 class="mb-4">🧾 Đơn hàng của tôi</h2>
+
+<table class="table table-striped align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Mã</th>
+            <th>Ngày tạo</th>
+            <th>Tổng tiền</th>
+            <th>Trạng thái</th>
+            <th>Thanh toán</th>
+            <th class="text-center">Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in Model)
+        {
+            <tr>
+                <td>#@order.Id</td>
+                <td>@order.CreatedAt.ToString("dd/MM/yyyy")</td>
+                <td>@order.Total.ToString("N0") đ</td>
+
+                <!-- Trạng thái đơn hàng -->
+                <td>
+                    @switch (order.Status)
+                    {
+                        case "Pending":
+                            <span class="badge bg-warning text-dark">⏳ Chờ xác nhận</span>
+                            ;
+                            break;
+                        case "Confirmed":
+                            <span class="badge bg-success">✅ Đã xác nhận</span>
+                            ;
+                            break;
+                        case "Completed":
+                            <span class="badge bg-primary">📘 Hoàn tất</span>
+                            ;
+                            break;
+                        case "Canceled":
+                            <span class="badge bg-danger">❌ Đã hủy</span>
+                            ;
+                            break;
+                        default:
+                            <span class="badge bg-secondary">Không xác định</span>
+                            ;
+                            break;
+                    }
+                </td>
+
+                <!-- Trạng thái thanh toán -->
+                <td>
+                    @if (order.IsPaid)
+                    {
+                        <span class="text-success fw-bold">Đã thanh toán</span>
+                    }
+                    else
+                    {
+                        <span class="text-danger fw-bold">Chưa thanh toán</span>
+                    }
+                </td>
+
+                <!-- Hành động -->
+                <td class="text-center">
+                    <!-- Xem chi tiết -->
+                    <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-outline-info">
+                        👁 Xem
+                    </a>
+
+                    <!-- Thanh toán (chỉ khi đã được admin xác nhận & chưa thanh toán) -->
+                    @if (order.Status == "Confirmed" && !order.IsPaid)
+                    {
+                        <a asp-controller="Checkout"
+                           asp-action="FakePay"
+                           asp-route-orderId="@order.Id"
+                           class="btn btn-sm btn-success ms-2">
+                            💳 Thanh toán
+                        </a>
+                    }
+
+                    <!-- Tải sách (chỉ khi đã hoàn tất và thanh toán xong) -->
+                    @if (order.Status == "Completed" && order.IsPaid)
+                    {
+                        @foreach (var item in order.Items)
+                        {
+                            <a href="@item.Product.BookContentUrl" target="_blank"
+                               class="btn btn-sm btn-primary ms-2">
+                                📥 Tải @item.Product.Name
+                            </a>
+                        }
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
