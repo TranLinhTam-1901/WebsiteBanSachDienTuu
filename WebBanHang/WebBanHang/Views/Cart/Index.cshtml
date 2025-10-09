@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Giỏ hàng";
     decimal subtotal = Model.Items.Sum(i => i.UnitPrice * i.Quantity);
+    //decimal shipping = subtotal > 0 ? 15000 : 0;
     decimal total = subtotal;
 }
 <h2 class="mb-4">Giỏ hàng</h2>
@@ -58,27 +59,30 @@ else
                 </tbody>
             </table>
         </div>
-    </div>
-
-    <div class="col-lg-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title mb-3">Tổng kết đơn hàng</h5>
-                <div class="d-flex justify-content-between mb-2">
-                    <span>Tạm tính</span>
-                    <strong><span id="cart-subtotal">@subtotal.ToString("N0")</span> đ</strong>
-                </div>
-                <hr />
-                <div class="d-flex justify-content-between fs-5 mb-3">
-                    <span>Tổng cộng</span>
-                    <strong class="text-success"><span id="cart-total">@total.ToString("N0")</span> đ</strong>
-                </div>
-                <div class="d-grid gap-2">
-                    <a asp-controller="Checkout" asp-action="Index" class="btn btn-success">Thanh toán</a>
-                    <form asp-action="Clear" method="post" class="js-clear-form">
-                        <button type="submit" class="btn btn-outline-secondary">Xóa tất cả</button>
-                        @Html.AntiForgeryToken()
-                    </form>
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Tổng kết đơn hàng</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tạm tính</span>
+                        <strong>@subtotal.ToString("N0") đ</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        @* <span>Phí vận chuyển</span> *@
+                        @* <strong>@shipping.ToString("N0") đ</strong> *@
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between fs-5 mb-3">
+                        <span>Tổng cộng</span>
+                        <strong class="text-success">@total.ToString("N0") đ</strong>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a asp-controller="Checkout" asp-action="Index" class="btn btn-success">Thanh toán</a>
+                        <form asp-action="Clear" method="post">
+                            <button type="submit" class="btn btn-outline-secondary">Xóa tất cả</button>
+                            @Html.AntiForgeryToken()
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,0 +1,32 @@
+﻿@model WebBanHang.Models.Order
+@{
+    ViewData["Title"] = "Thanh toán đơn hàng";
+}
+
+<h2 class="mb-3 text-primary">💳 Thanh toán đơn hàng #@Model.Id</h2>
+
+<!-- Nếu đơn chưa được xác nhận thì cảnh báo -->
+@if (Model.Status != "Confirmed")
+{
+    <div class="alert alert-warning">
+        ⏳ Đơn hàng của bạn hiện <b>chưa được Admin xác nhận</b>.<br />
+        Vui lòng quay lại sau khi đơn hàng được duyệt để tiến hành thanh toán.
+    </div>
+
+    <a asp-controller="Order" asp-action="Index" class="btn btn-secondary mt-2">
+        ← Quay lại danh sách đơn hàng
+    </a>
+}
+else
+{
+    <div class="alert alert-info">
+        💰 <b>Tổng tiền cần thanh toán:</b> @Model.Total.ToString("N0") đ
+    </div>
+
+    <form asp-action="ConfirmFakePay" method="post" asp-controller="Checkout">
+        <input type="hidden" name="orderId" value="@Model.Id" />
+        <button type="submit" class="btn btn-success btn-lg">
+            ✅ Xác nhận Thanh toán
+        </button>
+    </form>
+}
