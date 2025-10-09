@@ -20,14 +20,18 @@ namespace WebBanHang.Controllers
             _userManager = userManager;
         }
 
+        // Hiển thị trang thanh toán
         [HttpGet]
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
-            var cart = await _db.Carts.Include(c => c.Items).ThenInclude(i => i.Product)
+
+            var cart = await _db.Carts
+                .Include(c => c.Items)
+                .ThenInclude(i => i.Product)
                 .FirstOrDefaultAsync(c => c.UserId == user.Id);
+
             if (cart == null || !cart.Items.Any())
-            {
                 return RedirectToAction("Index", "Cart");
             }
             ViewBag.Subtotal = cart.Items.Sum(i => i.UnitPrice * i.Quantity);
@@ -35,6 +39,7 @@ namespace WebBanHang.Controllers
             return View(cart);
         }
 
+        // Xử lý khi người dùng đặt hàng
         [HttpPost]
         public async Task<IActionResult> PlaceOrder(string fullName, string phone)
         {
@@ -45,13 +50,16 @@ namespace WebBanHang.Controllers
             }
 
             var user = await _userManager.GetUserAsync(User);
-            var cart = await _db.Carts.Include(c => c.Items).ThenInclude(i => i.Product)
-                .FirstOrDefaultAsync(c => c.UserId == user.Id);
-            if (cart == null || !cart.Items.Any())
-            {
-                return RedirectToAction("Index", "Cart");
-            }
 
+            var cart = await _db.Carts
+                .Include(c => c.Items)
+                .ThenInclude(i => i.Product)
+                .FirstOrDefaultAsync(c => c.UserId == user.Id);
+
+            if (cart == null || !cart.Items.Any())
+                return RedirectToAction("Index", "Cart");
+
+            // ✅ Không tính phí ship nữa
             var subtotal = cart.Items.Sum(i => i.UnitPrice * i.Quantity);
             var total = subtotal ;
 
@@ -76,6 +84,8 @@ namespace WebBanHang.Controllers
             }
 
             _db.Orders.Add(order);
+
+            // Sau khi đặt hàng thì xóa sạch giỏ hàng
             _db.CartItems.RemoveRange(cart.Items);
             await _db.SaveChangesAsync();
 
@@ -143,5 +153,3 @@ namespace WebBanHang.Controllers
        
     }
 }
-
-

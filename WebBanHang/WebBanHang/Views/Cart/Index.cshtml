@@ -5,7 +5,6 @@
     //decimal shipping = subtotal > 0 ? 15000 : 0;
     decimal total = subtotal;
 }
-
 <h2 class="mb-4">Giỏ hàng</h2>
 
 @if (!Model.Items.Any())
@@ -14,49 +13,51 @@
 }
 else
 {
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="table-responsive shadow-sm rounded">
-                <table class="table align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Sách</th>
-                            <th style="width:140px">Giá</th>
-                            <th style="width:220px">Số lượng</th>
-                            <th style="width:140px">Tạm tính</th>
-                            <th style="width:80px"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.Items)
-                        {
-                            <tr>
-                                <td>
-                                    <div class="fw-semibold">@item.Product?.Name</div>
-                                    <div class="text-muted small">@item.Product?.Author</div>
-                                </td>
-                                <td>@item.UnitPrice.ToString("N0") đ</td>
-                                <td>
-                                    <form asp-action="UpdateQuantity" method="post" class="d-flex align-items-center gap-2">
-                                        <input type="hidden" name="itemId" value="@item.Id" />
-                                        <input type="number" name="quantity" value="@item.Quantity" min="0" class="form-control" style="width:100px" />
-                                        <button type="submit" class="btn btn-sm btn-primary">Cập nhật</button>
-                                        @Html.AntiForgeryToken()
-                                    </form>
-                                </td>
-                                <td>@((item.UnitPrice * item.Quantity).ToString("N0")) đ</td>
-                                <td>
-                                    <form asp-action="Remove" method="post">
-                                        <input type="hidden" name="itemId" value="@item.Id" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
-                                        @Html.AntiForgeryToken()
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+<div class="row g-4" id="cart-wrapper">
+    <div class="col-lg-8">
+        <div class="table-responsive shadow-sm rounded">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Sách</th>
+                        <th style="width:140px">Giá</th>
+                        <th style="width:220px">Số lượng</th>
+                        <th style="width:140px">Tạm tính</th>
+                        <th style="width:80px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr data-row-item="@item.Id">
+                        <td>
+                            <div class="fw-semibold">@item.Product?.Name</div>
+                            <div class="text-muted small">@item.Product?.Author</div>
+                        </td>
+                        <td>@item.UnitPrice.ToString("N0") đ</td>
+                        <td>
+                            <input type="number"
+                                   class="form-control qty-input"
+                                   data-item-id="@item.Id"
+                                   value="@item.Quantity" min="0"
+                                   style="width:100px" />
+                        </td>
+                        <td class="text-end">
+                            <span class="line-subtotal" data-item-id="@item.Id">
+                                @((item.UnitPrice * item.Quantity).ToString("N0"))
+                            </span> đ
+                        </td>
+                        <td>
+                            <form asp-action="Remove" method="post" class="js-remove-form" data-item-id="@item.Id">
+                                <input type="hidden" name="itemId" value="@item.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                                @Html.AntiForgeryToken()
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
         </div>
         <div class="col-lg-4">
             <div class="card shadow-sm">
@@ -86,6 +87,69 @@ else
             </div>
         </div>
     </div>
+</div>
+
+@Html.AntiForgeryToken() <!-- token global -->
 }
 
+<script>
+(function(){
+  const fmt = (n) => (n || 0).toLocaleString('vi-VN');
+  const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
 
+  async function postUpdate(itemId, quantity){
+    const fd = new FormData();
+    fd.append('itemId', itemId);
+    fd.append('quantity', quantity);
+    fd.append('__RequestVerificationToken', token);
+    const res = await fetch('/Cart/UpdateQuantityAjax', { method: 'POST', body: fd });
+    if (!res.ok) return null;
+    return res.json();
+  }
+
+  function updateSummary(data){
+    const sub = document.getElementById('cart-subtotal');
+    const tot = document.getElementById('cart-total');
+    if (sub)  sub.textContent  = fmt(data.subtotal);
+    if (tot)  tot.textContent  = fmt(data.total);
+  }
+
+  function updateLine(itemId, value){
+    const span = document.querySelector(`.line-subtotal[data-item-id="${itemId}"]`);
+    if (span) span.textContent = fmt(value);
+  }
+
+  function removeRow(itemId){
+    const row = document.querySelector(`tr[data-row-item="${itemId}"]`);
+    row?.remove();
+    if (!document.querySelector('tr[data-row-item]')){
+      document.querySelector('#cart-wrapper').innerHTML =
+        '<div class="alert alert-info">Giỏ hàng trống.</div>';
+    }
+  }
+
+  const timers = new Map();
+  function debounce(itemId, fn, delay=400){
+    clearTimeout(timers.get(itemId));
+    const t = setTimeout(fn, delay);
+    timers.set(itemId, t);
+  }
+
+  // Khi người dùng thay đổi số lượng
+  document.addEventListener('input', e => {
+    const input = e.target.closest('.qty-input');
+    if (!input) return;
+    const itemId = input.dataset.itemId;
+    let qty = Number(input.value);
+    if (isNaN(qty) || qty < 0) qty = 0;
+
+    debounce(itemId, async () => {
+      const data = await postUpdate(itemId, qty);
+      if (!data?.ok) return;
+      if (data.quantity <= 0) removeRow(itemId);
+      else updateLine(itemId, data.lineSubtotal);
+      updateSummary(data);
+    });
+  });
+})();
+</script>

@@ -1,0 +1,37 @@
+﻿@model IEnumerable<WebBanHang.Models.Product>
+@{
+    ViewData["Title"] = "Kết quả tìm kiếm";
+}
+
+<div class="container mt-4">
+    <h3 class="text-success mb-3">
+        Kết quả tìm kiếm cho: "<strong>@ViewBag.Keyword</strong>"
+    </h3>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-warning text-center">
+            Không tìm thấy sản phẩm nào phù hợp với từ khóa "<strong>@ViewBag.Keyword</strong>".
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            @foreach (var product in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <img src="@product.ImageUrl" class="card-img-top" alt="@product.Name" />
+                        <div class="card-body">
+                            <h5 class="card-title">@product.Name</h5>
+                            <p class="text-danger fw-bold">@string.Format("{0:N0}₫", product.Price)</p>
+                            <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id" class="btn btn-outline-primary btn-sm">
+                                Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
