@@ -34,7 +34,7 @@ namespace WebBanHang.Models
         [ForeignKey("UserId")]
         public ApplicationUser? User { get; set; }
 
-        public string Title { get; set; }
+        //public string Title { get; set; }
 
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
 
