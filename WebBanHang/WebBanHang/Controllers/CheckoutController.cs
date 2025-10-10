@@ -32,13 +32,14 @@ namespace WebBanHang.Controllers
                 .FirstOrDefaultAsync(c => c.UserId == user.Id);
 
             if (cart == null || !cart.Items.Any())
-            {
+            { 
                 return RedirectToAction("Index", "Cart");
             }
             ViewBag.Subtotal = cart.Items.Sum(i => i.UnitPrice * i.Quantity);
             ViewBag.Total = (decimal)ViewBag.Subtotal;
             return View(cart);
         }
+        
 
         // Xử lý khi người dùng đặt hàng
         [HttpPost]

@@ -1,0 +1,30 @@
+﻿@model IEnumerable<WebBanHang.Models.Product>
+@{
+    ViewData["Title"] = "Thư viện của tôi";
+}
+
+<h2>📚 Thư viện của tôi</h2>
+
+@if (!Model.Any())
+{
+    <p>Bạn chưa mua sách nào.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var book in Model)
+        {
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm">
+                    <img src="@book.ImageUrl" class="card-img-top" alt="@book.Name">
+                    <div class="card-body">
+                        <h6>@book.Name</h6>
+                        <a asp-action="Read" asp-route-id="@book.Id" class="btn btn-primary btn-sm w-100">
+                            📖 Đọc ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
