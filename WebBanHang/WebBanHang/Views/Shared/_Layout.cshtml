@@ -10,6 +10,9 @@
     <title>@ViewData["Title"] - 3T-books</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <!-- 🧩 PDF.js CDN chính thức -->
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"></script>
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 
@@ -64,31 +67,24 @@
                     <li class="nav-item">
                         <a class="nav-link text-white" asp-controller="Product" asp-action="Index">Sản Phẩm</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" asp-controller="Order" asp-action="Index">
-                            Lịch sử đặt hàng
-                        </a>
-                    </li>
-
-                    @* <li class="nav-item"><a class="nav-link text-white" href="#">Trang</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="#">Blog</a></li>
-                    <li class="nav-item"><a class="nav-link text-white" href="#">Khác</a></li> *@
-                    @* <li class="nav-item">
-                        <a class="nav-link text-warning" asp-area="Admin" asp-controller="Product" asp-action="Index">
-                           Quản lý Sách 
-                        </a>
-                    </li> *@
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-controller="Order" asp-action="Index">
+                                Lịch sử đặt hàng
+                            </a>
+                        </li>
+                    }
+                    
                 </ul>
 
                 <!-- Search + Giỏ hàng + User/Login/Register -->
                 <div class="d-flex align-items-center gap-2">
                     <!-- Search -->
                        <form asp-controller="Product" asp-action="Search" method="get" class="d-flex ms-auto">
-    <input class="form-control me-2" type="search" name="keyword" placeholder="Tìm sản phẩm, tác giả, thể loại..." aria-label="Search" />
-    <button class="btn btn-outline-light" type="submit">Tìm</button>
-</form>
-
-
+                            <input class="form-control me-2" type="search" name="keyword" placeholder="Tìm sản phẩm, tác giả, thể loại..." aria-label="Search" />
+                            <button class="btn btn-outline-light" type="submit">Tìm</button>
+                        </form>
                     <!-- Giỏ hàng -->
                     <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-light position-relative">
                         <i class="bi bi-cart3"></i>
@@ -107,7 +103,11 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
                                 <li class="dropdown-header">👋 Xin chào, @UserManager.GetUserName(User)</li>
-
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Library" asp-action="Index">
+                                        📚 Thư viện của tôi
+                                    </a>
+                                </li>
                                 <li><a class="dropdown-item" href="/Identity/Account/Manage">Tài khoản của tôi</a></li>
                                 <li>
                                      <form method="post" asp-area="Identity" asp-page="/Account/Logout" 

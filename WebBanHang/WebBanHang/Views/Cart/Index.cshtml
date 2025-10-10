@@ -59,6 +59,8 @@ else
                 </tbody>
             </table>
         </div>
+
+    </div>
         <div class="col-lg-4">
             <div class="card shadow-sm">
                 <div class="card-body">
@@ -77,7 +79,7 @@ else
                         <strong class="text-success">@total.ToString("N0") đ</strong>
                     </div>
                     <div class="d-grid gap-2">
-                        <a asp-controller="Checkout" asp-action="Index" class="btn btn-success">Thanh toán</a>
+                        <a asp-controller="Checkout" asp-action="Index" class="btn btn-success">Đặt hàng</a>
                         <form asp-action="Clear" method="post">
                             <button type="submit" class="btn btn-outline-secondary">Xóa tất cả</button>
                             @Html.AntiForgeryToken()
@@ -86,7 +88,7 @@ else
                 </div>
             </div>
         </div>
-    </div>
+    
 </div>
 
 @Html.AntiForgeryToken() <!-- token global -->

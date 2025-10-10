@@ -45,17 +45,18 @@
 
 <p class="fw-bold text-end">Tổng cộng: @Model.Total.ToString("N0") đ</p>
 
-<hr />
+<hr/>
 
 <div class="d-flex justify-content-between align-items-center">
-    <a asp-controller="Order"
-       asp-action="Index"
-       class="btn btn-outline-primary btn-sm">
-        ← Quay lại danh sách
-    </a>
-
+    @* 💳 Nếu đơn hàng đã xác nhận nhưng chưa thanh toán *@
     @if (Model.Status == "Confirmed" && !Model.IsPaid)
     {
+        <a asp-controller="Order"
+           asp-action="Index"
+           class="btn btn-outline-primary btn-sm">
+            ← Quay lại danh sách
+        </a>
+
         <a asp-controller="Checkout"
            asp-action="FakePay"
            asp-route-orderId="@Model.Id"
@@ -63,21 +64,66 @@
             💳 Thanh toán ngay
         </a>
     }
+
+    @* 📖 Nếu đã thanh toán xong *@
     else if (Model.IsPaid)
     {
-        <a asp-controller="Order"
-           asp-action="Download"
-           asp-route-id="@Model.Id"
-           class="btn btn-primary btn-sm">
-            📚 Tải sách
-        </a>
+        <div class="w-100 text-center mt-3">
+            <div class="alert alert-success p-4 shadow-sm" style="max-width: 700px; margin: 0 auto;">
+                <h5>🎉 Cảm ơn bạn đã mua sách!</h5>
+                <p>Sách của bạn đã được thêm vào thư viện cá nhân.</p>
+
+                <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+                    @if (Model.Items.Any())
+                    {
+                        var firstProduct = Model.Items.First().Product;
+                        if (firstProduct != null)
+                        {
+                            <a asp-controller="Library"
+                               asp-action="Read"
+                               asp-route-id="@firstProduct.Id"
+                               class="btn btn-success px-4">
+                                📖 Đọc ngay
+                            </a>
+                        }
+                    }
+
+                    <a asp-controller="Library"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary px-4">
+                        📚 Về thư viện
+                    </a>
+
+                    <a asp-controller="Order"
+                       asp-action="Index"
+                       class="btn btn-outline-primary px-4">
+                        ← Quay lại danh sách
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+     else if (Model.Status == "Pending")
+    {
+        <div class="w-100 text-center mt-3">
+            <div class="alert alert-warning p-4 shadow-sm" style="max-width: 700px; margin: 0 auto;">
+                <h5>⏳ Đơn hàng của bạn đang chờ xác nhận</h5>
+                <p>Vui lòng quay lại sau khi admin duyệt để tiến hành thanh toán.</p>
+                <a asp-controller="Order"
+                   asp-action="Index"
+                   class="btn btn-outline-primary mt-3">
+                    ← Quay lại danh sách đơn hàng
+                </a>
+            </div>
+        </div>
     }
 </div>
 
-@if (Model.Status == "Pending")
+
+@* @if (Model.Status == "Pending")
 {
     <div class="alert alert-warning mt-3 py-2 px-3" style="max-width: 500px; font-size: 0.9rem;">
         ⏳ Đơn hàng của bạn đang chờ admin xác nhận.<br />
         Vui lòng quay lại sau khi được duyệt để thanh toán.
     </div>
-}
+} *@
