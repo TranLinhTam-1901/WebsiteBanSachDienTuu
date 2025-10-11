@@ -47,7 +47,7 @@
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="fw-semibold">@item.Product?.Name</div>
-                                <div class="small text-muted">x @item.Quantity</div>
+                                @* <div class="small text-muted">x @item.Quantity</div> *@
                             </div>
                             <div>@((item.UnitPrice * item.Quantity).ToString("N0")) đ</div>
                         </li>

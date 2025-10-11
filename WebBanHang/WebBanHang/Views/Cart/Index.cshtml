@@ -2,156 +2,171 @@
 @{
     ViewData["Title"] = "Giỏ hàng";
     decimal subtotal = Model.Items.Sum(i => i.UnitPrice * i.Quantity);
-    //decimal shipping = subtotal > 0 ? 15000 : 0;
+
     decimal total = subtotal;
 }
-<h2 class="mb-4">Giỏ hàng</h2>
+<h2 class="mb-4">🛒 Giỏ hàng của bạn</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        📗 <strong>Thành công:</strong> @Html.Raw(TempData["Success"])
+    </div>
+}
+@if (TempData["Info"] != null)
+{
+    <div class="alert alert-info">
+        ℹ️ <strong>Thông báo:</strong> @Html.Raw(TempData["Info"])
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        ❌ <strong>Lỗi:</strong> @Html.Raw(TempData["Error"])
+    </div>
+}
 
 @if (!Model.Items.Any())
 {
-    <div class="alert alert-info">Giỏ hàng trống.</div>
+    <div class="alert alert-info">Giỏ hàng của bạn hiện đang trống.</div>
 }
 else
 {
-<div class="row g-4" id="cart-wrapper">
-    <div class="col-lg-8">
-        <div class="table-responsive shadow-sm rounded">
-            <table class="table align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Sách</th>
-                        <th style="width:140px">Giá</th>
-                        <th style="width:220px">Số lượng</th>
-                        <th style="width:140px">Tạm tính</th>
-                        <th style="width:80px"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach (var item in Model.Items)
-                {
-                    <tr data-row-item="@item.Id">
-                        <td>
-                            <div class="fw-semibold">@item.Product?.Name</div>
-                            <div class="text-muted small">@item.Product?.Author</div>
-                        </td>
-                        <td>@item.UnitPrice.ToString("N0") đ</td>
-                        <td>
-                            <input type="number"
-                                   class="form-control qty-input"
-                                   data-item-id="@item.Id"
-                                   value="@item.Quantity" min="0"
-                                   style="width:100px" />
-                        </td>
-                        <td class="text-end">
-                            <span class="line-subtotal" data-item-id="@item.Id">
-                                @((item.UnitPrice * item.Quantity).ToString("N0"))
-                            </span> đ
-                        </td>
-                        <td>
-                            <form asp-action="Remove" method="post" class="js-remove-form" data-item-id="@item.Id">
-                                <input type="hidden" name="itemId" value="@item.Id" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
-                                @Html.AntiForgeryToken()
-                            </form>
-                        </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
+    <div class="row g-4" id="cart-wrapper">
+        <div class="col-lg-8">
+            <div class="table-responsive shadow-sm rounded">
+                <table class="table align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tên sách</th>
+                            <th style="width:140px">Giá</th>
+                            <th style="width:180px">Số lượng</th>
+                            <th style="width:140px">Tạm tính</th>
+                            <th style="width:80px"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr data-row-item="@item.Id">
+                                <td>
+                                    <div class="fw-semibold">@item.Product?.Name</div>
+                                    <div class="text-muted small">@item.Product?.Author</div>
+                                </td>
+                                <td>@item.UnitPrice.ToString("N0") đ</td>
+                                <td class="text-center">
+                                    <input type="number"
+                                           class="form-control text-center"
+                                           value="@item.Quantity"
+                                           readonly
+                                           style="width:80px; background-color:#f8f9fa; cursor:not-allowed;" />
+                                </td>
+                                <td class="text-end">
+                                    <span class="line-subtotal" data-item-id="@item.Id">
+                                        @((item.UnitPrice * item.Quantity).ToString("N0"))
+                                    </span> đ
+                                </td>
+                                <td>
+                                    <form asp-action="Remove" method="post" class="js-remove-form" data-item-id="@item.Id">
+                                        <input type="hidden" name="itemId" value="@item.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                                        @Html.AntiForgeryToken()
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-    </div>
         <div class="col-lg-4">
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title mb-3">Tổng kết đơn hàng</h5>
+
                     <div class="d-flex justify-content-between mb-2">
                         <span>Tạm tính</span>
                         <strong>@subtotal.ToString("N0") đ</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        @* <span>Phí vận chuyển</span> *@
-                        @* <strong>@shipping.ToString("N0") đ</strong> *@
                     </div>
                     <hr />
                     <div class="d-flex justify-content-between fs-5 mb-3">
                         <span>Tổng cộng</span>
                         <strong class="text-success">@total.ToString("N0") đ</strong>
                     </div>
+
                     <div class="d-grid gap-2">
-                        <a asp-controller="Checkout" asp-action="Index" class="btn btn-success">Đặt hàng</a>
+                        <a asp-controller="Checkout" asp-action="Index" class="btn btn-success">✅ Đặt hàng</a>
                         <form asp-action="Clear" method="post">
-                            <button type="submit" class="btn btn-outline-secondary">Xóa tất cả</button>
+                            <button type="submit" class="btn btn-outline-secondary">🗑️ Xóa tất cả</button>
                             @Html.AntiForgeryToken()
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-    
-</div>
+    </div>
 
-@Html.AntiForgeryToken() <!-- token global -->
+    @Html.AntiForgeryToken()
 }
 
+<!-- 🧠 Script cập nhật giỏ hàng -->
 <script>
-(function(){
-  const fmt = (n) => (n || 0).toLocaleString('vi-VN');
-  const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+    (function(){
+      const fmt = (n) => (n || 0).toLocaleString('vi-VN');
+      const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
 
-  async function postUpdate(itemId, quantity){
-    const fd = new FormData();
-    fd.append('itemId', itemId);
-    fd.append('quantity', quantity);
-    fd.append('__RequestVerificationToken', token);
-    const res = await fetch('/Cart/UpdateQuantityAjax', { method: 'POST', body: fd });
-    if (!res.ok) return null;
-    return res.json();
-  }
+      async function postUpdate(itemId, quantity){
+        const fd = new FormData();
+        fd.append('itemId', itemId);
+        fd.append('quantity', quantity);
+        fd.append('__RequestVerificationToken', token);
+        const res = await fetch('/Cart/UpdateQuantityAjax', { method: 'POST', body: fd });
+        if (!res.ok) return null;
+        return res.json();
+      }
 
-  function updateSummary(data){
-    const sub = document.getElementById('cart-subtotal');
-    const tot = document.getElementById('cart-total');
-    if (sub)  sub.textContent  = fmt(data.subtotal);
-    if (tot)  tot.textContent  = fmt(data.total);
-  }
+      function updateLine(itemId, value){
+        const span = document.querySelector(`.line-subtotal[data-item-id="${itemId}"]`);
+        if (span) span.textContent = fmt(value);
+      }
 
-  function updateLine(itemId, value){
-    const span = document.querySelector(`.line-subtotal[data-item-id="${itemId}"]`);
-    if (span) span.textContent = fmt(value);
-  }
+      function removeRow(itemId){
+        const row = document.querySelector(`tr[data-row-item="${itemId}"]`);
+        row?.remove();
+        if (!document.querySelector('tr[data-row-item]')){
+          document.querySelector('#cart-wrapper').innerHTML =
+            '<div class="alert alert-info">Giỏ hàng của bạn hiện đang trống.</div>';
+        }
+      }
 
-  function removeRow(itemId){
-    const row = document.querySelector(`tr[data-row-item="${itemId}"]`);
-    row?.remove();
-    if (!document.querySelector('tr[data-row-item]')){
-      document.querySelector('#cart-wrapper').innerHTML =
-        '<div class="alert alert-info">Giỏ hàng trống.</div>';
-    }
-  }
+      const timers = new Map();
+      function debounce(itemId, fn, delay=400){
+        clearTimeout(timers.get(itemId));
+        const t = setTimeout(fn, delay);
+        timers.set(itemId, t);
+      }
 
-  const timers = new Map();
-  function debounce(itemId, fn, delay=400){
-    clearTimeout(timers.get(itemId));
-    const t = setTimeout(fn, delay);
-    timers.set(itemId, t);
-  }
+      // Khi người dùng thay đổi số lượng
+      document.addEventListener('input', e => {
+        const input = e.target.closest('.qty-input');
+        if (!input) return;
+        const itemId = input.dataset.itemId;
+        let qty = Number(input.value);
+        if (isNaN(qty) || qty < 0) qty = 0;
+        if (qty > 1) qty = 1; // Chỉ cho phép mua 1 bản duy nhất
 
-  // Khi người dùng thay đổi số lượng
-  document.addEventListener('input', e => {
-    const input = e.target.closest('.qty-input');
-    if (!input) return;
-    const itemId = input.dataset.itemId;
-    let qty = Number(input.value);
-    if (isNaN(qty) || qty < 0) qty = 0;
+        debounce(itemId, async () => {
+          const data = await postUpdate(itemId, qty);
+          if (!data?.ok) return;
+          if (data.quantity <= 0) removeRow(itemId);
+          else updateLine(itemId, data.lineSubtotal);
+        });
+      });
 
-    debounce(itemId, async () => {
-      const data = await postUpdate(itemId, qty);
-      if (!data?.ok) return;
-      if (data.quantity <= 0) removeRow(itemId);
-      else updateLine(itemId, data.lineSubtotal);
-      updateSummary(data);
-    });
-  });
-})();
+      // Ẩn thông báo sau 4 giây
+      setTimeout(() => {
+          document.querySelectorAll('.alert').forEach(a => a.style.display = 'none');
+      }, 4000);
+    })();
 </script>
