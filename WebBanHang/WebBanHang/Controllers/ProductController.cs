@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,10 +10,11 @@ namespace WebBanHang.Controllers
     public class ProductController : Controller
     {
         private readonly ApplicationDbContext _db;
-
-        public ProductController(ApplicationDbContext db)
+        private readonly UserManager<ApplicationUser> _userManager;
+        public ProductController(ApplicationDbContext db, UserManager<ApplicationUser> userManager)
         {
             _db = db;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
@@ -37,6 +39,24 @@ namespace WebBanHang.Controllers
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
 
+            var user = await _userManager.GetUserAsync(User);
+            bool alreadyOwned = false;
+            bool inCart = false;
+
+            if (user != null)
+            {
+                alreadyOwned = await _db.Orders
+                    .AnyAsync(o => o.UserId == user.Id && o.IsPaid &&
+                                   o.Items.Any(i => i.ProductId == id));
+
+                inCart = await _db.CartItems
+                    .AnyAsync(ci => ci.Cart.UserId == user.Id && ci.ProductId == id);
+            }
+
+            // ✅ Gửi thông tin sang view
+            ViewBag.AlreadyOwned = alreadyOwned;
+            ViewBag.InCart = inCart;
+
             var viewModel = new ProductDetailViewModel
             {
                 Product = product,
@@ -45,8 +65,6 @@ namespace WebBanHang.Controllers
 
             return View(viewModel);
         }
-
-
 
         [HttpPost]
         public async Task<IActionResult> AddReview(int productId, int rating, string comment, IFormFile? imageFile)
@@ -88,25 +106,25 @@ namespace WebBanHang.Controllers
 
             _db.Reviews.Add(review);
             await _db.SaveChangesAsync();
-
+            TempData["Success"] = "🎉 Cảm ơn bạn đã đánh giá sách này!";
             return RedirectToAction("Details", new { id = productId });
 
 
-            if (imageFile != null && imageFile.Length > 0)
-            {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/reviews");
-                Directory.CreateDirectory(uploadsFolder);
+            //if (imageFile != null && imageFile.Length > 0)
+            //{
+            //    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/reviews");
+            //    Directory.CreateDirectory(uploadsFolder);
 
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-                var filePath = Path.Combine(uploadsFolder, fileName);
+            //    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+            //    var filePath = Path.Combine(uploadsFolder, fileName);
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await imageFile.CopyToAsync(stream);
-                }
+            //    using (var stream = new FileStream(filePath, FileMode.Create))
+            //    {
+            //        await imageFile.CopyToAsync(stream);
+            //    }
 
-                review.ImageUrl = "/uploads/reviews/" + fileName; // ✅ Đường dẫn tương đối để hiển thị
-            }
+            //    review.ImageUrl = "/uploads/reviews/" + fileName; // ✅ Đường dẫn tương đối để hiển thị
+            //}
         }
 
             [HttpGet]
