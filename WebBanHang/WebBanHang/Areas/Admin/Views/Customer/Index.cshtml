@@ -1,0 +1,86 @@
+﻿@model IEnumerable<WebBanHang.Areas.Admin.Controllers.CustomerAccountViewModel>
+
+@{
+    ViewData["Title"] = "Quản lý tài khoản khách hàng";
+    Layout = "_LayoutAdmin";
+}
+
+<h2 class="mb-3"><i class="fa fa-users"></i> Danh sách tài khoản khách hàng</h2>
+
+<table class="table table-bordered table-striped text-center align-middle">
+    <thead class="table-success">
+        <tr>
+            <th>Tên đăng nhập</th>
+            <th>Email</th>
+            <th>Ngày tạo</th>
+            <th>Vai trò</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>@(user.CreatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+
+                <!-- Hiển thị vai trò với biểu tượng màu -->
+                <td>
+                    @if (user.Roles.Contains("Admin"))
+                    {
+                        <span class="badge bg-danger">
+                            <i class="fa fa-crown"></i> Admin
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-primary">
+                            <i class="fa fa-user"></i> User
+                        </span>
+                    }
+                </td>
+
+                <!-- Nút thao tác -->
+                <td>
+                    <div class="d-flex justify-content-center gap-2">
+
+                        <!-- Nút đổi vai trò -->
+                        <form asp-action="ToggleRole" method="post" asp-route-id="@user.Id" style="display:inline">
+                            @if (user.Roles.Contains("Admin"))
+                            {
+                                <button type="submit" class="btn btn-outline-warning btn-sm" title="Chuyển thành User">
+                                    <i class="fa fa-arrow-down"></i> Chuyển User
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-outline-success btn-sm" title="Chuyển thành Admin">
+                                    <i class="fa fa-arrow-up"></i> Chuyển Admin
+                                </button>
+                            }
+                        </form>
+
+                        <!-- Nút xóa -->
+                        <form asp-action="Delete" asp-route-id="@user.Id" method="post"
+                              onsubmit="return confirm('Bạn có chắc chắn muốn xoá tài khoản này không?')" style="display:inline">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="fa fa-trash"></i> Xoá
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+          <style>
+    .badge {
+        font-size: 0.9rem;
+        padding: 6px 10px;
+    }
+    .table td, .table th {
+        vertical-align: middle !important;
+    }
+</style>
