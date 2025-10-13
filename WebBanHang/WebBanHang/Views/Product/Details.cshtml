@@ -1,64 +1,161 @@
-﻿@model WebBanHang.Models.Product
+﻿@model WebBanHang.Models.ProductDetailViewModel
 
 <div class="container py-4">
     <div class="row">
+        <!-- Ảnh sản phẩm -->
         <div class="col-md-5">
-            <img src="@Model.ImageUrl" class="img-fluid rounded shadow" alt="@Model.Name" />
+            <img src="@Model.Product.ImageUrl"
+                 class="img-fluid rounded shadow"
+                 alt="@Model.Product.Name" />
         </div>
-        <div class="col-md-7">
-            <h2>@Model.Name</h2>
-            <p class="text-muted">@Model.Description</p>
-            <h4 class="text-success">@Model.Price.ToString("C0")</h4>
 
-            <div class="mt-3">
-                <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline">
-                    <input type="hidden" name="productId" value="@Model.Id" />
-                    <input type="number" name="quantity" value="1" min="1" class="form-control d-inline" style="width:100px;display:inline-block" />
-                    <button type="submit" class="btn btn-success btn-lg me-2">Thêm vào giỏ</button>
-                    @Html.AntiForgeryToken()
-                </form>
-                <a asp-action="Index" class="btn btn-outline-secondary btn-lg">Quay lại</a>
+        <!-- Thông tin chi tiết -->
+        <div class="col-md-7">
+            <h2 class="fw-bold">@Model.Product.Name</h2>
+            <p class="text-muted">@Model.Product.Description</p>
+            <h4 class="text-success fw-bold">@Model.Product.Price.ToString("N0") đ</h4>
+
+            <div class="mt-4">
+                <!-- 🧩 Hiển thị điều kiện khác nhau tùy trạng thái -->
+                @if (ViewBag.AlreadyOwned == true)
+                {
+                    <div class="alert alert-success">
+                        ✅ Bạn đã sở hữu sách này.
+                        <a asp-controller="Library" asp-action="Index" class="alert-link">
+                            👉 Xem trong Thư viện của bạn
+                        </a>.
+                    </div>
+                }
+                else if (ViewBag.InCart == true)
+                {
+                    <div class="alert alert-info">
+                        📚 Sách này đã có trong giỏ hàng của bạn.
+                        <a asp-controller="Cart" asp-action="Index" class="alert-link">
+                            🛒 Xem giỏ hàng
+                        </a>.
+                    </div>
+                }
+                else
+                {
+                    <!-- 🛒 Nút thêm vào giỏ hàng -->
+                    <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline">
+                        <input type="hidden" name="productId" value="@Model.Product.Id" />
+                        <button type="submit" class="btn btn-success btn-lg me-2">
+                            🛒 Thêm vào giỏ hàng
+                        </button>
+                        @Html.AntiForgeryToken()
+                    </form>
+                }
+
+                <!-- 🔙 Nút quay lại -->
+                <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                    ← Quay lại danh sách
+                </a>
             </div>
         </div>
     </div>
 </div>
 
-@if (User.Identity.IsAuthenticated)
-{
-    <form asp-action="AddReview" method="post">
-        <input type="hidden" name="productId" value="@Model.Id" />
+<hr class="my-5" />
 
-        <label>Đánh giá (1-5⭐):</label>
-        <select name="rating" class="form-control">
-            <option value="1">1⭐</option>
-            <option value="2">2⭐</option>
-            <option value="3">3⭐</option>
-            <option value="4">4⭐</option>
-            <option value="5">5⭐</option>
-        </select>
+<!-- 🗨️ Khu vực bình luận -->
+<div class="bg-light p-4 rounded">
+    <h3 class="mb-4 text-danger">Bình luận và Đánh giá</h3>
 
-        <label>Bình luận:</label>
-        <textarea name="comment" class="form-control"></textarea>
+    @if (Model.Reviews != null && Model.Reviews.Any())
+    {
+        foreach (var review in Model.Reviews)
+        {
+            <div class="border-bottom pb-3 mb-3">
+                <strong>@(review.User?.UserName ?? "Người dùng ẩn danh")</strong>
+                <span class="text-warning">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        if (i <= review.Rating)
+                        {
+                            <i class="bi bi-star-fill"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-star"></i>
+                        }
+                    }
+                </span>
+                <span class="text-muted">(@review.Rating/5)</span>
+                <p>@review.Comment</p>
+                <small class="text-muted">Ngày: @review.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
 
-        <button type="submit" class="btn btn-primary mt-2">Gửi đánh giá</button>
+                @if (!string.IsNullOrEmpty(review.ImageUrl))
+                {
+                    <div class="mt-2">
+                        <img src="@review.ImageUrl" alt="Hình ảnh đánh giá"
+                             class="img-thumbnail" style="max-width: 250px;" />
+                    </div>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-muted">Chưa có bình luận nào cho cuốn sách này.</p>
+    }
+
+    <!-- ✍️ Form thêm bình luận -->
+    <h4 class="mt-5 text-primary">Viết bình luận của bạn</h4>
+    <form asp-action="AddReview" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="productId" value="@Model.Product.Id" />
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Đánh giá:</label>
+            <div id="rating-container" class="d-flex gap-2">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <input type="radio" name="rating" value="@i" id="star@i" class="d-none" />
+                    <label for="star@i" class="rating-star"
+                           data-value="@i"
+                           style="font-size: 2rem; color: #ccc; cursor: pointer;">
+                        <i class="bi bi-star-fill"></i>
+                    </label>
+                }
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nội dung bình luận:</label>
+            <textarea name="comment" class="form-control" rows="4"
+                      placeholder="Nhập cảm nhận của bạn..."></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Thêm hình ảnh (tùy chọn):</label>
+            <input type="file" name="imageFile" class="form-control" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Gửi bình luận</button>
+        @Html.AntiForgeryToken()
     </form>
-}
-else
-{
-    <p><a href="/Account/Login">Đăng nhập</a> để viết đánh giá.</p>
+</div>
+
+@section Scripts {
+    <script>
+        const stars = document.querySelectorAll('.rating-star');
+        stars.forEach((star, index) => {
+            star.addEventListener('click', () => {
+                stars.forEach(s => s.style.color = '#ccc');
+                for (let i = 0; i <= index; i++) {
+                    stars[i].style.color = '#ffc107';
+                }
+                const radio = document.getElementById('star' + (index + 1));
+                if (radio) radio.checked = true;
+            });
+        });
+    </script>
 }
 
-<h3>Đánh giá của khách hàng</h3>
-@foreach (var review in Model.Reviews)
-{
-    <div class="border p-2 mb-2">
-        <strong>@review.User?.UserName</strong> 
-        - @for (int i = 0; i < review.Rating; i++) { <span>⭐</span> }
-        <br />
-        <p>@review.Comment</p>
-        <small>@review.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
-    </div>
-}
-
-
-                 
+<style>
+    .rating-star:hover i {
+        color: #ffcc00 !important;
+        transform: scale(1.2);
+        transition: 0.2s;
+    }
+</style>

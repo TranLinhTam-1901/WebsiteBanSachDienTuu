@@ -1,14 +1,19 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using WebBanHang.Data;
 using WebBanHang.Models;
 using WebBanHang.Repositories;
 
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
-
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.CommandTimeout(180) // 180 giây
+    ));
+   
 //setup Indetity 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -39,6 +44,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddRazorPages();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews()
     .AddRazorRuntimeCompilation();
@@ -65,7 +71,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapStaticAssets();
 app.MapRazorPages(); // rất quan trọng để Identity chạy
-
+app.UseStaticFiles(); // ✅ Cho phép truy cập wwwroot
 
 app.MapAreaControllerRoute(
     name: "Admin",
@@ -77,5 +83,11 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 app.MapRazorPages();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await SeedData.InitializeAsync(services);
+}
 
 app.Run();
