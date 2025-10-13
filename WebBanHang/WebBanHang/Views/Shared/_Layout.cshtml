@@ -102,7 +102,12 @@
                                 <i class="bi bi-person-circle"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                                <li class="dropdown-header">👋 Xin chào, @UserManager.GetUserName(User)</li>
+                                <li class="dropdown-header">
+                                    @{
+                                        var user = await UserManager.GetUserAsync(User);
+                                    }
+                                    👋 Xin chào, @user.FullName
+                                </li>
                                 <li>
                                     <a class="dropdown-item" asp-controller="Library" asp-action="Index">
                                         📚 Thư viện của tôi

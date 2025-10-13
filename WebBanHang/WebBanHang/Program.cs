@@ -76,7 +76,7 @@ app.UseStaticFiles(); // ✅ Cho phép truy cập wwwroot
 app.MapAreaControllerRoute(
     name: "Admin",
     areaName: "Admin",
-    pattern: "Admin/{controller=Home}/{action=Index}/{id?}");
+    pattern: "Admin/{controller=Statistics}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",
