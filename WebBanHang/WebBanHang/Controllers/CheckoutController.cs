@@ -21,25 +21,50 @@ namespace WebBanHang.Controllers
         }
 
         // Hiển thị trang thanh toán
-        [HttpGet]
-        public async Task<IActionResult> Index()
+        // ✅ Khi người dùng nhấn "Đặt hàng" từ giỏ hàng (chỉ chọn 1 vài sản phẩm)
+        [HttpPost]
+        public async Task<IActionResult> Index(List<int> selectedItems)
         {
-            var user = await _userManager.GetUserAsync(User);
+            if (selectedItems == null || !selectedItems.Any())
+            {
+                TempData["ErrorMessage"] = " Bạn cần chọn sản phẩm để thanh toán";
+                return RedirectToAction("Index", "Cart");
+            }
 
+            var user = await _userManager.GetUserAsync(User);
             var cart = await _db.Carts
                 .Include(c => c.Items)
                 .ThenInclude(i => i.Product)
                 .FirstOrDefaultAsync(c => c.UserId == user.Id);
 
-            if (cart == null || !cart.Items.Any())
-            { 
+            if (cart == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy giỏ hàng.";
                 return RedirectToAction("Index", "Cart");
             }
-            ViewBag.Subtotal = cart.Items.Sum(i => i.UnitPrice * i.Quantity);
+
+            var selectedCartItems = cart.Items
+                .Where(i => selectedItems.Contains(i.Id))
+                .ToList();
+
+            if (!selectedCartItems.Any())
+            {
+                TempData["ErrorMessage"] = " Bạn cần chọn sản phẩm để thanh toán ";
+                return RedirectToAction("Index", "Cart");
+            }
+
+            ViewBag.Subtotal = selectedCartItems.Sum(i => i.UnitPrice * i.Quantity);
             ViewBag.Total = (decimal)ViewBag.Subtotal;
-            return View(cart);
+
+            var selectedCart = new Cart
+            {
+                UserId = user.Id,
+                Items = selectedCartItems
+            };
+
+            return View(selectedCart);
         }
-        
+
 
         // Xử lý khi người dùng đặt hàng
         [HttpPost]
