@@ -1,139 +1,180 @@
 ﻿@model WebBanHang.Models.ProductDetailViewModel
 
 <div class="container py-4">
-    <div class="row">
-        <!-- Ảnh sản phẩm -->
-        <div class="col-md-5">
-            <img src="@Model.Product.ImageUrl"
-                 class="img-fluid rounded shadow"
-                 alt="@Model.Product.Name" />
-        </div>
+    <div class="card shadow-sm border-0 rounded-3 p-4 bg-white">
+        <div class="row g-4 align-items-start">
+            <!-- ẢNH BÌA SÁCH -->
+            <div class="col-md-4 text-center">
+                <img src="@Model.Product.ImageUrl"
+                     alt="@Model.Product.Name"
+                     class="img-fluid rounded shadow-sm mb-3"
+                     style="max-height: 480px; object-fit: contain;" />
 
-        <!-- Thông tin chi tiết -->
-        <div class="col-md-7">
-            <h2 class="fw-bold">@Model.Product.Name</h2>
-            <p class="text-muted">@Model.Product.Description</p>
-            <h4 class="text-success fw-bold">@Model.Product.Price.ToString("N0") đ</h4>
-
-            <div class="mt-4">
-                <!-- 🧩 Hiển thị điều kiện khác nhau tùy trạng thái -->
-                @if (ViewBag.AlreadyOwned == true)
-                {
-                    <div class="alert alert-success">
-                        ✅ Bạn đã sở hữu sách này.
-                        <a asp-controller="Library" asp-action="Index" class="alert-link">
-                            👉 Xem trong Thư viện của bạn
-                        </a>.
-                    </div>
-                }
-                else if (ViewBag.InCart == true)
-                {
-                    <div class="alert alert-info">
-                        📚 Sách này đã có trong giỏ hàng của bạn.
-                        <a asp-controller="Cart" asp-action="Index" class="alert-link">
-                            🛒 Xem giỏ hàng
-                        </a>.
-                    </div>
-                }
-                else
-                {
-                    <!-- 🛒 Nút thêm vào giỏ hàng -->
-                    <form asp-controller="Cart" asp-action="Add" method="post" class="d-inline">
-                        <input type="hidden" name="productId" value="@Model.Product.Id" />
-                        <button type="submit" class="btn btn-success btn-lg me-2">
-                            🛒 Thêm vào giỏ hàng
-                        </button>
-                        @Html.AntiForgeryToken()
-                    </form>
-                }
-
-                <!-- 🔙 Nút quay lại -->
-                <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
-                    ← Quay lại danh sách
-                </a>
+                <button class="btn btn-outline-primary w-75 fw-semibold">
+                    📖 Xem bản đọc thử
+                </button>
             </div>
-        </div>
-    </div>
-</div>
 
-<hr class="my-5" />
+            <!-- THÔNG TIN + GIÁ + THỂ LOẠI -->
+            <div class="col-md-8">
+                <div class="d-flex flex-column h-100 justify-content-between">
+                    <!-- Thông tin sách -->
+                    <div>
+                        <h2 class="fw-bold mb-2">@Model.Product.Name</h2>
+                        <p class="mb-2 text-secondary">
+                            Tác giả: <span class="fw-semibold text-dark">@Model.Product.Author</span>
+                        </p>
 
-<!-- 🗨️ Khu vực bình luận -->
-<div class="bg-light p-4 rounded">
-    <h3 class="mb-4 text-danger">Bình luận và Đánh giá</h3>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="text-warning me-2 fs-5">⭐⭐⭐⭐⭐</span>
+                            <small class="text-muted">@Model.Reviews?.Count() đánh giá</small>
+                        </div>
 
-    @if (Model.Reviews != null && Model.Reviews.Any())
-    {
-        foreach (var review in Model.Reviews)
-        {
-            <div class="border-bottom pb-3 mb-3">
-                <strong>@(review.User?.UserName ?? "Người dùng ẩn danh")</strong>
-                <span class="text-warning">
-                    @for (int i = 1; i <= 5; i++)
-                    {
-                        if (i <= review.Rating)
+                        <p class="text-secondary lh-base mb-3" style="max-width: 700px;">
+                            @Model.Product.Description
+                        </p>
+
+                        <hr class="my-3" />
+
+                        <p class="fw-semibold mb-1 text-dark">
+                            📚 Thể loại:
+                            <span class="text-secondary">
+                                @if (Model.Product.Category != null)
+                                {
+                                    @Model.Product.Category.Name
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Chưa có</span>
+                                }
+                            </span>
+                        </p>
+                    </div>
+
+                    <!-- Nút mua -->
+                    <div class="mt-4">
+                        @if (ViewBag.AlreadyOwned == true)
                         {
-                            <i class="bi bi-star-fill"></i>
+                            <div class="alert alert-success p-2">
+                                ✅ Bạn đã sở hữu cuốn sách này.
+                                <a asp-controller="Library" asp-action="Index" class="alert-link">Xem trong thư viện</a>
+                            </div>
+                        }
+                        else if (ViewBag.InCart == true)
+                        {
+                            <div class="alert alert-info p-2">
+                                📚 Cuốn sách đã có trong giỏ hàng.
+                                <a asp-controller="Cart" asp-action="Index" class="alert-link">Xem giỏ hàng</a>
+                            </div>
                         }
                         else
                         {
-                            <i class="bi bi-star"></i>
+                            <form asp-controller="Cart" asp-action="Add" method="post" class="text-end">
+                                <input type="hidden" name="productId" value="@Model.Product.Id" />
+                                <button type="submit" class="btn btn-warning px-4 py-2 fw-bold fs-5 shadow-sm">
+                                    Mua ngay với giá @Model.Product.Price.ToString("N0") đ
+                                </button>
+                                @Html.AntiForgeryToken()
+                            </form>
                         }
-                    }
-                </span>
-                <span class="text-muted">(@review.Rating/5)</span>
-                <p>@review.Comment</p>
-                <small class="text-muted">Ngày: @review.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                @if (!string.IsNullOrEmpty(review.ImageUrl))
+    <!-- PHẦN ĐÁNH GIÁ -->
+    <div class="mt-5 p-4 bg-light rounded-3 shadow-sm">
+        <h3 class="fw-bold text-danger mb-4">💬 Đánh giá & Nhận xét từ khách hàng</h3>
+
+        @if (Model.Reviews != null && Model.Reviews.Any())
+        {
+            var avgRating = Model.Reviews.Average(r => r.Rating);
+            <div class="mb-4">
+                <h4 class="text-warning fw-bold">⭐ @avgRating.ToString("0.0") / 5</h4>
+                <small class="text-muted">@Model.Reviews.Count() lượt đánh giá</small>
+            </div>
+
+            <div class="row g-3">
+                @foreach (var review in Model.Reviews)
                 {
-                    <div class="mt-2">
-                        <img src="@review.ImageUrl" alt="Hình ảnh đánh giá"
-                             class="img-thumbnail" style="max-width: 250px;" />
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm p-3 h-100">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <strong>@(review.User?.UserName ?? "Người dùng ẩn danh")</strong>
+                                <small class="text-muted">@review.CreatedAt.ToString("dd/MM/yyyy")</small>
+                            </div>
+
+                            <div class="text-warning mb-2">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= review.Rating)
+                                    {
+                                        <i class="bi bi-star-fill"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-star"></i>
+                                    }
+                                }
+                            </div>
+
+                            <p class="text-secondary">@review.Comment</p>
+
+                            @if (!string.IsNullOrEmpty(review.ImageUrl))
+                            {
+                                <img src="@review.ImageUrl"
+                                     alt="Hình ảnh đánh giá"
+                                     class="img-thumbnail mt-2"
+                                     style="max-width: 180px;" />
+                            }
+                        </div>
                     </div>
                 }
             </div>
         }
-    }
-    else
-    {
-        <p class="text-muted">Chưa có bình luận nào cho cuốn sách này.</p>
-    }
+        else
+        {
+            <p class="text-muted">Chưa có đánh giá nào cho sản phẩm này.</p>
+        }
 
-    <!-- ✍️ Form thêm bình luận -->
-    <h4 class="mt-5 text-primary">Viết bình luận của bạn</h4>
-    <form asp-action="AddReview" method="post" enctype="multipart/form-data">
-        <input type="hidden" name="productId" value="@Model.Product.Id" />
+        <!-- FORM THÊM ĐÁNH GIÁ -->
+        <div class="mt-5">
+            <h4 class="text-dark fw-bold mb-3">✍️ Viết đánh giá của bạn</h4>
+            <form asp-action="AddReview" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="productId" value="@Model.Product.Id" />
 
-        <div class="mb-3">
-            <label class="form-label fw-bold">Đánh giá:</label>
-            <div id="rating-container" class="d-flex gap-2">
-                @for (int i = 1; i <= 5; i++)
-                {
-                    <input type="radio" name="rating" value="@i" id="star@i" class="d-none" />
-                    <label for="star@i" class="rating-star"
-                           data-value="@i"
-                           style="font-size: 2rem; color: #ccc; cursor: pointer;">
-                        <i class="bi bi-star-fill"></i>
-                    </label>
-                }
-            </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Chọn số sao:</label>
+                    <div id="rating-container" class="d-flex gap-2">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <input type="radio" name="rating" value="@i" id="star@i" class="d-none" />
+                            <label for="star@i" class="rating-star"
+                                   data-value="@i"
+                                   style="font-size: 2rem; color: #ccc; cursor: pointer;">
+                                <i class="bi bi-star-fill"></i>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nội dung đánh giá:</label>
+                    <textarea name="comment" class="form-control shadow-sm" rows="4"
+                              placeholder="Hãy chia sẻ cảm nhận của bạn..."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Thêm hình ảnh (tuỳ chọn):</label>
+                    <input type="file" name="imageFile" class="form-control shadow-sm" />
+                </div>
+
+                <button type="submit" class="btn btn-primary fw-bold px-4">Gửi đánh giá</button>
+                @Html.AntiForgeryToken()
+            </form>
         </div>
-
-        <div class="mb-3">
-            <label class="form-label">Nội dung bình luận:</label>
-            <textarea name="comment" class="form-control" rows="4"
-                      placeholder="Nhập cảm nhận của bạn..."></textarea>
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Thêm hình ảnh (tùy chọn):</label>
-            <input type="file" name="imageFile" class="form-control" />
-        </div>
-
-        <button type="submit" class="btn btn-primary">Gửi bình luận</button>
-        @Html.AntiForgeryToken()
-    </form>
+    </div>
 </div>
 
 @section Scripts {
@@ -153,9 +194,33 @@
 }
 
 <style>
+    body {
+        background-color: #f7f7f7;
+    }
+
+    .btn-warning {
+        background-color: #ffd814;
+        border: none;
+        color: #111;
+        transition: 0.2s;
+    }
+
+        .btn-warning:hover {
+            background-color: #f7ca00;
+        }
+
     .rating-star:hover i {
         color: #ffcc00 !important;
         transform: scale(1.2);
         transition: 0.2s;
+    }
+
+    .card {
+        border-radius: 12px;
+    }
+
+    h3.text-danger {
+        border-left: 5px solid #dc3545;
+        padding-left: 8px;
     }
 </style>

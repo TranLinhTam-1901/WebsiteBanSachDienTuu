@@ -1,83 +1,166 @@
 ﻿@model WebBanHang.Models.Product
+
 @{
     ViewData["Title"] = "Cập nhật sản phẩm";
     Layout = "_LayoutAdmin";
 }
 
-
-<h2 class="mb-4">📝 Cập nhật sản phẩm</h2>
-
-<form asp-action="Update" asp-controller="Product" method="post" enctype="multipart/form-data" class="p-3 border rounded shadow-sm bg-light">
-    
-    @* Các trường ẩn và Anti-forgery Token *@
-    <input type="hidden" asp-for="Id" />
-    <input type="hidden" asp-for="ImageUrl" />
-    <input type="hidden" asp-for="BookContentUrl" />
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-  
-
-    <div class="form-group mb-3">
-        <label asp-for="Name" class="form-label fw-bold">📖 Tên sách</label>
-        <input asp-for="Name" type="text" class="form-control" placeholder="Nhập tên sách..." />
-        <span asp-validation-for="Name" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="Author" class="form-label fw-bold">✍️ Tác giả</label>
-        <input asp-for="Author" type="text" class="form-control" placeholder="Tên tác giả..." />
-        <span asp-validation-for="Author" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="Price" class="form-label fw-bold">💰 Giá (VNĐ)</label>
-        <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="Ví dụ: 120000" />
-        <span asp-validation-for="Price" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="Description" class="form-label fw-bold">📝 Mô tả</label>
-        <textarea asp-for="Description" rows="4" class="form-control" placeholder="Mô tả ngắn gọn về sách..."></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <div class="form-group mb-3">
-        <label asp-for="CategoryId" class="form-label fw-bold">📂 Danh mục</label>
-        <select asp-for="CategoryId" asp-items="@(ViewBag.Categories as SelectList)" class="form-control">
-            <option value="">-- Chọn danh mục --</option>
-        </select>
-        <span asp-validation-for="CategoryId" class="text-danger"></span>
-    </div>
-
-    @* --- Phần Upload Ảnh Bìa --- *@
-    <div class="mb-3">
-        @if (!string.IsNullOrEmpty(Model.ImageUrl))
-        {
-            <p>Ảnh bìa hiện tại:</p>
-            <img src="@Model.ImageUrl" alt="Ảnh bìa" style="max-width: 200px;" />
-        }
-        <label for="ImageFile" class="form-label fw-bold">🖼️ Tải lên ảnh bìa mới (nếu muốn)</label>
-        <input type="file" name="ImageFile" accept="image/*" class="form-control" />
-        <span asp-validation-for="ImageUrl" class="text-danger"></span>
-    </div>
-
-    @* --- Phần Upload File PDF --- *@
-    <div class="mb-3">
-        @if (!string.IsNullOrEmpty(Model.BookContentUrl))
-        {
-            <p>
-                File PDF hiện tại: 
-                <a href="@Model.BookContentUrl" target="_blank">Tải về</a>
-            </p>
-        }
-        <label for="PdfFile" class="form-label fw-bold">📂 Tải lên file PDF mới (nếu muốn)</label>
-        <input type="file" name="PdfFile" accept="application/pdf" class="form-control" />
-        <span asp-validation-for="BookContentUrl" class="text-danger"></span>
-    </div>
-
-    <div class="mt-4">
-        <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
-        <a asp-action="Index" asp-controller="Product" asp-area="Admin" class="btn btn-secondary">
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark mb-0">
+            📝 Cập nhật sản phẩm
+        </h2>
+        <a asp-action="Index" asp-controller="Product" asp-area="Admin" class="btn btn-outline-secondary">
             ↩️ Quay lại danh sách
         </a>
     </div>
-</form>
+
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body p-4 bg-light">
+            <form asp-action="Update"
+                  asp-controller="Product"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ImageUrl" />
+                <input type="hidden" asp-for="BookContentUrl" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <!-- Hàng 1: Tên + Tác giả -->
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Name" class="form-label fw-bold">📖 Tên sách</label>
+                        <input asp-for="Name" type="text" class="form-control" placeholder="Nhập tên sách..." />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Author" class="form-label fw-bold">✍️ Tác giả</label>
+                        <input asp-for="Author" type="text" class="form-control" placeholder="Tên tác giả..." />
+                        <span asp-validation-for="Author" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Hàng 2: Giá + Danh mục -->
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Price" class="form-label fw-bold">💰 Giá (VNĐ)</label>
+                        <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="VD: 120000" />
+                        <span asp-validation-for="Price" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CategoryId" class="form-label fw-bold">📂 Danh mục</label>
+                        <select asp-for="CategoryId" asp-items="@(ViewBag.Categories as SelectList)" class="form-select">
+                            <option value="">-- Chọn danh mục --</option>
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Hàng 3: Mô tả -->
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label fw-bold">📝 Mô tả</label>
+                    <textarea asp-for="Description" rows="4" class="form-control" placeholder="Mô tả ngắn gọn về sách..."></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <hr class="my-4" />
+
+                <!-- Hàng 4: Ảnh bìa + PDF -->
+                <div class="row">
+                    <!-- Ảnh bìa -->
+                    <div class="col-md-6 mb-4">
+                        <label for="ImageFile" class="form-label fw-bold">🖼️ Ảnh bìa</label>
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <div class="text-center mb-3">
+                                <img src="@Model.ImageUrl"
+                                     alt="Ảnh bìa hiện tại"
+                                     class="rounded shadow-sm border"
+                                     style="max-width:180px; height:auto;" />
+                                <p class="text-muted small mt-2">Ảnh hiện tại</p>
+                            </div>
+                        }
+                        <input type="file" name="ImageFile" accept="image/*" class="form-control" />
+                        <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                    </div>
+
+                    <!-- File PDF -->
+                    <div class="col-md-6 mb-4">
+                        <label for="PdfFile" class="form-label fw-bold">📘 File PDF</label>
+                        @if (!string.IsNullOrEmpty(Model.BookContentUrl))
+                        {
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-file-earmark-pdf"></i>
+                                File hiện tại:
+                                <a href="@Model.BookContentUrl" target="_blank" class="fw-semibold text-decoration-none">
+                                    Xem hoặc tải về
+                                </a>
+                            </p>
+                        }
+                        <input type="file" name="PdfFile" accept="application/pdf" class="form-control" />
+                        <span asp-validation-for="BookContentUrl" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Nút hành động -->
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-success px-4 fw-bold">
+                        💾 Lưu thay đổi
+                    </button>
+                    <a asp-action="Index" asp-controller="Product" asp-area="Admin" class="btn btn-outline-secondary px-4">
+                        ↩️ Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .form-label {
+        color: #333;
+    }
+
+    input.form-control, select.form-select, textarea.form-control {
+        border-radius: 8px;
+        box-shadow: none;
+        transition: all 0.2s ease-in-out;
+    }
+
+        input.form-control:focus,
+        select.form-select:focus,
+        textarea.form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+        }
+
+    hr {
+        border-top: 2px solid #e9ecef;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border: none;
+    }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+    .btn-outline-secondary {
+        border-radius: 8px;
+    }
+
+    .text-muted.small {
+        font-size: 0.85rem;
+    }
+</style>

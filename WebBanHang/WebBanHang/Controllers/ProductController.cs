@@ -29,6 +29,7 @@ namespace WebBanHang.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var product = await _db.Products
+                .Include(p => p.Category)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
 

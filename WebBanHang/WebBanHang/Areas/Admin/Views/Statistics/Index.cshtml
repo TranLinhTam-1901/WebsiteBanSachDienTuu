@@ -9,64 +9,142 @@
     var dailyRevenue = ViewBag.DailyRevenue as IEnumerable<dynamic>;
 }
 
-<div class="container-fluid p-4">
-    <h2 class="mb-4 fw-bold"><i class="bi bi-bar-chart"></i> Thống kê doanh thu theo tháng</h2>
+<div class="container-fluid py-4">
+    <!-- Tiêu đề -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark mb-0">
+            📊 Thống kê doanh thu
+        </h2>
+        <small class="text-muted">
+            Cập nhật tháng <strong>@month/@year</strong>
+        </small>
+    </div>
 
-    <div class="row g-3 align-items-stretch">
-        <!-- Bộ lọc tháng -->
-        <div class="col-md-3">
-            <form method="get" asp-action="Index" class="bg-light p-3 rounded shadow-sm text-center">
-                <label class="fw-semibold mb-2">Chọn tháng để xem doanh thu</label>
-                <select name="month" class="form-select mb-3" onchange="this.form.submit()">
-                    @for (int i = 1; i <= 12; i++)
-                    {
-                        <option value="@i" selected="@(i == month)">@($"Tháng {i}")</option>
-                    }
-                </select>
-                <select name="year" class="form-select" onchange="this.form.submit()">
-                    @for (int y = DateTime.Now.Year - 2; y <= DateTime.Now.Year; y++)
-                    {
-                        <option value="@y" selected="@(y == year)">@y</option>
-                    }
-                </select>
-            </form>
-        </div>
+    <!-- Bộ lọc + Tổng doanh thu + Biểu đồ -->
+    <div class="card shadow-sm border-0 rounded-3 mb-5">
+        <div class="card-body">
+            <div class="row g-4 align-items-stretch">
+                <!-- Bộ lọc -->
+                <div class="col-lg-3">
+                    <div class="bg-light p-3 rounded shadow-sm h-100">
+                        <h6 class="fw-bold mb-3 text-secondary text-center">
+                            🔍 Lọc theo thời gian
+                        </h6>
+                        <form method="get" asp-action="Index">
+                            <label class="form-label fw-semibold">Chọn tháng</label>
+                            <select name="month" class="form-select mb-3" onchange="this.form.submit()">
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    <option value="@i" selected="@(i == month)">Tháng @i</option>
+                                }
+                            </select>
 
-        <!-- Tổng doanh thu theo ngày -->
-        <div class="col-md-3">
-            <div class="p-3 bg-light rounded shadow-sm text-center">
-                <label class="fw-semibold mb-2">TỔNG DOANH THU THÁNG</label>
-                <h4 class="text-success fw-bold">@totalRevenueMonth.ToString("N0") đ</h4>
-            </div>
-        </div>
+                            <label class="form-label fw-semibold">Chọn năm</label>
+                            <select name="year" class="form-select" onchange="this.form.submit()">
+                                @for (int y = DateTime.Now.Year - 2; y <= DateTime.Now.Year; y++)
+                                {
+                                    <option value="@y" selected="@(y == year)">@y</option>
+                                }
+                            </select>
+                        </form>
+                    </div>
+                </div>
 
-        <!-- Biểu đồ doanh thu -->
-        <div class="col-md-6">
-            <div class="bg-light rounded shadow-sm p-3">
-                <h6 class="text-muted mb-3">Biểu đồ doanh thu theo ngày trong tháng</h6>
-                <canvas id="chart" height="130"></canvas>
+                <!-- Tổng doanh thu -->
+                <div class="col-lg-3">
+                    <div class="text-center text-white p-4 rounded shadow-sm h-100 bg-gradient-success">
+                        <h6 class="fw-bold text-uppercase">Tổng doanh thu tháng</h6>
+                        <h3 class="fw-bold mb-1">@totalRevenueMonth.ToString("N0") đ</h3>
+                        <small class="text-light">(@month/@year)</small>
+                    </div>
+                </div>
+
+                <!-- Biểu đồ -->
+                <div class="col-lg-6">
+                    <div class="bg-light rounded shadow-sm p-3 h-100">
+                        <h6 class="fw-bold text-secondary mb-3">
+                            📈 Doanh thu theo ngày trong tháng
+                        </h6>
+                        <canvas id="chart" height="130"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <hr class="my-4" />
+    <!-- Bảng Top 5 sách -->
+    <div class="text-center mb-4">
+        <h4 class="fw-bold text-dark">🏆 Top 5 sách bán chạy tháng @month/@year</h4>
+        <p class="text-muted small">Dựa trên số lượng và doanh thu</p>
+    </div>
 
-    <h5 class="text-center fw-semibold mb-3">Top 5 sách bán nhiều nhất tháng @month/@year</h5>
-    <div class="d-flex justify-content-center flex-wrap gap-4">
-        @foreach (var book in topBooks)
-        {
-            <div class="card shadow-sm" style="width:160px;">
-                <img src="@book.Image" class="card-img-top" style="height:180px; object-fit:cover;" />
-                <div class="card-body text-center">
-                    <div class="fw-bold small text-truncate">@book.BookName</div>
-                    <div class="text-muted small">SL: @book.Quantity</div>
-                    <div class="text-success small fw-bold">@book.Revenue.ToString("N0") đ</div>
+    <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+        <div class="card-body p-0">
+            @if (topBooks != null && topBooks.Any())
+            {
+                <table class="table align-middle mb-0 table-borderless">
+                    <thead style="background-color:#d3f2dd;" class="text-center">
+                        <tr class="fw-bold text-uppercase text-secondary small">
+                            <th style="width: 70px;">#</th>
+                            <th style="width: 120px;">Ảnh bìa</th>
+                            <th class="text-start">Tên sách</th>
+                            <th style="width: 150px;">Số lượng bán</th>
+                            <th style="width: 180px;">Doanh thu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int index = 1;
+                        }
+                        @foreach (var book in topBooks)
+                        {
+                            string medal = index switch
+                            {
+                                1 => "🥇",
+                                2 => "🥈",
+                                3 => "🥉",
+                                _ => index.ToString()
+                            };
+
+                            string rowClass = index switch
+                            {
+                                1 => "table-warning",
+                                2 => "table-light",
+                                3 => "table-secondary",
+                                _ => ""
+                            };
+
+                            <tr class="hover-row @rowClass">
+                                <td class="text-center fw-bold fs-5">@medal</td>
+                                <td class="text-center">
+                                    <img src="@book.Image"
+                                         alt="@book.BookName"
+                                         class="rounded shadow-sm border"
+                                         style="width:80px; height:110px; object-fit:cover;" />
+                                </td>
+                                <td class="fw-semibold text-dark text-start">
+                                    <div style="font-size:1rem;">@book.BookName</div>
+                                </td>
+                                <td class="text-center text-primary fw-bold">@book.Quantity</td>
+                                <td class="text-success fw-bold text-center">@book.Revenue.ToString("N0") đ</td>
+                            </tr>
+                            index++;
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="p-4 text-center text-muted">
+                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                    Không có dữ liệu trong tháng này.
                 </div>
-            </div>
-        }
+            }
+        </div>
     </div>
 </div>
 
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const labels = [
@@ -75,6 +153,7 @@
                 @: "@d.Day",
         }
     ];
+
     const data = [
         @foreach (var d in dailyRevenue)
         {
@@ -82,27 +161,83 @@
         }
     ];
 
-    new Chart(document.getElementById('chart'), {
+    const ctx = document.getElementById('chart').getContext('2d');
+    new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
             datasets: [{
                 label: 'Doanh thu ngày (VNĐ)',
                 data: data,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: '#198754',
+                backgroundColor: 'rgba(25, 135, 84, 0.2)',
                 fill: true,
-                tension: 0.3
+                tension: 0.3,
+                borderWidth: 2,
+                pointBackgroundColor: '#198754',
+                pointHoverRadius: 6
             }]
         },
         options: {
             responsive: true,
             scales: {
-                y: { beginAtZero: true, ticks: { callback: value => value.toLocaleString('vi-VN') } }
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: value => value.toLocaleString('vi-VN')
+                    },
+                    grid: { color: '#f0f0f0' }
+                },
+                x: { grid: { color: 'transparent' } }
             },
             plugins: {
-                legend: { display: false }
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: context => context.parsed.y.toLocaleString('vi-VN') + ' đ'
+                    }
+                }
             }
         }
     });
 </script>
+
+<style>
+    .card {
+        border-radius: 12px;
+    }
+
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #198754, #28a745);
+    }
+
+    h2.fw-bold i {
+        color: #198754;
+    }
+
+    .hover-row:hover {
+        background-color: #f9fffa !important;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    .table thead th {
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.3px;
+        border-bottom: 2px solid #d1e7dd !important;
+    }
+
+    .table td, .table th {
+        vertical-align: middle !important;
+        padding: 1rem;
+    }
+
+    img.rounded.shadow-sm {
+        border-radius: 8px !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    td.fs-5 {
+        font-size: 1.3rem !important;
+    }
+</style>
