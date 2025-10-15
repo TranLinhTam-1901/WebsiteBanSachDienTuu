@@ -1,43 +1,22 @@
 @model WebBanHang.Models.Cart
-@{
-    ViewData["Title"] = "Giỏ hàng";
-    decimal subtotal = Model.Items.Sum(i => i.UnitPrice * i.Quantity);
 
-    decimal total = subtotal;
-}
-<h2 class="mb-4">🛒 Giỏ hàng của bạn</h2>
-
-@if (TempData["Success"] != null)
+@if (TempData["ErrorMessage"] != null)
 {
-    <div class="alert alert-success">
-        📗 <strong>Thành công:</strong> @Html.Raw(TempData["Success"])
+    <div class="alert alert-warning text-center fw-semibold mt-3">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        @TempData["ErrorMessage"]
     </div>
 }
-@if (TempData["Info"] != null)
-{
-    <div class="alert alert-info">
-        ℹ️ <strong>Thông báo:</strong> @Html.Raw(TempData["Info"])
-    </div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">
-        ❌ <strong>Lỗi:</strong> @Html.Raw(TempData["Error"])
-    </div>
-}
-
-@if (!Model.Items.Any())
-{
-    <div class="alert alert-info">Giỏ hàng của bạn hiện đang trống.</div>
-}
-else
-{
-    <div class="row g-4" id="cart-wrapper">
-        <div class="col-lg-8">
+<div class="row g-4" id="cart-wrapper">
+    <div class="col-lg-8">
+        <form id="cartForm" method="post" asp-controller="Checkout" asp-action="Index">
             <div class="table-responsive shadow-sm rounded">
                 <table class="table align-middle">
                     <thead class="table-light">
                         <tr>
+                            <th class="text-center">
+                                <input type="checkbox" id="checkAll" class="form-check-input" />
+                            </th>
                             <th>Tên sách</th>
                             <th style="width:140px">Giá</th>
                             <th style="width:180px">Số lượng</th>
@@ -49,6 +28,10 @@ else
                         @foreach (var item in Model.Items)
                         {
                             <tr data-row-item="@item.Id">
+                                <td class="text-center">
+                                    <input type="checkbox" name="selectedItems"
+                                           value="@item.Id" class="form-check-input product-check" />
+                                </td>
                                 <td>
                                     <div class="fw-semibold">@item.Product?.Name</div>
                                     <div class="text-muted small">@item.Product?.Author</div>
@@ -78,95 +61,71 @@ else
                     </tbody>
                 </table>
             </div>
-        </div>
+        </form>
+    </div>
 
-        <div class="col-lg-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Tổng kết đơn hàng</h5>
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Tổng kết đơn hàng</h5>
 
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Tạm tính</span>
-                        <strong>@subtotal.ToString("N0") đ</strong>
-                    </div>
-                    <hr />
-                    <div class="d-flex justify-content-between fs-5 mb-3">
-                        <span>Tổng cộng</span>
-                        <strong class="text-success">@total.ToString("N0") đ</strong>
-                    </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Sản phẩm đã chọn</span>
+                    <strong id="selectedCount">0</strong>
+                </div>
 
-                    <div class="d-grid gap-2">
-                        <a asp-controller="Checkout" asp-action="Index" class="btn btn-success">✅ Đặt hàng</a>
-                        <form asp-action="Clear" method="post">
-                            <button type="submit" class="btn btn-outline-secondary">🗑️ Xóa tất cả</button>
-                            @Html.AntiForgeryToken()
-                        </form>
-                    </div>
+                <div class="d-flex justify-content-between fs-5 mb-3">
+                    <span>Tổng cộng</span>
+                    <strong id="selectedTotal" class="text-success">0 đ</strong>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" form="cartForm" class="btn btn-success">✅ Đặt hàng</button>
+                    <form asp-action="Clear" method="post">
+                        <button type="submit" class="btn btn-outline-secondary">🗑️ Xóa tất cả</button>
+                        @Html.AntiForgeryToken()
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    @Html.AntiForgeryToken()
-}
-
-<!-- 🧠 Script cập nhật giỏ hàng -->
 <script>
-    (function(){
-      const fmt = (n) => (n || 0).toLocaleString('vi-VN');
-      const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+    document.addEventListener("DOMContentLoaded", () => {
+        const fmt = n => new Intl.NumberFormat("vi-VN").format(n) + " đ";
 
-      async function postUpdate(itemId, quantity){
-        const fd = new FormData();
-        fd.append('itemId', itemId);
-        fd.append('quantity', quantity);
-        fd.append('__RequestVerificationToken', token);
-        const res = await fetch('/Cart/UpdateQuantityAjax', { method: 'POST', body: fd });
-        if (!res.ok) return null;
-        return res.json();
-      }
+        const checkAll = document.getElementById("checkAll");
+        const checkboxes = document.querySelectorAll(".product-check");
+        const totalEl = document.getElementById("selectedTotal");
+        const countEl = document.getElementById("selectedCount");
 
-      function updateLine(itemId, value){
-        const span = document.querySelector(`.line-subtotal[data-item-id="${itemId}"]`);
-        if (span) span.textContent = fmt(value);
-      }
-
-      function removeRow(itemId){
-        const row = document.querySelector(`tr[data-row-item="${itemId}"]`);
-        row?.remove();
-        if (!document.querySelector('tr[data-row-item]')){
-          document.querySelector('#cart-wrapper').innerHTML =
-            '<div class="alert alert-info">Giỏ hàng của bạn hiện đang trống.</div>';
+        function updateTotal() {
+            let total = 0, count = 0;
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    const row = cb.closest("tr");
+                    const val = row.querySelector(".line-subtotal").textContent.replace(/[^\d]/g, "");
+                    total += parseInt(val);
+                    count++;
+                }
+            });
+            totalEl.textContent = fmt(total);
+            countEl.textContent = count;
         }
-      }
 
-      const timers = new Map();
-      function debounce(itemId, fn, delay=400){
-        clearTimeout(timers.get(itemId));
-        const t = setTimeout(fn, delay);
-        timers.set(itemId, t);
-      }
-
-      // Khi người dùng thay đổi số lượng
-      document.addEventListener('input', e => {
-        const input = e.target.closest('.qty-input');
-        if (!input) return;
-        const itemId = input.dataset.itemId;
-        let qty = Number(input.value);
-        if (isNaN(qty) || qty < 0) qty = 0;
-        if (qty > 1) qty = 1; // Chỉ cho phép mua 1 bản duy nhất
-
-        debounce(itemId, async () => {
-          const data = await postUpdate(itemId, qty);
-          if (!data?.ok) return;
-          if (data.quantity <= 0) removeRow(itemId);
-          else updateLine(itemId, data.lineSubtotal);
+        checkAll.addEventListener("change", e => {
+            checkboxes.forEach(cb => cb.checked = e.target.checked);
+            updateTotal();
         });
-      });
 
-      // Ẩn thông báo sau 4 giây
-      setTimeout(() => {
-          document.querySelectorAll('.alert').forEach(a => a.style.display = 'none');
-      }, 4000);
-    })();
+        checkboxes.forEach(cb => cb.addEventListener("change", updateTotal));
+    });
+
+    
+    setTimeout(() => {
+        const alert = document.querySelector('.alert');
+        if (alert) alert.style.display = 'none';
+    }, 4000);
+
 </script>
