@@ -3,130 +3,168 @@
 @{
     ViewData["Title"] = "Trang chủ - 3T Books";
 }
+<!-- 🎠 Hero Banner (Carousel) -->
+<section id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+    <div class="carousel-inner">
 
-<style>
-        /* Banner layout fix */
-        .hero-banner .banner-item {
-            height: 100%; /* để các ảnh full chiều cao cột */
-            overflow: hidden;
-            border-radius: 10px;
-
-        }
-        .hero-banner {
-        padding-left: 0;
-        padding-right: 0;
-    }
-        .hero-banner .banner-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* ảnh full mà không méo */
-            border-radius: 10px;
-        }
-
-        .hero-banner .banner-content {
-            z-index: 2;
-        }
-
-        /* Đặt chiều cao đồng bộ */
-        .hero-banner .col-lg-6:first-child .banner-item {
-            height: 400px; /* banner lớn bên trái */
-        }
-
-        .hero-banner .col-lg-6 .col-12 .banner-item {
-            height: 190px; /* banner trên bên phải */
-        }
-
-        .hero-banner .col-lg-6 .col-6 .banner-item {
-            height: 190px; /* 2 banner dưới bên phải */
-        }
-
-        /* Nền mờ cho text */
-        .hero-banner .banner-content {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 0 0 10px 10px;
-            width: 100%;
-        }
-</style>
-
-<div class="container-fluid mt-4 hero-banner">
-    <div class="row g-3">
-        <!-- Banner trái (chiếm nửa màn hình) -->
-        <div class="col-lg-6">
-            <div class="banner-item position-relative">
-                <img src="https://images.csmonitor.com/csm/2021/03/1116885_1_0304-readers-rec_standard.jpg?alias=standard_900x600"
-                     alt="Travel Books" />
-                <div class="banner-content position-absolute bottom-0 start-0 p-4 text-white">
-                    <h5>Your Guide To The World</h5>
-                    <h2 class="fw-bold">Nên đọc<br />Sách hành trình</h2>
-                    <a href="#" class="btn btn-light mt-2">Tìm hiểu ngay →</a>
-                </div>
+        <!-- Ảnh 1 -->
+        <div class="carousel-item active position-relative">
+            <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f" class="d-block w-100 hero-img" alt="Banner 1">
+            <div class="carousel-caption text-start">
+                <h1 class="fw-bold display-5">Khám phá cuốn sách yêu thích tiếp theo 📖</h1>
+                <p>Sách là người bạn yên lặng và thông thái nhất, luôn đồng hành cùng bạn trên mọi hành trình.</p>
+                <a href="/Product/Index" class="btn btn-danger btn-lg px-4 rounded-pill">Khám phá ngay</a>
             </div>
         </div>
 
-        <!-- Banner phải (chia thành 1 + 2) -->
-        <div class="col-lg-6">
-            <div class="row g-3">
-                <!-- Banner trên -->
-                <div class="col-12">
-                    <div class="banner-item position-relative">
-                        <img src="https://www.telegraph.co.uk/content/dam/books/2025/03/27/TELEMMGLPICT000417904878_17430757074830_trans_NvBQzQNjv4BqqVzuuqpFlyLIwiB6NTmJwfSVWeZ_vEN7c6bHu2jJnT8.jpeg?imwidth=640"
-                             alt="Romance Books" />
-                        <div class="banner-content position-absolute bottom-0 start-0 p-3 text-white">
-                            <span class="small">Sách mới trong tuần</span>
-                            <h5 class="fw-bold">Discover Our<br />Best Romance Books</h5>
-                            <a href="#" class="btn btn-outline-light btn-sm mt-2">Discover Now</a>
-                        </div>
-                    </div>
-                </div>
+        <!-- Ảnh 2 -->
+        <div class="carousel-item position-relative">
+            <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794" class="d-block w-100 hero-img" alt="Banner 2">
+            <div class="carousel-caption text-start">
+                <h1 class="fw-bold display-5">Ưu đãi đặc biệt 🌟</h1>
+                <p>Giảm giá 20% cho tất cả đơn hàng trong tuần này. Mua ngay kẻo lỡ!</p>
+                <a href="/Product/Index" class="btn btn-warning btn-lg px-4 rounded-pill text-dark">Xem ưu đãi</a>
+            </div>
+        </div>
 
-                <!-- Banner dưới chia đôi -->
-                <div class="col-6">
-                    <div class="banner-item position-relative">
-                        <img src="https://i.etsystatic.com/25506687/r/il/a4a078/3690325814/il_fullxfull.3690325814_28h9.jpg"
-                             alt="Sale" />
-                        <div class="banner-content position-absolute bottom-0 start-0 text-white p-2">
-                            <span class="small">Ưu đãi ngày hôm nay</span>
-                            <h6>Giảm giá 20% <br />sử dụng mã: TTT</h6>
-                            <a href="#" class="btn btn-light btn-sm mt-1">Shop Now</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-6">
-                    <div class="banner-item position-relative">
-                        <img src="https://d1imjpjik7kc4g.cloudfront.net/images/BCG-Attorney-Searchs-Guide-to-Corporate-and-Finance-Practice-Areas-new.jpg"
-                             alt="Business" />
-                        <div class="banner-content position-absolute bottom-0 start-0 text-white p-2">
-                            <span class="small">New Arrivals</span>
-                            <h6>Business Economics</h6>
-                            <a href="#" class="btn btn-outline-light btn-sm mt-1">Discover Now</a>
-                        </div>
-                    </div>
-                </div>
+        <!-- Ảnh 3 -->
+        <div class="carousel-item position-relative">
+            <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da" class="d-block w-100 hero-img" alt="Banner 3">
+            <div class="carousel-caption text-start">
+                <h1 class="fw-bold display-5">Sách mới về mỗi ngày ✨</h1>
+                <p>Khám phá bộ sưu tập sách mới nhất — cập nhật liên tục trong tháng này.</p>
+                <a href="/Product/Index" class="btn btn-success btn-lg px-4 rounded-pill">Xem ngay</a>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- Nút điều hướng -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Trước</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Tiếp</span>
+    </button>
+
+    <!-- Dấu chấm nhỏ bên dưới -->
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+    </div>
+</section>
+
+
+<section class="info-strip text-center py-4 bg-light border-top">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <i class="bi bi-truck fs-2 text-success"></i>
+                <h6 class="fw-bold mt-2">Giao hàng miễn phí</h6>
+                <p class="text-muted small">Áp dụng cho thành viên</p>
+            </div>
+            <div class="col-md-3">
+                <i class="bi bi-shield-check fs-2 text-success"></i>
+                <h6 class="fw-bold mt-2">Thanh toán an toàn</h6>
+                <p class="text-muted small">Đảm bảo bảo mật tuyệt đối</p>
+            </div>
+            <div class="col-md-3">
+                <i class="bi bi-headset fs-2 text-success"></i>
+                <h6 class="fw-bold mt-2">Hỗ trợ 24/7</h6>
+                <p class="text-muted small">Sẵn sàng phục vụ bạn</p>
+            </div>
+            <div class="col-md-3">
+                <i class="bi bi-arrow-repeat fs-2 text-success"></i>
+                <h6 class="fw-bold mt-2">Đổi trả trong 30 ngày</h6>
+                <p class="text-muted small">Hoàn tiền hoặc đổi sản phẩm</p>
+            </div>
+        </div>
+    </div>
+</section>
+
 
 
 <!-- CSS custom -->
 <style>
-    .card-book {
-        transition: transform 0.2s, box-shadow 0.2s;
+    /* 🎨 Hero Banner Style */
+    .hero-banner {
+        height: 75vh;
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 3rem;
     }
-    .card-book:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+
+        .hero-banner .hero-img {
+            object-fit: cover;
+            height: 100%;
+            width: 100%;
+            filter: brightness(70%);
+            transition: transform 6s ease;
+        }
+
+        .hero-banner:hover .hero-img {
+            transform: scale(1.05);
+        }
+
+        .hero-banner h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            text-shadow: 1px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .hero-banner p {
+            font-size: 1.15rem;
+            color: #f8f9fa;
+            max-width: 550px;
+        }
+
+        .hero-banner .btn {
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+    /* 🎠 Hero Carousel */
+    #heroCarousel {
+        height: 75vh;
+        overflow: hidden;
+        margin-bottom: 3rem;
     }
-    .card-book img {
-        transition: transform 0.3s;
+
+    .hero-img {
+        height: 75vh;
+        object-fit: cover;
+        filter: brightness(70%);
     }
-    .card-book:hover img {
-        transform: scale(1.05);
+
+    .carousel-caption {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        left: 5%;
+        text-align: left;
+        max-width: 600px;
     }
+
+        .carousel-caption h1 {
+            text-shadow: 1px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .carousel-caption p {
+            color: #f8f9fa;
+            font-size: 1.15rem;
+        }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        filter: invert(1);
+    }
+
 </style>
 
 
+<!-- Sách bán chạy sửa ở đây nhé -->
 <div class="container mt-4">
     <h2 class="text-success fw-bold mb-4">
         📚 Sách bán chạy
