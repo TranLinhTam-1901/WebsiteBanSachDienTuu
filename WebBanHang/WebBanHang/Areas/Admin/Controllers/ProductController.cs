@@ -21,9 +21,29 @@ namespace WebBanHang.Areas.Admin.Controllers
             _categoryRepository = categoryRepository;
         }       
         
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchTerm, int? categoryId)
         {
             var products = await _productRepository.GetAllAsync();
+            
+            // Filter by search term
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                products = products.Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                                               p.Author.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            }
+            
+            // Filter by category
+            if (categoryId.HasValue)
+            {
+                products = products.Where(p => p.CategoryId == categoryId.Value);
+            }
+            
+            // Load categories for dropdown
+            var categories = await _categoryRepository.GetAllAsync();
+            ViewBag.Categories = categories;
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.SelectedCategoryId = categoryId;
+            
             return View(products);
         }
 

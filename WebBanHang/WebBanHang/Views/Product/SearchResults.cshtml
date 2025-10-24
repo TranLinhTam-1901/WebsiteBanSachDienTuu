@@ -74,7 +74,8 @@
                 <div class="card h-100 border-0 shadow-sm">
                     <img src="@product.ImageUrl" class="card-img-top rounded-top" alt="@product.Name" />
                     <div class="card-body text-center">
-                        <h6 class="fw-bold">@product.Name</h6>
+                        <h6 class="fw-bold product-name">@product.Name</h6>
+                        
                         <p class="text-danger fw-semibold">@product.Price.ToString("N0") đ</p>
                         <a asp-action="Details" asp-route-id="@product.Id"
                            class="btn btn-outline-success btn-sm">
@@ -86,6 +87,20 @@
         }
     </div>
 </div>
+
+<style>
+    /* CSS cho tên sản phẩm - giới hạn 2 dòng */
+    .product-name {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.4;
+        max-height: 2.8em; /* 2 dòng x 1.4 line-height */
+        word-wrap: break-word;
+    }
+</style>
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {

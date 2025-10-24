@@ -9,6 +9,9 @@ namespace WebBanHang.Models
     {
         public int Id { get; set; }
 
+        [Required, StringLength(20)]
+        public string OrderCode { get; set; } = string.Empty;
+
         [Required]
         public string UserId { get; set; } = string.Empty;
         public ApplicationUser? User { get; set; }

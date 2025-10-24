@@ -43,7 +43,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.Expiration = null;
 });
 
-builder.Services.AddRazorPages();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews()

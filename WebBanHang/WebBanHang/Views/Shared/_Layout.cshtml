@@ -16,20 +16,6 @@
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 
-@* --- Hiển thị thông báo toàn trang nếu có TempData --- *@
-@if (TempData["LoginRequired"] != null)
-{
-    <div class="alert alert-warning text-center m-0" style="border-radius: 0;">
-        @TempData["LoginRequired"]
-    </div>
-}
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success text-center m-0" style="border-radius: 0;">
-        @TempData["Success"]
-    </div>
-}
-
 <body>
    
     <!-- Top Bar -->
@@ -137,6 +123,32 @@
         </div>
     </nav>
 
+    <!-- Thông báo TempData -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show m-3" role="alert" id="tempAlert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show m-3" role="alert" id="tempAlert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Info"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show m-3" role="alert" id="tempAlert">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            @TempData["Info"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
    <main>
         <div class="container">
             @RenderBody()
@@ -225,73 +237,14 @@
         @* <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> *@
 
 </body>
-</html>
-
-<style>
-    /* Top bar */
-    .top-bar {
-        font-size: 14px;
-    }
-
-    /* Navbar links */
-    .navbar-nav .nav-link {
-        font-size: 16px;
-        font-weight: 500;
-        padding: 8px 14px;
-        transition: 0.3s;
-    }
-
-        .navbar-nav .nav-link:hover {
-            color: #ffd700 !important;
-            border-bottom: 2px solid #ffd700;
-        }
-
-    /* Dropdown */
-    .dropdown-menu-dark {
-        background-color: #2d2d2d;
-        border-radius: 8px;
-    }
-
-        .dropdown-menu-dark .dropdown-item:hover {
-            background-color: #444;
-            color: #ffd700;
-        }
-
-    /* Search box */
-    .search-box input {
-        border-radius: 20px 0 0 20px;
-        border: none;
-        padding-left: 12px;
-    }
-
-    .search-box button {
-        border-radius: 0 20px 20px 0;
-        border: none;
-    }
-
-    /* Navbar link hover */
-    .navbar-nav .nav-link:hover {
-        color: #ffd700 !important;
-    }
-
-    .navbar .btn {
-        font-size: 14px;
-        font-weight: 500;
-        padding: 6px 16px;
-        transition: 0.3s;
-    }
-
-        .navbar .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-</style>
-
 @section Scripts {
     <script>
+        // Tự động ẩn thông báo TempData sau 5 giây
         setTimeout(() => {
-            document.querySelectorAll('.alert').forEach(a => a.style.display = 'none');
-        }, 4000); // 4 giây
+            const tempAlert = document.getElementById('tempAlert');
+            if (tempAlert) {
+                tempAlert.style.display = 'none';
+            }
+        }, 5000);
     </script>
 }

@@ -7,19 +7,7 @@
 
 <h2 class="mb-4"><i class="fa fa-wrench"></i> Quản lý đơn hàng</h2>
 
-<!-- ⚠️ [CHỈNH 1] Thông báo TempData hiển thị alert -->
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
-@if (TempData["Warning"] != null)
-{
-    <div class="alert alert-warning">@TempData["Warning"]</div>
-}
+<!-- Bỏ thông báo admin -->
 
 <table class="table table-hover align-middle">
     <thead class="table-dark">
@@ -37,7 +25,7 @@
         @foreach (var order in Model)
         {
             <tr>
-                <td>#@order.Id</td>
+                <td>@(string.IsNullOrEmpty(order.OrderCode) ? $"#{order.Id}" : order.OrderCode)</td>
                 <td>@order.User?.Email</td>
                 <td>@order.Total.ToString("N0") đ</td>
                 <td>@order.CreatedAt.ToString("dd/MM/yyyy")</td>

@@ -1,6 +1,6 @@
 ﻿@model WebBanHang.Models.Order
 
-<h2>Chi tiết đơn hàng #@Model.Id</h2>
+<h2>Chi tiết đơn hàng @(string.IsNullOrEmpty(Model.OrderCode) ? $"#{Model.Id}" : Model.OrderCode)</h2>
 
 <p><strong>Người đặt:</strong> @Model.FullName</p>
 <p><strong>Email:</strong> @Model.User?.Email</p>

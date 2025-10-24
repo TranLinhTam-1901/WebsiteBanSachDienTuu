@@ -6,7 +6,7 @@
 }
 
 <div>
-    <p><strong>Mã đơn hàng:</strong> #@Model.Id</p>
+    <p><strong>Mã đơn hàng:</strong> @(string.IsNullOrEmpty(Model.OrderCode) ? $"#{Model.Id}" : Model.OrderCode)</p>
     <p><strong>Khách hàng:</strong> @Model.User?.Email</p>
     <p><strong>SĐT:</strong> @Model.Phone</p>
 

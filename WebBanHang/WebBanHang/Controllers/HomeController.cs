@@ -16,10 +16,10 @@ namespace WebBanHang.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Lấy 8 sản phẩm mới nhất hoặc phổ biến (tùy bạn)
+            // Lấy 5 sách mới nhất
             var products = await _db.Products
                 .OrderByDescending(p => p.Id)
-                .Take(8)
+                .Take(5)
                 .ToListAsync();
 
             return View(products); // truyền danh sách sản phẩm cho view

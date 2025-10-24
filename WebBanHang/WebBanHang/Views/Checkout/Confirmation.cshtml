@@ -5,7 +5,7 @@
 
 <div class="text-center py-5">
     <h2 class="text-success">Cảm ơn bạn đã đặt hàng!</h2>
-    <p class="lead">Mã đơn hàng: <strong>#@Model.Id</strong></p>
+    <p class="lead">Mã đơn hàng: <strong>@(string.IsNullOrEmpty(Model.OrderCode) ? $"#{Model.Id}" : Model.OrderCode)</strong></p>
 </div>
 
 <div class="card shadow-sm">
