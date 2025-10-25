@@ -3,7 +3,14 @@
 @{
     ViewData["Title"] = "Đơn hàng của tôi";
 }
-
+@if (!Model.Any())
+{
+    <div class="alert alert-info mt-3 text-center">
+        😢 Bạn chưa có đơn đặt hàng nào.
+    </div>
+}
+else
+{
 <h2 class="mb-4">🧾 Đơn hàng của tôi</h2>
 
 <table class="table table-striped align-middle">
@@ -98,3 +105,4 @@
         }
     </tbody>
 </table>
+}
