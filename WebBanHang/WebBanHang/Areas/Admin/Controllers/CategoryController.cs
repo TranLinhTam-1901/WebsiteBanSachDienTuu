@@ -1,12 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebBanHang.Models;
 using WebBanHang.Repositories;
+using System.Threading.Tasks;
 namespace WebBanHang.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = SD.Role_Admin)]
     public class CategoryController:Controller
     {
         private readonly ICategoryRepository _categoryRepository;   

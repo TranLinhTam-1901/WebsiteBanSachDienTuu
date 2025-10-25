@@ -10,14 +10,10 @@
     <title>@ViewData["Title"] - 3T-books</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <!-- 🧩 PDF.js CDN chính thức -->
-    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"></script>
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
-
 <body>
-   
+
     <!-- Top Bar -->
     <div class="top-bar bg-dark text-white py-1">
         <div class="container d-flex justify-content-between align-items-center small">
@@ -34,7 +30,6 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm sticky-top">
         <div class="container">
-       
             <!-- Logo -->
             <a class="navbar-brand fw-bold fs-4 text-white" href="/">📚 3T-Books</a>
 
@@ -49,28 +44,30 @@
                 <!-- Menu chính -->
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item"><a class="nav-link active text-white" href="/">Trang Chủ</a></li>
-                    
+                    <li class="nav-item"><a class="nav-link text-white" href="#">Cửa Hàng</a></li>
                     <li class="nav-item">
                         <a class="nav-link text-white" asp-controller="Product" asp-action="Index">Sản Phẩm</a>
                     </li>
-                    @if (SignInManager.IsSignedIn(User))
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Order" asp-action="Index">
-                                Lịch sử đặt hàng
-                            </a>
-                        </li>
-                    }
-                    
+
+                    @* <li class="nav-item"><a class="nav-link text-white" href="#">Trang</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">Blog</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="#">Khác</a></li> *@
+                    @* <li class="nav-item">
+                        <a class="nav-link text-warning" asp-area="Admin" asp-controller="Product" asp-action="Index">
+                           Quản lý Sách 
+                        </a>
+                    </li> *@
                 </ul>
 
                 <!-- Search + Giỏ hàng + User/Login/Register -->
                 <div class="d-flex align-items-center gap-2">
                     <!-- Search -->
-                    <form asp-controller="Product" asp-action="Search" method="get" class="d-flex">
-                            <input class="form-control me-2" type="search" name="keyword" placeholder="Tìm sản phẩm, tác giả, thể loại..." aria-label="Search" />
-                            <button class="btn btn-outline-light" type="submit">Tìm</button>
-                        </form>
+                    <form asp-controller="Books" asp-action="Search" method="get" class="d-flex">
+                        <input type="text" name="keyword" class="form-control" placeholder="Tìm sách, tác giả, thể loại..." />
+                        <button type="submit" class="btn btn-success">Tìm</button>
+                    </form>
+
+
                     <!-- Giỏ hàng -->
                     <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-light position-relative">
                         <i class="bi bi-cart3"></i>
@@ -88,17 +85,8 @@
                                 <i class="bi bi-person-circle"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                                <li class="dropdown-header">
-                                    @{
-                                        var user = await UserManager.GetUserAsync(User);
-                                    }
-                                    👋 Xin chào, @user.FullName
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Library" asp-action="Index">
-                                        📚 Thư viện của tôi
-                                    </a>
-                                </li>
+                                <li class="dropdown-header">👋 Xin chào, @UserManager.GetUserName(User)</li>
+
                                 <li><a class="dropdown-item" href="/Identity/Account/Manage">Tài khoản của tôi</a></li>
                                 <li>
                                      <form method="post" asp-area="Identity" asp-page="/Account/Logout" 
@@ -122,32 +110,6 @@
             </div>
         </div>
     </nav>
-
-    <!-- Thông báo TempData -->
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show m-3" role="alert" id="tempAlert">
-            <i class="bi bi-check-circle-fill me-2"></i>
-            @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show m-3" role="alert" id="tempAlert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-    @if (TempData["Info"] != null)
-    {
-        <div class="alert alert-info alert-dismissible fade show m-3" role="alert" id="tempAlert">
-            <i class="bi bi-info-circle-fill me-2"></i>
-            @TempData["Info"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
 
    <main>
         <div class="container">
@@ -237,14 +199,67 @@
         @* <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> *@
 
 </body>
-@section Scripts {
-    <script>
-        // Tự động ẩn thông báo TempData sau 5 giây
-        setTimeout(() => {
-            const tempAlert = document.getElementById('tempAlert');
-            if (tempAlert) {
-                tempAlert.style.display = 'none';
-            }
-        }, 5000);
-    </script>
-}
+</html>
+
+<style>
+    /* Top bar */
+    .top-bar {
+        font-size: 14px;
+    }
+
+    /* Navbar links */
+    .navbar-nav .nav-link {
+        font-size: 16px;
+        font-weight: 500;
+        padding: 8px 14px;
+        transition: 0.3s;
+    }
+
+        .navbar-nav .nav-link:hover {
+            color: #ffd700 !important;
+            border-bottom: 2px solid #ffd700;
+        }
+
+    /* Dropdown */
+    .dropdown-menu-dark {
+        background-color: #2d2d2d;
+        border-radius: 8px;
+    }
+
+        .dropdown-menu-dark .dropdown-item:hover {
+            background-color: #444;
+            color: #ffd700;
+        }
+
+    /* Search box */
+    .search-box input {
+        border-radius: 20px 0 0 20px;
+        border: none;
+        padding-left: 12px;
+    }
+
+    .search-box button {
+        border-radius: 0 20px 20px 0;
+        border: none;
+    }
+
+    /* Navbar link hover */
+    .navbar-nav .nav-link:hover {
+        color: #ffd700 !important;
+    }
+
+    .navbar .btn {
+        font-size: 14px;
+        font-weight: 500;
+        padding: 6px 16px;
+        transition: 0.3s;
+    }
+
+        .navbar .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+</style>
+
+    

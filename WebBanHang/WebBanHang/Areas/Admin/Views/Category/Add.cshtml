@@ -1,87 +1,30 @@
 ﻿@model WebBanHang.Models.Category
 
 @{
-    ViewData["Title"] = "Thêm danh mục mới";
+    ViewData["Title"] = "Thêm Danh mục mới";
     Layout = "_LayoutAdmin";
 }
 
-<div class="container py-4">
-    <div class="card border-0 shadow-lg rounded-3 mx-auto" style="max-width: 600px;">
-        <div class="card-header bg-dark text-white py-3">
-            <h4 class="mb-0 fw-semibold">
-                ➕ Thêm danh mục mới
-            </h4>
-        </div>
+<h2 class="mb-4">➕ Thêm Danh mục mới</h2>
 
-        <div class="card-body bg-light">
-            <form asp-action="Add"
-                  asp-controller="Category"
-                  asp-area="Admin"
-                  method="post"
-                  class="needs-validation"
-                  novalidate>
-                @Html.AntiForgeryToken()
+<form asp-action="Add"
+      asp-controller="Category"
+      asp-area="Admin"
+      method="post"
+      class="p-3 border rounded shadow-sm bg-light">
 
-                <div class="mb-3">
-                    <label asp-for="Name" class="form-label fw-bold">Tên danh mục</label>
-                    <input asp-for="Name" type="text" class="form-control form-control-lg" placeholder="Nhập tên danh mục..." />
-                    <span asp-validation-for="Name" class="text-danger small"></span>
-                </div>
+    @Html.AntiForgeryToken()
 
-                <div class="d-flex justify-content-between mt-4">
-                    <a asp-action="Index"
-                       asp-controller="Category"
-                       asp-area="Admin"
-                       class="btn btn-outline-secondary px-4">
-                        ↩️ Quay lại
-                    </a>
-
-                    <button type="submit" class="btn btn-success px-4 fw-bold">
-                        💾 Lưu danh mục
-                    </button>
-                </div>
-            </form>
-        </div>
+    <div class="form-group mb-3">
+        <label asp-for="Name" class="form-label fw-bold">Tên Danh mục</label>
+        <input asp-for="Name" type="text" class="form-control" placeholder="Nhập tên danh mục..." />
+        <span asp-validation-for="Name" class="text-danger"></span>
     </div>
-</div>
 
-<style>
-    .card {
-        border-radius: 14px;
-        overflow: hidden;
-    }
-
-    .card-header {
-        background: linear-gradient(90deg, #1e1e1e, #343a40);
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-    }
-
-    .form-control {
-        border-radius: 8px;
-        box-shadow: none;
-        transition: all 0.2s ease-in-out;
-    }
-
-        .form-control:focus {
-            border-color: #198754;
-            box-shadow: 0 0 0 0.15rem rgba(25, 135, 84, 0.25);
-        }
-
-    .btn-success {
-        background-color: #28a745;
-        border: none;
-    }
-
-        .btn-success:hover {
-            background-color: #218838;
-        }
-
-    .btn-outline-secondary {
-        font-weight: 500;
-    }
-
-    h4.fw-semibold {
-        letter-spacing: 0.3px;
-    }
-</style>
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">💾 Thêm Danh mục</button>
+        <a asp-action="Index" asp-controller="Category" asp-area="Admin" class="btn btn-secondary">
+            ↩️ Quay lại
+        </a>
+    </div>
+</form>

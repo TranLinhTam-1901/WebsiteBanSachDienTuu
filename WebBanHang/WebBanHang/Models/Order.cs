@@ -9,9 +9,6 @@ namespace WebBanHang.Models
     {
         public int Id { get; set; }
 
-        [Required, StringLength(20)]
-        public string OrderCode { get; set; } = string.Empty;
-
         [Required]
         public string UserId { get; set; } = string.Empty;
         public ApplicationUser? User { get; set; }
@@ -19,8 +16,8 @@ namespace WebBanHang.Models
         [Required, StringLength(200)]
         public string FullName { get; set; } = string.Empty;
 
-        //[Required, StringLength(300)]
-       // public string? Address { get; set; }
+        [Required, StringLength(300)]
+        public string Address { get; set; } = string.Empty;
 
         [Required, StringLength(20)]
         public string Phone { get; set; } = string.Empty;
@@ -29,18 +26,12 @@ namespace WebBanHang.Models
         public decimal Subtotal { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
-        public decimal? ShippingFee { get; set; }
+        public decimal ShippingFee { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal Total { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public bool IsPaid { get; set; } = false;
-        public string PaymentMethod { get; set; } = "Fake";
-        
-        public string Status { get; set; } = "Pending";
-        public string? TransactionId { get; set; }
 
         public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
     }

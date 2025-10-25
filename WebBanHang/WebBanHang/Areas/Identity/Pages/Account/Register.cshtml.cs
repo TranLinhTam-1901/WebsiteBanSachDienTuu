@@ -143,7 +143,6 @@ namespace WebBanHang.Areas.Identity.Pages.Account
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            Input.Role = SD.Role_User;
             // Always repopulate RoleList so selection is preserved when returning the page
             if (Input != null)
             {
@@ -159,30 +158,24 @@ namespace WebBanHang.Areas.Identity.Pages.Account
                 user.FullName = Input.FullName;
                 user.Address = Input.Address; // Thêm dòng này
                 user.Age = Input.Age;
-
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
-                   
-
                     _logger.LogInformation("User created a new account with password.");
-                    await _userManager.AddToRoleAsync(user, SD.Role_User);
-                    //if (!String.IsNullOrEmpty(Input.Role))
-                    //{
-                    //    await _userManager.AddToRoleAsync(user, Input.Role);
-                    //}
-                    //else
-                    //{
-                    //    await _userManager.AddToRoleAsync(user, SD.Role_User);
-                    //}
+                    if(!String.IsNullOrEmpty(Input.Role))
+                    {
+                        await _userManager.AddToRoleAsync(user, Input.Role);
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, SD.Role_User);
+                    }
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
                         pageHandler: null,

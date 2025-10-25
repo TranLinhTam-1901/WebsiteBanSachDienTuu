@@ -1,147 +1,78 @@
 ﻿@model IEnumerable<WebBanHang.Models.Category>
 
 @{
-    ViewData["Title"] = "Danh sách danh mục";
-    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Danh sách Danh mục";
+    Layout = "_LayoutAdmin"; // Hoặc tên layout admin của bạn
 }
 
-<div class="container py-4">
-    <div class="card border-0 shadow-lg rounded-3 overflow-hidden">
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0 fw-semibold">
-                📂 Danh sách danh mục
-            </h4>
-            <a asp-action="Add"
-               asp-area="Admin"
-               asp-controller="Category"
-               class="btn btn-success btn-sm fw-bold shadow-sm">
-                <i class="bi bi-plus-circle"></i> Thêm danh mục
-            </a>
-        </div>
+@Html.AntiForgeryToken() @* Cần cho thao tác AJAX Delete *@
 
-        <div class="card-body bg-light p-0">
-            @if (Model != null && Model.Any())
-            {
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-secondary text-center">
-                        <tr>
-                            <th style="width: 80px;">#</th>
-                            <th>Tên danh mục</th>
-                            <th style="width: 150px;">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @{
-                            int index = 1;
-                        }
-                        @foreach (var item in Model)
-                        {
-                            <tr class="bg-white">
-                                <td class="text-center text-muted fw-semibold">@index</td>
-                                <td class="fw-semibold text-dark ps-3">
-                                    <i class="bi bi-bookmark-fill text-primary me-2"></i> @item.Name
-                                </td>
-                                <td class="text-center">
-                                    <div class="btn-group" role="group">
-                                        <a asp-action="Update"
-                                           asp-controller="Category"
-                                           asp-area="Admin"
-                                           asp-route-id="@item.Id"
-                                           class="btn btn-warning btn-sm">
-                                            <i class="bi bi-pencil-square"></i> Sửa
-                                        </a>
-                                        <button type="button"
-                                                onclick="deleteCategory(@item.Id)"
-                                                class="btn btn-danger btn-sm">
-                                            <i class="bi bi-trash3"></i> Xóa
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            index++;
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <div class="p-4 text-center text-muted">
-                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
-                    Chưa có danh mục nào được tạo.
-                </div>
-            }
-        </div>
-    </div>
-</div>
+<h2>📋 Danh sách Danh mục</h2>
 
-@section Scripts {
-    <script>
-        function deleteCategory(id) {
-            if (confirm("🗑️ Bạn có chắc chắn muốn xóa danh mục này không?")) {
-                fetch(`/Admin/Category/Delete/${id}`, {
-                    method: "POST"
-                })
-                    .then(res => {
-                        if (res.ok) {
-                            alert("✅ Xóa danh mục thành công!");
-                            location.reload();
-                        } else {
-                            alert("❌ Xóa thất bại!");
-                        }
-                    });
-            }
+<a asp-action="Add" asp-controller="Category" asp-area="Admin" class="btn btn-success mb-3">
+    ➕ Thêm Danh mục
+</a>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tên Danh mục</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Name</td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a asp-action="Update" asp-controller="Category" asp-area="Admin" asp-route-id="@item.Id" class="btn btn-warning btn-sm">
+                            Sửa
+                        </a>
+                        <a href="javascript:void(0);"
+                           onclick="deleteCategory(@item.Id)"
+                           class="btn btn-danger btn-sm">
+                            Xóa
+                        </a>
+                    </div>
+                </td>
+            </tr>
         }
-    </script>
-}
+    </tbody>
+</table>
 
-<style>
-    .card {
-        border-radius: 14px;
-        overflow: hidden;
-    }
+<script>
+    function deleteCategory(id) {
+        if (confirm("Bạn có chắc chắn muốn xóa danh mục này không?")) {
+            // Lấy Anti-Forgery Token (đã học ở phần trước)
+            let tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
 
-    .card-header {
-        background: linear-gradient(90deg, #1e1e1e, #343a40);
-        padding: 1rem 1.5rem;
-    }
+            if (!tokenElement) {
+                alert("Lỗi bảo mật: Không tìm thấy Anti-Forgery Token.");
+                return;
+            }
+            let token = tokenElement.value;
 
-    .table {
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    .table-hover tbody tr:hover {
-        background-color: #f2f6ff !important;
-        transition: background-color 0.2s ease-in-out;
-    }
-
-    .btn-warning, .btn-danger {
-        color: #fff !important;
-        font-weight: 500;
-    }
-
-        .btn-warning:hover {
-            background-color: #dca600;
-            border-color: #dca600;
+            fetch(`/Admin/Category/Delete/${id}`, {
+                method: "POST",
+                headers: {
+                    'RequestVerificationToken': token
+                }
+            })
+            .then(res => {
+                if (res.ok) {
+                    alert("Xóa danh mục thành công!");
+                    location.reload();
+                } else {
+                    alert("Xóa thất bại. Danh mục có thể đang chứa sản phẩm.");
+                }
+            })
+            .catch(error => {
+                 alert("Đã xảy ra lỗi kết nối: " + error);
+            });
         }
-
-        .btn-danger:hover {
-            background-color: #c82333;
-            border-color: #c82333;
-        }
-
-    .bi-bookmark-fill {
-        font-size: 1rem;
-        vertical-align: middle;
     }
-
-    .table-secondary {
-        background-color: #f8f9fa !important;
-    }
-
-    .table thead th {
-        text-transform: uppercase;
-        font-size: 0.9rem;
-        letter-spacing: 0.3px;
-    }
-</style>
+</script>
