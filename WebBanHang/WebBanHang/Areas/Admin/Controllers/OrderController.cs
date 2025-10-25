@@ -55,7 +55,7 @@ namespace WebBanHang.Areas.Admin.Controllers
 
             order.Status = status;
             await _context.SaveChangesAsync();
-            TempData["Success"] = $"Đơn hàng #{order.Id} đã được cập nhật trạng thái thành '{status}'.";
+            // Bỏ thông báo admin
             return RedirectToAction("Manage");
         }
 
@@ -82,7 +82,7 @@ namespace WebBanHang.Areas.Admin.Controllers
 
             order.Status = "Confirmed";
             await _context.SaveChangesAsync();
-            TempData["Success"] = $"Đơn hàng #{order.Id} đã được xác nhận.";
+            // Bỏ thông báo admin
             return RedirectToAction("Manage");
         }
 
@@ -101,7 +101,7 @@ namespace WebBanHang.Areas.Admin.Controllers
 
             order.Status = "Canceled";
             await _context.SaveChangesAsync();
-            TempData["Warning"] = $"Đơn hàng #{order.Id} đã bị hủy.";
+            // Bỏ thông báo admin
             return RedirectToAction("Manage");
         }
 

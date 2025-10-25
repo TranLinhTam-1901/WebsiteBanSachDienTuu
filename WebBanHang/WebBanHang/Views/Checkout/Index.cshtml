@@ -14,6 +14,21 @@
                 <h5 class="card-title mb-3">Thông tin giao hàng</h5>
                 <form asp-action="PlaceOrder" method="post" class="row g-3">
                     @Html.AntiForgeryToken()
+                    
+                    @if (ViewBag.IsBuyNow == true)
+                    {
+                        @* Hidden field cho mua ngay *@
+                        <input type="hidden" name="buyNowProductId" value="@Model.Items.First().ProductId" />
+                    }
+                    else
+                    {
+                        @* Hidden fields để truyền selectedItems từ giỏ hàng *@
+                        @foreach (var item in Model.Items)
+                        {
+                            <input type="hidden" name="selectedItems" value="@item.Id" />
+                        }
+                    }
+                    
                     <div class="col-md-12">
                         <label class="form-label">Họ và tên</label>
                         <input type="text" name="fullName" class="form-control" required />

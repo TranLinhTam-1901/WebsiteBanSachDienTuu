@@ -16,6 +16,40 @@
         </a>
     </div>
 
+    <!-- Search Box -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Tìm kiếm theo tên sách:</label>
+                    <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control" placeholder="Nhập tên sách..." />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Thể loại:</label>
+                    <select name="categoryId" class="form-select">
+                        <option value="">Tất cả thể loại</option>
+                        @foreach (var category in ViewBag.Categories ?? new List<WebBanHang.Models.Category>())
+                        {
+                            <option value="@category.Id" selected="@(ViewBag.SelectedCategoryId?.ToString() == category.Id.ToString())">
+                                @category.Name
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Tìm kiếm
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-arrow-clockwise"></i> Làm mới
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <table class="table table-hover align-middle mb-0">

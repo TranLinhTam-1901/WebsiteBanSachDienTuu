@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using WebBanHang.Models;
@@ -21,7 +22,11 @@ namespace WebBanHang.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var products = await _db.Products.AsNoTracking().ToListAsync();
+            var products = await _db.Products
+                .Include(p => p.Category)
+                .AsNoTracking()
+                .ToListAsync();
+
             return View(products);
         }
 
@@ -35,12 +40,6 @@ namespace WebBanHang.Controllers
 
             if (product == null)
                 return NotFound();
-
-            var reviews = await _db.Reviews
-                .Include(r => r.User) // nếu có liên kết với ApplicationUser
-                .Where(r => r.ProductId == id)
-                .OrderByDescending(r => r.CreatedAt)
-                .ToListAsync();
 
             var user = await _userManager.GetUserAsync(User);
             bool alreadyOwned = false;
@@ -60,75 +59,9 @@ namespace WebBanHang.Controllers
             ViewBag.AlreadyOwned = alreadyOwned;
             ViewBag.InCart = inCart;
 
-            var viewModel = new ProductDetailViewModel
-            {
-                Product = product,
-                Reviews = reviews
-            };
-
-            return View(viewModel);
+            return View(product);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddReview(int productId, int rating, string comment, IFormFile? imageFile)
-        {
-            // 🔹 Nếu người dùng chưa đăng nhập
-            if (!User.Identity.IsAuthenticated)
-            {
-                TempData["LoginRequired"] = "Vui lòng đăng nhập để gửi đánh giá!";
-                return RedirectToAction("Details", new { id = productId });
-            }
-
-
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-            string? imagePath = null;
-            if (imageFile != null && imageFile.Length > 0)
-            {
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-                var savePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/reviews", fileName);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(savePath)!);
-                using (var stream = new FileStream(savePath, FileMode.Create))
-                {
-                    await imageFile.CopyToAsync(stream);
-                }
-
-                imagePath = "/uploads/reviews/" + fileName;
-            }
-
-            var review = new Review
-            {
-                ProductId = productId,
-                Rating = rating,      // ⭐ quan trọng — nhận giá trị từ form
-                Comment = comment,
-                ImageUrl = imagePath,
-                UserId = userId,
-                CreatedAt = DateTime.Now
-            };
-
-            _db.Reviews.Add(review);
-            await _db.SaveChangesAsync();
-            TempData["Success"] = "🎉 Cảm ơn bạn đã đánh giá sách này!";
-            return RedirectToAction("Details", new { id = productId });
-
-
-            //if (imageFile != null && imageFile.Length > 0)
-            //{
-            //    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/reviews");
-            //    Directory.CreateDirectory(uploadsFolder);
-
-            //    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
-            //    var filePath = Path.Combine(uploadsFolder, fileName);
-
-            //    using (var stream = new FileStream(filePath, FileMode.Create))
-            //    {
-            //        await imageFile.CopyToAsync(stream);
-            //    }
-
-            //    review.ImageUrl = "/uploads/reviews/" + fileName; // ✅ Đường dẫn tương đối để hiển thị
-            //}
-        }
 
         private readonly ApplicationDbContext _context;
 

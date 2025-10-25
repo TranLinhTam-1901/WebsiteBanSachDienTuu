@@ -5,7 +5,7 @@
 
 <div class="alert alert-success mt-3 text-center p-4 shadow-sm" style="max-width: 700px; margin: 0 auto;">
     <h2>✅ Thanh toán thành công!</h2>
-    <p><b>Mã đơn hàng:</b> #@Model.Id</p>
+    <p><b>Mã đơn hàng:</b> @(string.IsNullOrEmpty(Model.OrderCode) ? $"#{Model.Id}" : Model.OrderCode)</p>
     <p><b>Mã giao dịch:</b> <code>@Model.TransactionId</code></p>
     <p class="mt-3">
         🎉 Cảm ơn bạn đã mua sách tại <strong>3T-Books</strong>!
