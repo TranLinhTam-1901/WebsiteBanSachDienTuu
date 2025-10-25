@@ -22,11 +22,15 @@ namespace WebBanHang.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger)
+
+        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger, UserManager<ApplicationUser> userManager)
         {
             _signInManager = signInManager;
             _logger = logger;
+           _userManager = userManager;
         }
 
         /// <summary>
@@ -115,8 +119,24 @@ namespace WebBanHang.Areas.Identity.Pages.Account
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
+                    //_logger.LogInformation("User logged in.");
+                    //return LocalRedirect(returnUrl);
                     _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+
+                    // 🧩 Lấy thông tin user vừa đăng nhập
+                    var user = await _userManager.FindByEmailAsync(Input.Email);
+
+                    // 🧩 Kiểm tra role và điều hướng tương ứng
+                    if (await _userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        // 👉 Nếu là Admin → vào khu vực Admin (trang thống kê)
+                        return LocalRedirect("/Admin");
+                    }
+                    else
+                    {
+                        // 👉 Nếu là user thường → về trang Home hoặc trang trước đó
+                        return LocalRedirect(returnUrl ?? "/Home/Index");
+                    }
                 }
                 if (result.RequiresTwoFactor)
                 {

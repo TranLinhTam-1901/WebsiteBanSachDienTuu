@@ -45,11 +45,12 @@
                             <span asp-validation-for="Input.Address" class="text-danger small"></span>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Vai trò</label>
-                            <select asp-for="Input.Role" asp-items="@Model.Input.RoleList" class="form-select">
+                            @* <label class="form-label">Vai trò</label> *@
+                            @* <select asp-for="Input.Role" asp-items="@Model.Input.RoleList" class="form-select">
                                 <option disabled selected>-- Chọn vai trò --</option>
                             </select>
-                            <span asp-validation-for="Input.Role" class="text-danger small"></span>
+                            <span asp-validation-for="Input.Role" class="text-danger small"></span> *@
+                                <input type="hidden" asp-for="Input.Role" value="User" />
                         </div>
                         <button id="registerSubmit" type="submit" class="btn btn-primary w-100 btn-lg shadow-sm">Đăng ký</button>
                         <div class="d-flex align-items-center gap-3 my-4">

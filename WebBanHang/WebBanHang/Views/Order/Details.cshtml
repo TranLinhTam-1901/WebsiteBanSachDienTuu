@@ -1,0 +1,129 @@
+﻿@model WebBanHang.Models.Order
+
+<h2>Chi tiết đơn hàng @(string.IsNullOrEmpty(Model.OrderCode) ? $"#{Model.Id}" : Model.OrderCode)</h2>
+
+<p><strong>Người đặt:</strong> @Model.FullName</p>
+<p><strong>Email:</strong> @Model.User?.Email</p>
+<p><strong>SĐT:</strong> @Model.Phone</p>
+<p><strong>Ngày đặt:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+
+<p>
+    <strong>Trạng thái:</strong>
+    <span class="badge bg-@(Model.Status switch {
+        "Pending" => "warning text-dark",
+        "Confirmed" => "success",
+        "Completed" => "primary",
+        "Canceled" => "danger",
+        _ => "secondary"
+    })">@Model.Status</span>
+</p>
+
+<hr />
+
+<h5>Sản phẩm trong đơn</h5>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Tên sách</th>
+            <th>Số lượng</th>
+            <th>Đơn giá</th>
+            <th>Thành tiền</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@item.Product?.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice.ToString("N0") đ</td>
+                <td>@((item.UnitPrice * item.Quantity).ToString("N0")) đ</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p class="fw-bold text-end">Tổng cộng: @Model.Total.ToString("N0") đ</p>
+
+<hr/>
+
+<div class="d-flex justify-content-between align-items-center">
+    @* 💳 Nếu đơn hàng đã xác nhận nhưng chưa thanh toán *@
+    @if (Model.Status == "Confirmed" && !Model.IsPaid)
+    {
+        <a asp-controller="Order"
+           asp-action="Index"
+           class="btn btn-outline-primary btn-sm">
+            ← Quay lại danh sách
+        </a>
+
+        <a asp-controller="Checkout"
+           asp-action="FakePay"
+           asp-route-orderId="@Model.Id"
+           class="btn btn-success btn-sm">
+            💳 Thanh toán ngay
+        </a>
+    }
+
+    @* 📖 Nếu đã thanh toán xong *@
+    else if (Model.IsPaid)
+    {
+        <div class="w-100 text-center mt-3">
+            <div class="alert alert-success p-4 shadow-sm" style="max-width: 700px; margin: 0 auto;">
+                <h5>🎉 Cảm ơn bạn đã mua sách!</h5>
+                <p>Sách của bạn đã được thêm vào thư viện cá nhân.</p>
+
+                <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+                    @if (Model.Items.Any())
+                    {
+                        var firstProduct = Model.Items.First().Product;
+                        if (firstProduct != null)
+                        {
+                            <a asp-controller="Library"
+                               asp-action="Read"
+                               asp-route-id="@firstProduct.Id"
+                               class="btn btn-success px-4">
+                                📖 Đọc ngay
+                            </a>
+                        }
+                    }
+
+                    <a asp-controller="Library"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary px-4">
+                        📚 Về thư viện
+                    </a>
+
+                    <a asp-controller="Order"
+                       asp-action="Index"
+                       class="btn btn-outline-primary px-4">
+                        ← Quay lại danh sách
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+     else if (Model.Status == "Pending")
+    {
+        <div class="w-100 text-center mt-3">
+            <div class="alert alert-warning p-4 shadow-sm" style="max-width: 700px; margin: 0 auto;">
+                <h5>⏳ Đơn hàng của bạn đang chờ xác nhận</h5>
+                <p>Vui lòng quay lại sau khi admin duyệt để tiến hành thanh toán.</p>
+                <a asp-controller="Order"
+                   asp-action="Index"
+                   class="btn btn-outline-primary mt-3">
+                    ← Quay lại danh sách đơn hàng
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+
+@* @if (Model.Status == "Pending")
+{
+    <div class="alert alert-warning mt-3 py-2 px-3" style="max-width: 500px; font-size: 0.9rem;">
+        ⏳ Đơn hàng của bạn đang chờ admin xác nhận.<br />
+        Vui lòng quay lại sau khi được duyệt để thanh toán.
+    </div>
+} *@

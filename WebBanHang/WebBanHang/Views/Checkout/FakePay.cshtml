@@ -1,0 +1,18 @@
+﻿@model WebBanHang.Models.Order
+@{
+    ViewData["Title"] = "Thanh toán đơn hàng";
+}
+
+<h2 class="mb-3 text-primary">💳 Thanh toán đơn hàng @(string.IsNullOrEmpty(Model.OrderCode) ? $"#{Model.Id}" : Model.OrderCode)</h2>
+
+<!-- Bỏ thông báo admin chưa xác nhận -->
+<div class="alert alert-info">
+    💰 <b>Tổng tiền cần thanh toán:</b> @Model.Total.ToString("N0") đ
+</div>
+
+    <form asp-action="ConfirmFakePay" method="post" asp-controller="Checkout">
+        <input type="hidden" name="orderId" value="@Model.Id" />
+        <button type="submit" class="btn btn-success btn-lg">
+            ✅ Xác nhận Thanh toán
+        </button>
+    </form>

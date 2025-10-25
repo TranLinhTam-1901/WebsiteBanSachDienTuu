@@ -1,21 +1,28 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using WebBanHang.Models;
 
 namespace WebBanHang.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ApplicationDbContext _db;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ApplicationDbContext db)
         {
-            _logger = logger;
+            _db = db;
         }
 
-        public async Task <IActionResult> Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            // Lấy 5 sách mới nhất
+            var products = await _db.Products
+                .OrderByDescending(p => p.Id)
+                .Take(5)
+                .ToListAsync();
+
+            return View(products); // truyền danh sách sản phẩm cho view
         }
 
         public IActionResult Privacy()

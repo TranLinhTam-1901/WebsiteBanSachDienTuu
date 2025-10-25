@@ -1,91 +1,246 @@
 @model WebBanHang.Models.Cart
-@{
-    ViewData["Title"] = "Giỏ hàng";
-    decimal subtotal = Model.Items.Sum(i => i.UnitPrice * i.Quantity);
-    decimal shipping = subtotal > 0 ? 15000 : 0;
-    decimal total = subtotal + shipping;
-}
 
-<h2 class="mb-4">Giỏ hàng</h2>
-
-@if (!Model.Items.Any())
-{
-    <div class="alert alert-info">Giỏ hàng trống.</div>
-}
-else
-{
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="table-responsive shadow-sm rounded">
-                <table class="table align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Sách</th>
-                            <th style="width:140px">Giá</th>
-                            <th style="width:220px">Số lượng</th>
-                            <th style="width:140px">Tạm tính</th>
-                            <th style="width:80px"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.Items)
-                        {
-                            <tr>
-                                <td>
-                                    <div class="fw-semibold">@item.Product?.Name</div>
-                                    <div class="text-muted small">@item.Product?.Author</div>
-                                </td>
-                                <td>@item.UnitPrice.ToString("N0") đ</td>
-                                <td>
-                                    <form asp-action="UpdateQuantity" method="post" class="d-flex align-items-center gap-2">
-                                        <input type="hidden" name="itemId" value="@item.Id" />
-                                        <input type="number" name="quantity" value="@item.Quantity" min="0" class="form-control" style="width:100px" />
-                                        <button type="submit" class="btn btn-sm btn-primary">Cập nhật</button>
-                                        @Html.AntiForgeryToken()
-                                    </form>
-                                </td>
-                                <td>@((item.UnitPrice * item.Quantity).ToString("N0")) đ</td>
-                                <td>
-                                    <form asp-action="Remove" method="post">
-                                        <input type="hidden" name="itemId" value="@item.Id" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
-                                        @Html.AntiForgeryToken()
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">🛒 Giỏ hàng của tôi</h2>
+                <span class="badge bg-primary fs-6">@Model.Items.Count sản phẩm</span>
             </div>
         </div>
-        <div class="col-lg-4">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Tổng kết đơn hàng</h5>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Tạm tính</span>
-                        <strong>@subtotal.ToString("N0") đ</strong>
+    </div>
+
+    @if (!Model.Items.Any())
+    {
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-cart-x" style="font-size: 4rem; color: #6c757d;"></i>
+            </div>
+            <h4 class="text-muted">Giỏ hàng trống</h4>
+            <p class="text-muted">Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm!</p>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-primary">
+                <i class="bi bi-shop me-2"></i>Khám phá sách
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <form id="cartForm" method="post" asp-controller="Checkout" asp-action="Index">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white border-bottom">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <h5 class="mb-0">Sản phẩm trong giỏ hàng</h5>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="form-check">
+                                        <input type="checkbox" id="checkAll" class="form-check-input" />
+                                        <label for="checkAll" class="form-check-label small">Chọn tất cả</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="text-center" style="width: 50px;"></th>
+                                            <th>Sản phẩm</th>
+                                            <th class="text-center" style="width: 120px;">Giá</th>
+                                            <th class="text-center" style="width: 100px;">Số lượng</th>
+                                            <th class="text-end" style="width: 120px;">Tạm tính</th>
+                                            <th class="text-center" style="width: 80px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.Items)
+                                        {
+                                            <tr data-row-item="@item.Id">
+                                                <td class="text-center">
+                                                    <input type="checkbox" name="selectedItems"
+                                                           value="@item.Id" class="form-check-input product-check" />
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="@item.Product?.ImageUrl" alt="@item.Product?.Name" 
+                                                             class="rounded me-3" style="width: 60px; height: 80px; object-fit: cover;">
+                                                        <div>
+                                                            <h6 class="mb-1 product-name">@item.Product?.Name</h6>
+                                                            <small class="text-muted">@item.Product?.Author</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="fw-semibold">@item.UnitPrice.ToString("N0") đ</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-light text-dark px-3 py-2">@item.Quantity</span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <span class="fw-bold text-success line-subtotal" data-item-id="@item.Id">
+                                                        @((item.UnitPrice * item.Quantity).ToString("N0")) đ
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger delete-item-btn" 
+                                                            data-item-id="@item.Id" data-item-name="@item.Product?.Name">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Phí vận chuyển</span>
-                        <strong>@shipping.ToString("N0") đ</strong>
+                </form>
+
+                @* Hidden remove forms *@
+                @foreach (var item in Model.Items)
+                {
+                    <form id="remove-@item.Id" asp-controller="Cart" asp-action="Remove" method="post">
+                        <input type="hidden" name="itemId" value="@item.Id" />
+                        @Html.AntiForgeryToken()
+                    </form>
+                }
+                
+                @* Hidden clear cart form *@
+                <form id="clear-cart-form" asp-controller="Cart" asp-action="Clear" method="post">
+                    @Html.AntiForgeryToken()
+                </form>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-receipt me-2"></i>Tổng kết đơn hàng
+                        </h5>
                     </div>
-                    <hr />
-                    <div class="d-flex justify-content-between fs-5 mb-3">
-                        <span>Tổng cộng</span>
-                        <strong class="text-success">@total.ToString("N0") đ</strong>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <a asp-controller="Checkout" asp-action="Index" class="btn btn-success">Thanh toán</a>
-                        <form asp-action="Clear" method="post">
-                            <button type="submit" class="btn btn-outline-secondary">Xóa tất cả</button>
-                            @Html.AntiForgeryToken()
-                        </form>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Sản phẩm đã chọn:</span>
+                            <strong id="selectedCount">0</strong>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Tổng tiền:</span>
+                            <strong id="selectedTotal" class="text-success fs-5">0 đ</strong>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" form="cartForm" class="btn btn-success btn-lg" id="checkoutBtn" disabled>
+                                <i class="bi bi-credit-card me-2"></i>Thanh toán
+                            </button>
+                            
+                            <button type="button" class="btn btn-outline-danger w-100" id="clearCartBtn">
+                                <i class="bi bi-trash me-2"></i>Xóa tất cả
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-}
+    }
+</div>
 
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const fmt = n => new Intl.NumberFormat("vi-VN").format(n) + " đ";
 
+        const checkAll = document.getElementById("checkAll");
+        const checkboxes = document.querySelectorAll(".product-check");
+        const totalEl = document.getElementById("selectedTotal");
+        const countEl = document.getElementById("selectedCount");
+        const checkoutBtn = document.getElementById("checkoutBtn");
+
+        function updateTotal() {
+            let total = 0, count = 0;
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    const row = cb.closest("tr");
+                    const val = row.querySelector(".line-subtotal").textContent.replace(/[^\d]/g, "");
+                    total += parseInt(val);
+                    count++;
+                }
+            });
+            totalEl.textContent = fmt(total);
+            countEl.textContent = count;
+            
+            // Update checkout button
+            checkoutBtn.disabled = count === 0;
+            checkoutBtn.innerHTML = count === 0 
+                ? '<i class="bi bi-credit-card me-2"></i>Thanh toán'
+                : `<i class="bi bi-credit-card me-2"></i>Thanh toán (${count})`;
+        }
+
+        checkAll.addEventListener("change", e => {
+            checkboxes.forEach(cb => cb.checked = e.target.checked);
+            updateTotal();
+        });
+
+        checkboxes.forEach(cb => cb.addEventListener("change", updateTotal));
+        updateTotal(); // Initial call
+
+        // Xử lý sự kiện xóa sản phẩm
+        const deleteItemBtns = document.querySelectorAll(".delete-item-btn");
+        deleteItemBtns.forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                const itemId = btn.dataset.itemId;
+                const itemName = btn.dataset.itemName;
+                if (confirm(`Bạn có chắc chắn muốn xóa "${itemName}" khỏi giỏ hàng?`)) {
+                    document.getElementById(`remove-${itemId}`).submit();
+                }
+            });
+        });
+
+        // Xử lý sự kiện xóa tất cả
+        const clearCartBtn = document.getElementById("clearCartBtn");
+        if (clearCartBtn) {
+            clearCartBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                if (confirm("Bạn có chắc chắn muốn xóa tất cả sản phẩm khỏi giỏ hàng?")) {
+                    document.getElementById("clear-cart-form").submit();
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    .product-name {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.4;
+        max-height: 2.8em;
+        word-wrap: break-word;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .card {
+        transition: box-shadow 0.2s ease-in-out;
+    }
+
+    .card:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    }
+
+    .btn {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+</style>

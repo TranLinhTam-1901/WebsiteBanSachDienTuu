@@ -1,0 +1,176 @@
+﻿@model IEnumerable<WebBanHang.Models.Order>
+
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">🧾 Đơn hàng của tôi</h2>
+                <span class="badge bg-primary fs-6">@Model.Count() đơn hàng</span>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-receipt" style="font-size: 4rem; color: #6c757d;"></i>
+            </div>
+            <h4 class="text-muted">Chưa có đơn hàng nào</h4>
+            <p class="text-muted">Hãy mua sách để bắt đầu xây dựng thư viện của bạn!</p>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-primary">
+                <i class="bi bi-shop me-2"></i>Khám phá sách
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="fw-semibold">Mã đơn hàng</th>
+                                <th class="fw-semibold">Ngày tạo</th>
+                                <th class="fw-semibold">Tổng tiền</th>
+                                <th class="fw-semibold">Trạng thái</th>
+                                <th class="fw-semibold">Thanh toán</th>
+                                <th class="fw-semibold text-center">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="fw-bold text-primary">@(string.IsNullOrEmpty(order.OrderCode) ? $"#{order.Id}" : order.OrderCode)</span>
+                                    </td>
+                                    <td>@order.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <span class="fw-bold text-success">@order.Total.ToString("N0") ₫</span>
+                                    </td>
+
+                                    <!-- Trạng thái đơn hàng -->
+                                    <td>
+                                        @switch (order.Status)
+                                        {
+                                            case "Pending":
+                                                <span class="badge bg-warning text-dark">⏳ Chờ xác nhận</span>
+                                                break;
+                                            case "Confirmed":
+                                                <span class="badge bg-success">✅ Đã xác nhận</span>
+                                                break;
+                                            case "Completed":
+                                                <span class="badge bg-primary">📘 Hoàn tất</span>
+                                                break;
+                                            case "Cancelled":
+                                                <span class="badge bg-danger">❌ Đã hủy</span>
+                                                break;
+                                            default:
+                                                <span class="badge bg-secondary">Không xác định</span>
+                                                break;
+                                        }
+                                    </td>
+
+                                    <!-- Trạng thái thanh toán -->
+                                    <td>
+                                        @if (order.IsPaid)
+                                        {
+                                            <span class="text-success fw-bold">✅ Đã thanh toán</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger fw-bold">❌ Chưa thanh toán</span>
+                                        }
+                                    </td>
+
+                                    <!-- Hành động -->
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <!-- Xem chi tiết -->
+                                            <a asp-action="Details" asp-route-id="@order.Id" 
+                                               class="btn btn-sm btn-outline-info">
+                                                <i class="bi bi-eye me-1"></i>Xem
+                                            </a>
+
+                                            <!-- Thanh toán (chỉ khi đã được admin xác nhận & chưa thanh toán) -->
+                                            @if (order.Status == "Confirmed" && !order.IsPaid)
+                                            {
+                                                <a asp-controller="Checkout"
+                                                   asp-action="FakePay"
+                                                   asp-route-orderId="@order.Id"
+                                                   class="btn btn-sm btn-success">
+                                                    <i class="bi bi-credit-card me-1"></i>Thanh toán
+                                                </a>
+                                            }
+
+                                            <!-- Tải sách (chỉ khi đã hoàn tất và thanh toán xong) -->
+                                            @if (order.Status == "Completed" && order.IsPaid)
+                                            {
+                                                @foreach (var item in order.Items)
+                                                {
+                                                    <a href="@item.Product.BookContentUrl" target="_blank"
+                                                       class="btn btn-sm btn-primary">
+                                                        <i class="bi bi-download me-1"></i>Tải sách
+                                                    </a>
+                                                }
+                                            }
+
+                                            <!-- Xóa đơn hàng (luôn hiển thị) -->
+                                            <button type="button" class="btn btn-sm btn-outline-danger delete-order-btn" 
+                                                    data-order-id="@order.Id" data-order-code="@(string.IsNullOrEmpty(order.OrderCode) ? $"#{order.Id}" : order.OrderCode)">
+                                                <i class="bi bi-trash me-1"></i>Xóa
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Hidden form for delete -->
+<form id="delete-order-form" asp-action="Delete" method="post" style="display: none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="delete-order-id" />
+</form>
+
+@section Scripts {
+    <script>
+        // Xử lý sự kiện xóa đơn hàng
+        document.querySelectorAll('.delete-order-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const orderId = this.dataset.orderId;
+                const orderCode = this.dataset.orderCode;
+                
+                if (confirm(`Bạn có chắc chắn muốn xóa đơn hàng ${orderCode}?`)) {
+                    document.getElementById('delete-order-id').value = orderId;
+                    document.getElementById('delete-order-form').submit();
+                }
+            });
+        });
+    </script>
+}
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+</style>
