@@ -88,31 +88,31 @@ namespace WebBanHang.Controllers
             return View(order);
         }
 
-        public async Task<IActionResult> Download(int id)
-        {
-            var userId = _userManager.GetUserId(User); 
+        //public async Task<IActionResult> Download(int id)
+        //{
+        //    var userId = _userManager.GetUserId(User); 
 
-            var order = await _context.Orders
-                .Include(o => o.Items)
-                .ThenInclude(i => i.Product)
-                .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
+        //    var order = await _context.Orders
+        //        .Include(o => o.Items)
+        //        .ThenInclude(i => i.Product)
+        //        .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
 
-            if (order == null || !order.IsPaid)
-                return Forbid();
+        //    if (order == null || !order.IsPaid)
+        //        return Forbid();
 
-            var product = order.Items.First().Product;
-            if (product == null || string.IsNullOrEmpty(product.BookContentUrl))
-                return Content("Không tìm thấy file sách để tải.");
+        //    var product = order.Items.First().Product;
+        //    if (product == null || string.IsNullOrEmpty(product.BookContentUrl))
+        //        return Content("Không tìm thấy file sách để tải.");
 
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", product.BookContentUrl.TrimStart('/'));
-            if (!System.IO.File.Exists(filePath))
-                return NotFound("File không tồn tại trên máy chủ.");
+        //    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", product.BookContentUrl.TrimStart('/'));
+        //    if (!System.IO.File.Exists(filePath))
+        //        return NotFound("File không tồn tại trên máy chủ.");
 
-            var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
-            var fileName = Path.GetFileName(filePath);
+        //    var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+        //    var fileName = Path.GetFileName(filePath);
 
-            return File(fileBytes, "application/pdf", fileName);
-        }
+        //    return File(fileBytes, "application/pdf", fileName);
+        //}
 
         // Xóa đơn hàng
         [HttpPost]

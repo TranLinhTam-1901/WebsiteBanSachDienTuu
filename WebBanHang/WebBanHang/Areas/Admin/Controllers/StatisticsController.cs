@@ -23,16 +23,19 @@ namespace WebBanHang.Areas.Admin.Controllers
             int m = month ?? now.Month;
             int y = year ?? now.Year;
 
-            // Lấy đơn hàng trong tháng
+            // ✅ Lấy các đơn hàng đã thanh toán trong tháng
             var ordersInMonth = await _db.Orders
-                .Where(o => o.CreatedAt.Month == m && o.CreatedAt.Year == y)
-                .Include(o => o.Items).ThenInclude(i => i.Product)
+                .Where(o => o.CreatedAt.Month == m
+                         && o.CreatedAt.Year == y
+                         && o.IsPaid == true)   // 🔥 CHỈ tính đơn đã thanh toán
+                .Include(o => o.Items)
+                .ThenInclude(i => i.Product)
                 .ToListAsync();
 
-            // Tổng doanh thu tháng (tổng tất cả đơn)
+            // ✅ Tổng doanh thu tháng
             var totalRevenueMonth = ordersInMonth.Sum(o => o.Total);
 
-            // Gom doanh thu theo ngày trong tháng
+            // ✅ Gom doanh thu theo ngày
             var dailyRevenue = ordersInMonth
                 .GroupBy(o => o.CreatedAt.Date)
                 .Select(g => new
@@ -43,7 +46,7 @@ namespace WebBanHang.Areas.Admin.Controllers
                 .OrderBy(x => x.Day)
                 .ToList();
 
-            // Top 5 sách bán chạy
+            // ✅ Top 5 sách bán chạy (chỉ tính từ đơn đã thanh toán)
             var topBooks = ordersInMonth
                 .SelectMany(o => o.Items)
                 .GroupBy(i => i.Product.Name)
@@ -58,6 +61,7 @@ namespace WebBanHang.Areas.Admin.Controllers
                 .Take(5)
                 .ToList();
 
+            // Gửi dữ liệu ra view
             ViewBag.Month = m;
             ViewBag.Year = y;
             ViewBag.TotalRevenueMonth = totalRevenueMonth;
