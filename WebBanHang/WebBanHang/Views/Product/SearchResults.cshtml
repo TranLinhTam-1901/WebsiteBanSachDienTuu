@@ -1,95 +1,68 @@
 ﻿@model IEnumerable<WebBanHang.Models.Product>
+
 @{
-    ViewData["Title"] = "Tìm kiếm nâng cao";
-}
-@if (ViewBag.ErrorMessage != null)
-{
-    <div class="alert alert-warning text-center fw-semibold mt-3">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        @ViewBag.ErrorMessage
-    </div>
+    ViewData["Title"] = "Kết quả tìm kiếm";
 }
 
 <div class="container py-4">
-    <h2 class="text-success fw-bold mb-4">
-        <i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm nâng cao
+
+    <!-- ✅ Tiêu đề kết quả -->
+    <h2 class="fw-bold mb-4 text-dark">
+        <i class="bi bi-search text-success"></i> Kết quả tìm kiếm
     </h2>
 
-    <form method="get" asp-controller="Product" asp-action="Search"
-          class="bg-light shadow-sm rounded p-4 mb-4">
-        <div class="row g-3 align-items-center">
-            <div class="col-md-3">
-                <input type="text" name="keyword" value="@ViewBag.Keyword"
-                       class="form-control" placeholder="Nhập từ khóa sản phẩm..." />
-            </div>
-
-            <div class="col-md-2">
-                <input type="text" name="author" value="@ViewBag.Author"
-                       class="form-control" placeholder="Tác giả..." />
-            </div>
-
-            <div class="col-md-3">
-                <div class="input-group">
-                    <input type="text" id="priceDisplay"
-                           class="form-control"
-                           placeholder="Nhập giá tối đa (VNĐ)..."
-                           value="@(ViewBag.MaxPrice != null ? string.Format("{0:N0}", ViewBag.MaxPrice) : "")" />
-                    <input type="hidden" id="maxPrice" name="maxPrice" value="@ViewBag.MaxPrice" />
-                    <span class="input-group-text">₫</span>
-                </div>
-            </div>
-
-
-            <div class="col-md-1">
-                <select name="inStock" class="form-select">
-                    <option value="">Kho</option>
-                    @{
-                        var inStockValue = ViewBag.InStock;
-                    }
-                    <option value="true" selected="@(inStockValue == true ? "selected" : null)">Còn</option>
-                    <option value="false" selected="@(inStockValue == false ? "selected" : null)">Hết</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="text-end mt-3">
-            <button type="submit" class="btn btn-success px-4 me-2">
-                <i class="fa fa-search"></i> Tìm kiếm
-            </button>
-            <a href="/Product/Search" class="btn btn-secondary">Xóa bộ lọc</a>
-        </div>
-    </form>
-
-    <hr />
-
+    <!-- ✅ Thông báo khi không có kết quả -->
     @if (ViewBag.Message != null)
     {
-        <p class="text-muted mb-3">@ViewBag.Message</p>
+        <div class="alert alert-info text-center shadow-sm mb-4">
+            @Html.Raw(ViewBag.Message)
+        </div>
     }
 
-    <div class="row">
-        @foreach (var product in Model)
-        {
-            <div class="col-md-3 mb-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="@product.ImageUrl" class="card-img-top rounded-top" alt="@product.Name" />
-                    <div class="card-body text-center">
-                        <h6 class="fw-bold product-name">@product.Name</h6>
-                        
-                        <p class="text-danger fw-semibold">@product.Price.ToString("N0") đ</p>
-                        <a asp-action="Details" asp-route-id="@product.Id"
-                           class="btn btn-outline-success btn-sm">
-                            <i class="fa fa-eye"></i> Xem chi tiết
-                        </a>
+    <!-- ✅ Hiển thị danh sách sản phẩm -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var product in Model)
+            {
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm product-card">
+                        <div class="ratio ratio-4x3 bg-light d-flex align-items-center justify-content-center">
+                            <img src="@product.ImageUrl"
+                                 alt="@product.Name"
+                                 class="img-fluid p-2"
+                                 style="max-height:220px; object-fit:contain;" />
+                        </div>
+                        <div class="card-body text-center">
+                            <h6 class="fw-semibold product-name mb-1">@product.Name</h6>
+                            <p class="text-muted small mb-1">@product.Author</p>
+                            <p class="text-danger fw-bold mb-0">@product.Price.ToString("N0") đ</p>
+                        </div>
+                        <a asp-action="Details" asp-route-id="@product.Id" class="stretched-link"></a>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
+    }
+    @* else
+    {
+        <div class="alert alert-warning text-center fw-semibold shadow-sm">
+            <i class="bi bi-exclamation-circle"></i> Không tìm thấy sản phẩm phù hợp.
+        </div>
+    } *@
 </div>
 
 <style>
-    /* CSS cho tên sản phẩm - giới hạn 2 dòng */
+    .product-card {
+        border-radius: 12px;
+        transition: all 0.25s ease;
+    }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
     .product-name {
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -97,22 +70,6 @@
         overflow: hidden;
         text-overflow: ellipsis;
         line-height: 1.4;
-        max-height: 2.8em; /* 2 dòng x 1.4 line-height */
-        word-wrap: break-word;
+        min-height: 2.8em;
     }
 </style>
-
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const display = document.getElementById("priceDisplay");
-        const hidden = document.getElementById("maxPrice");
-
-        display.addEventListener("input", () => {
-            // Xóa ký tự không phải số
-            let raw = display.value.replace(/\D/g, "");
-            hidden.value = raw; // gán lại giá trị thực gửi về server
-            // Format hiển thị: 1.000.000
-            display.value = new Intl.NumberFormat("vi-VN").format(raw);
-        });
-    });
-</script>

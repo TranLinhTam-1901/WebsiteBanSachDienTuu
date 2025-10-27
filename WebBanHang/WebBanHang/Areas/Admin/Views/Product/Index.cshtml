@@ -6,6 +6,7 @@
 }
 
 <div class="container-fluid py-4">
+    <!-- 🧭 Tiêu đề + nút thêm -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-dark mb-0">
             📚 Danh sách sản phẩm
@@ -16,7 +17,7 @@
         </a>
     </div>
 
-    <!-- Search Box -->
+    <!-- 🔍 Khu vực tìm kiếm -->
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
             <form asp-action="Index" method="get" class="row g-3 align-items-end">
@@ -24,6 +25,7 @@
                     <label class="form-label fw-semibold">Tìm kiếm theo tên sách:</label>
                     <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control" placeholder="Nhập tên sách..." />
                 </div>
+
                 <div class="col-md-3">
                     <label class="form-label fw-semibold">Thể loại:</label>
                     <select name="categoryId" class="form-select">
@@ -36,11 +38,13 @@
                         }
                     </select>
                 </div>
+
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-search"></i> Tìm kiếm
                     </button>
                 </div>
+
                 <div class="col-md-2">
                     <a asp-action="Index" class="btn btn-outline-secondary w-100">
                         <i class="bi bi-arrow-clockwise"></i> Làm mới
@@ -50,85 +54,112 @@
         </div>
     </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-0">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light text-center align-middle">
-                    <tr>
-                        <th style="width: 80px;">Ảnh</th>
-                        <th>Tên sách</th>
-                        <th>Tác giả</th>
-                        <th>Giá</th>
-                        <th style="width: 250px;">Mô tả</th>
-                        <th>Danh mục</th>
-                        <th>File PDF</th>
-                        <th style="width: 150px;">Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td class="text-center">
-                                @if (!string.IsNullOrEmpty(item.ImageUrl))
-                                {
-                                    <img src="@item.ImageUrl" alt="Ảnh bìa" class="rounded shadow-sm" width="60" height="80" style="object-fit: cover;" />
-                                }
-                                else
-                                {
-                                    <span class="text-muted">—</span>
-                                }
-                            </td>
-                            <td class="fw-semibold">@item.Name</td>
-                            <td>@item.Author</td>
-                            <td class="text-success fw-bold">@item.Price.ToString("N0") đ</td>
-                            <td class="text-muted small" style="max-width:250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                @item.Description
-                            </td>
-                            <td>@item.Category?.Name</td>
-                            <td>
-                                @if (!string.IsNullOrEmpty(item.BookContentUrl))
-                                {
-                                    <a href="@item.BookContentUrl" target="_blank" class="btn btn-outline-primary btn-sm">
-                                        <i class="bi bi-file-earmark-pdf"></i> Xem
-                                    </a>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">Không có</span>
-                                }
-                            </td>
-                            <td class="text-center">
-                                <div class="btn-group" role="group">
-                                    <a asp-action="Update"
-                                       asp-controller="Product"
-                                       asp-area="Admin"
-                                       asp-route-id="@item.Id"
-                                       class="btn btn-warning btn-sm">
-                                        <i class="bi bi-pencil-square"></i> Sửa
-                                    </a>
-                                    <button type="button"
-                                            onclick="deleteProduct(@item.Id)"
-                                            class="btn btn-danger btn-sm">
-                                        <i class="bi bi-trash3"></i> Xóa
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <!-- 📦 Bảng danh sách sản phẩm -->
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light text-center align-middle">
+            <tr>
+                <th style="width:80px;">Ảnh</th>
+                <th>Tên sách</th>
+                <th>Tác giả</th>
+                <th class="text-end" style="width:110px;">Giá</th>
+                <th style="width:260px;">Mô tả</th>
+                <th>Danh mục</th>
+                <th class="text-center">File PDF</th>
+                <th class="text-center" style="width:150px;">Thao tác</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <!-- Ảnh -->
+                    <td class="text-center">
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl"
+                                 alt="Ảnh bìa"
+                                 class="rounded shadow-sm"
+                                 width="60"
+                                 height="80"
+                                 style="object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                    </td>
+
+                    <!-- Tên sách -->
+                    <td class="fw-semibold">@item.Name</td>
+
+                    <!-- Tác giả -->
+                    <td>@item.Author</td>
+
+                    <!-- Giá -->
+                    <td class="text-end">
+                        <span class="fw-semibold text-dark">@item.Price.ToString("N0")</span>
+                        <span class="text-muted small">đ</span>
+                    </td>
+
+                    <!-- ✅ Mô tả (đã fix hiển thị trắng / đè text) -->
+                    <td>
+                        <div class="table-description" title="@item.Description">
+                            @item.Description
+                        </div>
+                    </td>
+
+                    <!-- Danh mục -->
+                    <td>@item.Category?.Name</td>
+
+                    <!-- File PDF -->
+                    <td class="text-center">
+                        @if (!string.IsNullOrEmpty(item.BookContentUrl))
+                        {
+                            <a href="@item.BookContentUrl"
+                               target="_blank"
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-book-half"></i> Xem
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary-subtle text-secondary fw-normal border">
+                                Chưa có
+                            </span>
+                        }
+                    </td>
+
+                    <!-- Thao tác -->
+                    <td class="text-center">
+                        <div class="btn-group" role="group">
+                            <a asp-action="Update"
+                               asp-controller="Product"
+                               asp-area="Admin"
+                               asp-route-id="@item.Id"
+                               class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-pencil-square"></i> Sửa
+                            </a>
+
+                            <button type="button"
+                                    onclick="deleteProduct(@item.Id)"
+                                    class="btn btn-danger btn-sm">
+                                <i class="bi bi-trash3"></i> Xóa
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
 
 @section Scripts {
     <script>
+        // ⚠️ Hỏi xác nhận trước khi xóa sản phẩm
         function deleteProduct(id) {
             if (confirm("🗑️ Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
-                fetch(`/Admin/Product/Delete/${id}`, {
-                    method: "POST"
-                })
+                fetch(`/Admin/Product/Delete/${id}`, { method: "POST" })
                     .then(res => {
                         if (res.ok) {
                             alert("✅ Xóa thành công!");
@@ -143,30 +174,68 @@
 }
 
 <style>
-    h2.fw-bold {
-        letter-spacing: 0.5px;
-    }
+    /* ========== 🎨 CHỈNH BẢNG HIỂN THỊ ========== */
 
+    /* Căn giữa dọc nội dung bảng */
     .table > :not(caption) > * > * {
         vertical-align: middle;
     }
 
-    .table-hover tbody tr:hover {
-        background-color: #f8f9fa;
-        transition: background-color 0.2s;
+    /* ✅ Cố định bố cục bảng để tránh lệch cột */
+    .table {
+        table-layout: fixed; /* ép cố định độ rộng theo <th> */
+        width: 100%;
+        word-wrap: break-word;
     }
 
+        /* ✅ Ngăn mô tả bị tràn / trắng: buộc xuống dòng nếu dài */
+        .table td,
+        .table th {
+            white-space: normal !important;
+            word-break: break-word !important;
+        }
+
+    /* ✅ Giới hạn mô tả hiển thị 2 dòng (thẩm mỹ & gọn) */
+    .table-description {
+        max-width: 260px;
+        font-size: 0.875rem;
+        color: #6c757d;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* chỉ hiển thị 2 dòng */
+        -webkit-box-orient: vertical;
+        word-break: break-word;
+        white-space: normal;
+    }
+
+    /* Header bảng */
+    thead.table-light th {
+        background-color: #f8f9fa !important;
+        color: #212529;
+        font-weight: 600;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    /* Hover từng hàng */
+    .table-hover tbody tr:hover {
+        background-color: #f1f3f5;
+        transition: background-color 0.15s;
+    }
+
+    /* Nút hành động */
     .btn-warning, .btn-danger {
         color: #fff !important;
     }
-
-        .btn-warning:hover {
-            background-color: #e6a700;
-            border-color: #e6a700;
-        }
 
         .btn-danger:hover {
             background-color: #c82333;
             border-color: #c82333;
         }
+
+    /* Bo góc bảng */
+    .card {
+        border-radius: 0.75rem;
+    }
 </style>

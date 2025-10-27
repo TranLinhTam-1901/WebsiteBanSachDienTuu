@@ -50,6 +50,15 @@ namespace WebBanHang.Controllers
                 return RedirectToAction("Index", "Product");
             }
 
+            // ✅ Thêm đoạn này
+            if (user != null)
+            {
+                ViewBag.UserFullName = user.FullName;
+                ViewBag.UserEmail = user.Email;
+                ViewBag.UserAddress = user.Address;
+                ViewBag.UserPhone = user.PhoneNumber;
+            } 
+
             // Kiểm tra xem người dùng đã sở hữu sách này chưa
             bool alreadyOwned = await _db.Orders
                 .AnyAsync(o => o.UserId == user.Id && o.IsPaid &&
@@ -125,6 +134,15 @@ namespace WebBanHang.Controllers
                 UserId = user.Id,
                 Items = selectedCartItems
             };
+
+            // ✅ Thêm đoạn này
+            if (user != null)
+            {
+                ViewBag.UserFullName = user.FullName;
+                ViewBag.UserEmail = user.Email;
+                ViewBag.UserAddress = user.Address;
+                ViewBag.UserPhone = user.PhoneNumber;
+            }
 
             return View(selectedCart);
         }
@@ -212,6 +230,8 @@ namespace WebBanHang.Controllers
                 OrderCode = GenerateOrderCode(),
                 FullName = fullName,                
                 Phone = phone,
+                //Address = address,
+                //Note = note,
                 Subtotal = subtotal,
                 Status = "Pending",
                 Total = total

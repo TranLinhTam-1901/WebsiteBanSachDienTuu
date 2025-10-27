@@ -26,7 +26,7 @@
         {
             <tr>
                 <td>@(string.IsNullOrEmpty(order.OrderCode) ? $"#{order.Id}" : order.OrderCode)</td>
-                <td>@order.User?.Email</td>
+                <td>@order.User?.FullName</td>
                 <td>@order.Total.ToString("N0") đ</td>
                 <td>@order.CreatedAt.ToString("dd/MM/yyyy")</td>
                 <td>

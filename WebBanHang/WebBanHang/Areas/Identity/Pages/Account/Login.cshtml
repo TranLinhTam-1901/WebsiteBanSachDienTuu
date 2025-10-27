@@ -13,7 +13,7 @@
             <div class="card shadow border-0 rounded-4">
                 <div class="card-body p-4 p-md-5">
                     <div class="text-center mb-4">
-                        <div class="fw-semibold text-primary mb-1" style="letter-spacing:.08em;">WEBSHOP</div>
+                            <div class="fw-semibold text-primary mb-1" style="letter-spacing:.08em;">📚 3T-Books</div>
                         <h2 class="h3 mb-1">Đăng nhập</h2>
                         <p class="text-muted mb-0">Chào mừng bạn quay lại</p>
                     </div>
@@ -29,7 +29,7 @@
                             <label asp-for="Input.Password" class="form-label">Mật khẩu</label>
                             <span asp-validation-for="Input.Password" class="text-danger small"></span>
                         </div>
-                        <div class="d-flex align-items-center justify-content-between mb-3">
+                        @* <div class="d-flex align-items-center justify-content-between mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" asp-for="Input.RememberMe" />
                                 <label class="form-check-label" asp-for="Input.RememberMe">
@@ -37,11 +37,11 @@
                                 </label>
                             </div>
                             <a id="forgot-password" asp-page="./ForgotPassword" class="small">Quên mật khẩu?</a>
-                        </div>
+                        </div> *@
                         <button id="login-submit" type="submit" class="btn btn-primary w-100 btn-lg shadow-sm">Đăng nhập</button>
-                        <div class="text-center mt-3">
+                        @* <div class="text-center mt-3">
                             <a id="resend-confirmation" asp-page="./ResendEmailConfirmation" class="small">Gửi lại email xác nhận</a>
-                        </div>
+                        </div> *@
                         <div class="d-flex align-items-center gap-3 my-4">
                             <hr class="flex-grow-1 m-0" />
                             <span class="text-muted small">Chưa có tài khoản?</span>
@@ -52,7 +52,7 @@
                             <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Đăng ký ngay</a>
                         </div>
                     </form>
-                    <div class="mt-4">
+                    @* <div class="mt-4">
                         <div class="d-flex align-items-center gap-3 mb-3 mt-2">
                             <hr class="flex-grow-1 m-0" />
                             <span class="text-muted small">Hoặc đăng nhập bằng</span>
@@ -77,7 +77,7 @@
                                 }  
                             }
                         </div>
-                    </div>
+                    </div> *@
                 </div>
             </div>
             </div>
@@ -89,3 +89,101 @@
     <partial name="_ValidationScriptsPartial" />
 }
 
+<style>
+    /* 🌈 Toàn khung trang login */
+    body {
+        background: linear-gradient(135deg, #f9fafb, #eef2f7);
+        font-family: "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* Card login */
+    .card {
+        border-radius: 1rem;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+
+    /* Input floating */
+    .form-floating > label {
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        border-radius: 0.6rem;
+        border: 1px solid #d0d7de;
+        box-shadow: none;
+        transition: all 0.25s ease;
+    }
+
+        .form-control:focus {
+            border-color: #4e73df;
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.2);
+        }
+
+    /* Nút đăng nhập */
+    .btn-primary {
+        background: linear-gradient(90deg, #4e73df, #375cd3);
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #3b5bdb, #2f49c5);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 91, 219, 0.35);
+        }
+
+    /* Liên kết (Register, Forgot...) */
+    a {
+        text-decoration: none;
+        color: #3b5bdb;
+        transition: color 0.2s ease;
+    }
+
+        a:hover {
+            color: #1d3fdc;
+            text-decoration: underline;
+        }
+
+    /* Khoảng cách giữa các phần */
+    .card-body {
+        padding: 2rem 2.5rem;
+    }
+
+    /* Tiêu đề */
+    .h3, h2 {
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    /* Dòng chữ phụ */
+    p.text-muted {
+        font-size: 0.95rem;
+        color: #6c757d !important;
+    }
+
+    /* Nút và input khi disabled */
+    .btn:disabled, .form-control:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    /* Nhỏ: hiệu ứng divider */
+    hr.flex-grow-1 {
+        opacity: 0.2;
+    }
+
+    /* Hiệu ứng nhỏ khi form focus */
+    form:focus-within .card {
+        box-shadow: 0 10px 30px rgba(78, 115, 223, 0.15);
+    }
+</style>
