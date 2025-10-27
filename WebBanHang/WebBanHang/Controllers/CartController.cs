@@ -95,12 +95,14 @@ namespace WebBanHang.Controllers
 
                 await _db.SaveChangesAsync();
 
-                // Chỉ hiển thị thông báo, không redirect về giỏ hàng
-                if (!string.IsNullOrEmpty(Request.Headers["Referer"]))
-                {
-                    return Redirect(Request.Headers["Referer"].ToString());
-                }
-                return RedirectToAction("Index", "Product");
+                //// Chỉ hiển thị thông báo, không redirect về giỏ hàng
+                //if (!string.IsNullOrEmpty(Request.Headers["Referer"]))
+                //{
+                //    return Redirect(Request.Headers["Referer"].ToString());
+                //}
+                //return RedirectToAction("Index", "Product");
+                return RedirectToAction("Index", "Cart");
+
             }
             catch (Exception ex)
             {

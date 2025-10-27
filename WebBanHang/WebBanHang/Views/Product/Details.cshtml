@@ -29,6 +29,36 @@
                                 Thể loại: @Model.Category?.Name
                             </span>
                         </div>
+                        <!-- ⭐ ĐÁNH GIÁ TRUNG BÌNH -->
+                        @if (ViewBag.ReviewCount > 0)
+                        {
+                            <div class="mb-3 d-flex align-items-center">
+                                <span class="text-warning fs-5 me-2">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= Math.Round((double)ViewBag.AvgRating))
+                                        {
+                                            <i class="bi bi-star-fill"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star"></i>
+                                        }
+                                    }
+                                </span>
+                                <span class="text-secondary">
+                                    <strong>@ViewBag.AvgRating.ToString("0.0")</strong>/5
+                                    (<span>@ViewBag.ReviewCount</span> đánh giá)
+                                </span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mb-3 text-muted fst-italic">
+                                ⭐ Chưa có đánh giá nào
+                            </div>
+                        }
+
                     </div>
 
                     <!-- GIÁ + NÚT MUA -->
@@ -41,12 +71,10 @@
 
                         @if (User.Identity.IsAuthenticated)
                         {
-                            // Kiểm tra xem người dùng đã sở hữu sách này chưa
                             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
                             bool alreadyOwned = false;
                             if (!string.IsNullOrEmpty(userId))
                             {
-                                // Kiểm tra trong database (có thể cache lại để tối ưu)
                                 alreadyOwned = ViewBag.AlreadyOwned ?? false;
                             }
 
@@ -82,12 +110,12 @@
                         else
                         {
                             <div class="d-flex gap-2">
-                                <a asp-area="Identity" asp-page="/Account/Login" 
+                                <a asp-area="Identity" asp-page="/Account/Login"
                                    asp-route-returnUrl="@Url.Action("Details", "Product", new { id = Model.Id })"
                                    class="btn btn-warning px-3 py-2 fw-bold shadow-sm flex-fill">
                                     Mua ngay @Model.Price.ToString("N0")đ
                                 </a>
-                                <a asp-area="Identity" asp-page="/Account/Login" 
+                                <a asp-area="Identity" asp-page="/Account/Login"
                                    asp-route-returnUrl="@Url.Action("Details", "Product", new { id = Model.Id })"
                                    class="btn btn-outline-success px-3 py-2 fw-semibold flex-fill">
                                     🛒 Thêm giỏ
@@ -105,36 +133,237 @@
             </div>
         </div>
     </div>
-</div>
 
+    <!-- ✅ PHẦN ĐÁNH GIÁ -->
+    <hr class="my-5" />
+
+    <section id="reviews" class="py-4">
+        <h3 class="fw-bold mb-4">📖 Đánh giá của độc giả</h3>
+
+        <!-- Danh sách đánh giá -->
+        @if (Model.Reviews != null && Model.Reviews.Any())
+        {
+            @foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedAt))
+            {
+                <div class="border rounded-3 p-3 mb-3 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>@(review.User?.FullName ?? "Người dùng ẩn danh")</strong>
+                            <span class="text-warning ms-2">
+                                @for (int i = 0; i < review.Rating; i++)
+                                {
+                                    <i class="bi bi-star-fill"></i>
+                                }
+                                @for (int i = review.Rating; i < 5; i++)
+                                {
+                                    <i class="bi bi-star"></i>
+                                }
+                            </span>
+                        </div>
+                        <small class="text-muted">@review.CreatedAt.ToString("dd/MM/yyyy")</small>
+                    </div>
+
+                    <p class="mt-2">@review.Comment</p>
+
+                    @if (!string.IsNullOrEmpty(review.ImageUrl))
+                    {
+                        <div class="mt-2">
+                            <img src="~/@review.ImageUrl"
+                                 class="img-thumbnail rounded review-image"
+                                 style="max-width:200px; cursor:pointer;"
+                                 alt="Ảnh đánh giá"
+                                 onclick="openImageModal('@Url.Content("~/" + review.ImageUrl)')" />
+                        </div>
+                    }
+
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-muted fst-italic">Chưa có đánh giá nào cho sản phẩm này.</p>
+        }
+
+        <!-- Form nhập đánh giá -->
+        @if (User.Identity.IsAuthenticated && ViewBag.AlreadyOwned)
+        {
+            <div class="mt-5 p-4 border rounded-3 bg-light shadow-sm">
+                <h5 class="fw-bold mb-3">📝 Viết đánh giá của bạn</h5>
+
+                <form asp-controller="Review" asp-action="Create" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="productId" value="@Model.Id" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Chọn số sao:</label>
+                        <div class="star-rating">
+                            <input type="radio" id="star5" name="rating" value="5" />
+                            <label for="star5" title="5 sao">★</label>
+
+                            <input type="radio" id="star4" name="rating" value="4" />
+                            <label for="star4" title="4 sao">★</label>
+
+                            <input type="radio" id="star3" name="rating" value="3" />
+                            <label for="star3" title="3 sao">★</label>
+
+                            <input type="radio" id="star2" name="rating" value="2" />
+                            <label for="star2" title="2 sao">★</label>
+
+                            <input type="radio" id="star1" name="rating" value="1" required />
+                            <label for="star1" title="1 sao">★</label>
+                        </div>
+
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nhận xét của bạn:</label>
+                        <textarea name="comment" class="form-control" rows="3" placeholder="Chia sẻ cảm nhận của bạn..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tải ảnh (tuỳ chọn):</label>
+                        <input type="file" name="imageFile" accept="image/*" class="form-control" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary fw-bold px-4">Gửi đánh giá</button>
+                </form>
+            </div>
+        }
+        else if (!User.Identity.IsAuthenticated)
+        {
+            <div class="alert alert-info mt-4">
+                <i class="bi bi-info-circle"></i>
+                <a asp-area="Identity" asp-page="/Account/Login" class="alert-link">Đăng nhập</a> để viết đánh giá.
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning mt-4">
+                📚 Bạn cần mua sách này để có thể viết đánh giá.
+            </div>
+        }
+    </section>
+    <!-- Modal xem ảnh -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+</div>
 
 @section Scripts {
     <script>
-        // Hiệu ứng khi mua ngay
-        document.getElementById('buyNowBtn').addEventListener('click', function(e) {
-            // Có thể thêm hiệu ứng loading hoặc redirect ngay
+        document.getElementById('buyNowBtn')?.addEventListener('click', function (e) {
+            // hiệu ứng khi click mua ngay
         });
+
+             function openImageModal(imageUrl) {
+            const modal = document.getElementById("imageModal");
+            const modalImg = document.getElementById("modalImage");
+            modal.style.display = "block";
+            modalImg.src = imageUrl;
+        }
+
+        function closeImageModal() {
+            document.getElementById("imageModal").style.display = "none";
+        }
     </script>
 }
 
 <style>
-    /* Hiệu ứng cho nút */
     .btn {
         transition: all 0.3s ease;
     }
 
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
 
-    /* Animation cho card */
     .card {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+    .star-rating {
+        display: inline-flex;
+        flex-direction: row-reverse; /* hiển thị 5 4 3 2 1 từ trái qua phải */
+        gap: 5px;
+    }
+
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+
+        .star-rating label {
+            font-size: 28px;
+            color: #ccc;
+            cursor: pointer;
+            transition: color 0.2s, transform 0.1s;
+            user-select: none;
+        }
+
+            /* Hover hiệu ứng: tô sáng sao đang hover và tất cả sao "lớn hơn" nó */
+            .star-rating label:hover,
+            .star-rating label:hover ~ label {
+                color: #FFD700;
+                transform: scale(1.15);
+            }
+
+        /* Khi đã chọn: tô sáng sao được chọn và tất cả sao "lớn hơn" nó */
+        .star-rating input[type="radio"]:checked + label,
+        .star-rating input[type="radio"]:checked + label ~ label {
+            color: #FFD700;
+        }
+
+    .image-modal {
+        display: none;
+        position: fixed;
+        z-index: 1050;
+        padding-top: 60px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.85);
+    }
+
+        .image-modal .modal-content {
+            display: block;
+            margin: auto;
+            max-width: 90%;
+            max-height: 85vh;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+            animation: zoomIn 0.3s ease;
+        }
+
+        .image-modal .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #fff;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+    @@keyframes zoomIn {
+        from
+
+    {
+        transform: scale(0.6);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+
     }
 </style>

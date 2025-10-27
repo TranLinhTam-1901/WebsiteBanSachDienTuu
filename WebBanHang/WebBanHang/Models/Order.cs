@@ -19,8 +19,9 @@ namespace WebBanHang.Models
         [Required, StringLength(200)]
         public string FullName { get; set; } = string.Empty;
 
-        //[Required, StringLength(300)]
-       // public string? Address { get; set; }
+        public string? Address { get; set; }  
+        public string? Note { get; set; }    
+
 
         [Required, StringLength(20)]
         public string Phone { get; set; } = string.Empty;
