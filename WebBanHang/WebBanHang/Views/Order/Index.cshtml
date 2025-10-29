@@ -4,173 +4,330 @@
     ViewData["Title"] = "Đơn hàng của tôi";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="mb-0">🧾 Đơn hàng của tôi</h2>
-                <span class="badge bg-primary fs-6">@Model.Count() đơn hàng</span>
+<div class="order-page">
+    <!-- Header -->
+    <div class="order-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="fw-bold mb-2">
+                    <i class="bi bi-receipt text-primary me-2"></i>
+                    Đơn hàng của tôi
+                </h1>
+                <p class="text-muted mb-0">Lịch sử và chi tiết đơn hàng</p>
+            </div>
+            <div>
+                <span class="badge bg-primary-subtle text-primary border border-primary px-3 py-2">
+                    <i class="bi bi-cart me-1"></i>
+                    @Model.Count() đơn hàng
+                </span>
             </div>
         </div>
     </div>
 
+    <!-- Content -->
     @if (!Model.Any())
     {
-        <div class="text-center py-5">
-            <div class="mb-4">
-                <i class="bi bi-receipt" style="font-size: 4rem; color: #6c757d;"></i>
+        <div class="empty-orders">
+            <div class="empty-icon">
+                <i class="bi bi-receipt"></i>
             </div>
-            <h4 class="text-muted">Chưa có đơn hàng nào</h4>
-            <p class="text-muted">Hãy mua sách để bắt đầu xây dựng thư viện của bạn!</p>
-            <a asp-controller="Product" asp-action="Index" class="btn btn-primary">
-                <i class="bi bi-shop me-2"></i>Khám phá sách
+            <h3 class="empty-title">Chưa có đơn hàng</h3>
+            <p class="empty-text">Bạn chưa có đơn hàng nào.</p>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-primary btn-lg">
+                <i class="bi bi-bag-plus me-2"></i>Mua sách ngay
             </a>
         </div>
     }
     else
     {
-        <div class="card shadow-sm border-0">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="fw-semibold">Mã đơn hàng</th>
-                                <th class="fw-semibold">Ngày tạo</th>
-                                <th class="fw-semibold">Tổng tiền</th>
-                                <th class="fw-semibold">Trạng thái</th>
-                                <th class="fw-semibold">Thanh toán</th>
-                                <th class="fw-semibold text-center">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var order in Model)
-                            {
-                                <tr>
-                                    <td>
-                                        <span class="fw-bold text-primary">@(string.IsNullOrEmpty(order.OrderCode) ? $"#{order.Id}" : order.OrderCode)</span>
-                                    </td>
-                                    <td>@order.CreatedAt.ToString("dd/MM/yyyy")</td>
-                                    <td>
-                                        <span class="fw-bold text-success">@order.Total.ToString("N0") ₫</span>
-                                    </td>
-
-                                    <!-- Trạng thái đơn hàng -->
-                                    <td>
-                                        @switch (order.Status)
-                                        {
-                                            case "Pending":
-                                                <span class="badge bg-warning text-dark">⏳ Chờ xác nhận</span>
-                                                break;
-                                            case "Confirmed":
-                                                <span class="badge bg-success">✅ Đã xác nhận</span>
-                                                break;
-                                            case "Completed":
-                                                <span class="badge bg-primary">📘 Hoàn tất</span>
-                                                break;
-                                            case "Cancelled":
-                                                <span class="badge bg-danger">❌ Đã hủy</span>
-                                                break;
-                                            default:
-                                                <span class="badge bg-secondary">Không xác định</span>
-                                                break;
-                                        }
-                                    </td>
-
-                                    <!-- Trạng thái thanh toán -->
-                                    <td>
-                                        @if (order.IsPaid)
-                                        {
-                                            <span class="text-success fw-bold">✅ Đã thanh toán</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-danger fw-bold">❌ Chưa thanh toán</span>
-                                        }
-                                    </td>
-
-                                    <!-- Hành động -->
-                                    <td class="text-center">
-                                        <div class="btn-group" role="group">
-                                            <!-- Xem chi tiết -->
-                                            <a asp-action="Details" asp-route-id="@order.Id" 
-                                               class="btn btn-sm btn-outline-info">
-                                                <i class="bi bi-eye me-1"></i>Xem
-                                            </a>
-
-                                            <!-- Thanh toán (chỉ khi đã được admin xác nhận & chưa thanh toán) -->
-                                            @if (order.Status == "Confirmed" && !order.IsPaid)
-                                            {
-                                                <a asp-controller="Checkout"
-                                                   asp-action="FakePay"
-                                                   asp-route-orderId="@order.Id"
-                                                   class="btn btn-sm btn-success">
-                                                    <i class="bi bi-credit-card me-1"></i>Thanh toán
-                                                </a>
-                                            }
-
-                                            <!-- Tải sách (chỉ khi đã hoàn tất và thanh toán xong) -->
-                                            @if (order.Status == "Completed" && order.IsPaid)
-                                            {
-                                                @foreach (var item in order.Items)
-                                                {
-                                                    <a href="@item.Product.BookContentUrl" target="_blank"
-                                                       class="btn btn-sm btn-primary">
-                                                        <i class="bi bi-download me-1"></i>Tải sách
-                                                    </a>
-                                                }
-                                            }
-
-                                            <!-- Xóa đơn hàng (luôn hiển thị) -->
-                                            <button type="button" class="btn btn-sm btn-outline-danger delete-order-btn" 
-                                                    data-order-id="@order.Id" data-order-code="@(string.IsNullOrEmpty(order.OrderCode) ? $"#{order.Id}" : order.OrderCode)">
-                                                <i class="bi bi-trash me-1"></i>Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+        <div class="order-list">
+            @foreach (var order in Model)
+            {
+                <div class="order-item">
+                    <div class="order-main">
+                        <div class="order-info">
+                            <div class="d-flex align-items-center gap-3 mb-2">
+                                <h5 class="order-code mb-0">@(string.IsNullOrEmpty(order.OrderCode) ? $"#{order.Id}" : order.OrderCode)</h5>
+                                <span class="order-date">
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    @order.CreatedAt.ToString("dd/MM/yyyy")
+                                </span>
+                            </div>
+                            <div class="order-products">
+                                @foreach (var item in order.Items)
+                                {
+                                    <div class="product-item">
+                                        <i class="bi bi-book me-2 text-muted"></i>
+                                        <span>@item.Product.Name x @item.Quantity</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="order-status-section">
+                            <div class="order-amount">
+                                <span class="amount-label">Tổng:</span>
+                                <span class="amount-value">@order.Total.ToString("N0") ₫</span>
+                            </div>
+                            <div class="status-badge badge-@order.Status.ToLower()">
+                                @switch (order.Status)
+                                {
+                                    case "Pending":
+                                        <i class="bi bi-clock me-1"></i>
+                                        <span>Chờ xác nhận</span>
+                                        break;
+                                    case "Confirmed":
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        <span>Đã xác nhận</span>
+                                        break;
+                                    case "Completed":
+                                        <i class="bi bi-book me-1"></i>
+                                        <span>Hoàn tất</span>
+                                        break;
+                                    case "Cancelled":
+                                    case "Canceled":
+                                        <i class="bi bi-x-circle me-1"></i>
+                                        <span>Đã hủy</span>
+                                        break;
+                                    default:
+                                        <i class="bi bi-question-circle me-1"></i>
+                                        <span>N/A</span>
+                                        break;
+                                }
+                            </div>
+                            <div class="payment-badge @(order.IsPaid ? "paid" : "unpaid")">
+                                @if (order.IsPaid)
+                                {
+                                    <i class="bi bi-check-circle-fill me-1"></i>
+                                    <span>Đã thanh toán</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-clock me-1"></i>
+                                    <span>Chưa thanh toán</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-actions">
+                        <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye me-1"></i>Xem chi tiết
+                        </a>
+                        @if (order.Status == "Pending" && !order.IsPaid)
+                        {
+                            <form asp-action="Delete" method="post" class="d-inline" 
+                                  onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này?')">
+                                <input type="hidden" name="id" value="@order.Id" />
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-x-circle me-1"></i>Hủy đơn
+                                </button>
+                            </form>
+                        }
+                    </div>
                 </div>
-            </div>
+            }
         </div>
     }
 </div>
 
-<!-- Hidden form for delete -->
-<form id="delete-order-form" asp-action="Delete" method="post" style="display: none;">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="id" id="delete-order-id" />
-</form>
-
-@section Scripts {
-    <script>
-        // Xử lý sự kiện xóa đơn hàng
-        document.querySelectorAll('.delete-order-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const orderId = this.dataset.orderId;
-                const orderCode = this.dataset.orderCode;
-                
-                if (confirm(`Bạn có chắc chắn muốn xóa đơn hàng ${orderCode}?`)) {
-                    document.getElementById('delete-order-id').value = orderId;
-                    document.getElementById('delete-order-form').submit();
-                }
-            });
-        });
-    </script>
-}
-
 <style>
-    .table-hover tbody tr:hover {
-        background-color: rgba(0, 123, 255, 0.05);
+    .order-page {
+        padding: 40px 0;
+        min-height: 60vh;
     }
-    
-    .btn-group .btn {
-        margin-right: 2px;
+
+    .order-header {
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
     }
-    
-    .btn-group .btn:last-child {
-        margin-right: 0;
+
+    .order-header h1 {
+        font-size: 2rem;
+        color: #333;
+    }
+
+    /* Order List */
+    .order-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .order-item {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 20px;
+    }
+
+    .order-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+        margin-bottom: 15px;
+    }
+
+    .order-info {
+        flex: 1;
+    }
+
+    .order-code {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1976d2;
+    }
+
+    .order-date {
+        font-size: 0.9rem;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+    }
+
+    .order-products {
+        margin-top: 10px;
+    }
+
+    .product-item {
+        font-size: 0.9rem;
+        color: #495057;
+        margin-bottom: 5px;
+    }
+
+    .order-status-section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-end;
+        min-width: 200px;
+    }
+
+    .order-amount {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .amount-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .amount-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #28a745;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        width: fit-content;
+    }
+
+    .status-badge.badge-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-badge.badge-confirmed {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-badge.badge-completed {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .status-badge.badge-cancelled,
+    .status-badge.badge-canceled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .payment-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        width: fit-content;
+    }
+
+    .payment-badge.paid {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .payment-badge.unpaid {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 10px;
+        padding-top: 15px;
+        border-top: 1px solid #f1f3f4;
+    }
+
+    /* Empty State */
+    .empty-orders {
+        text-align: center;
+        padding: 80px 20px;
+        background: #f8f9fa;
+        border-radius: 16px;
+        border: 2px dashed #dee2e6;
+    }
+
+    .empty-icon {
+        font-size: 5rem;
+        color: #adb5bd;
+        margin-bottom: 20px;
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
+    }
+
+    .empty-text {
+        font-size: 1rem;
+        color: #6c757d;
+        margin-bottom: 30px;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .order-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .order-main {
+            flex-direction: column;
+        }
+
+        .order-status-section {
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .order-actions {
+            flex-direction: column;
+        }
+
+        .order-actions .btn {
+            width: 100%;
+        }
     }
 </style>

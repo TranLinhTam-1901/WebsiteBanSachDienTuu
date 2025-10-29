@@ -1,59 +1,114 @@
 ﻿@model IEnumerable<WebBanHang.Models.Product>
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using WebBanHang.Models
+@inject UserManager<ApplicationUser> UserManager
+@inject ApplicationDbContext _db
+
 @{
     ViewData["Title"] = "Thư viện của tôi";
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="mb-0">📚 Thư viện của tôi</h2>
-                <span class="badge bg-primary fs-6">@Model.Count() cuốn sách</span>
+<div class="library-page">
+    <!-- Header -->
+    <div class="library-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="fw-bold mb-2">
+                    <i class="bi bi-bookshelf text-primary me-2"></i>
+                    Thư viện của tôi
+                </h1>
+                <p class="text-muted mb-0">Quản lý và đọc sách đã mua</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-primary-subtle text-primary border border-primary px-3 py-2">
+                    <i class="bi bi-book me-1"></i>
+                    @Model.Count() cuốn sách
+                </span>
+                <a href="/Product/Index" class="btn btn-outline-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Mua thêm sách
+                </a>
             </div>
         </div>
     </div>
 
+    <!-- Content -->
     @if (!Model.Any())
     {
-        <div class="text-center py-5">
-            <div class="mb-4">
-                <i class="bi bi-book" style="font-size: 4rem; color: #6c757d;"></i>
+        <div class="empty-library">
+            <div class="empty-icon">
+                <i class="bi bi-book"></i>
             </div>
-            <h4 class="text-muted">Chưa có sách nào</h4>
-            <p class="text-muted">Hãy mua sách để bắt đầu xây dựng thư viện của bạn!</p>
-            <a asp-controller="Product" asp-action="Index" class="btn btn-primary">
-                <i class="bi bi-shop me-2"></i>Khám phá sách
+            <h3 class="empty-title">Thư viện trống</h3>
+            <p class="empty-text">Bạn chưa có cuốn sách nào trong thư viện.</p>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-primary btn-lg">
+                <i class="bi bi-bag-plus me-2"></i>Khám phá sách
             </a>
         </div>
     }
     else
     {
-        <div class="row g-4">
+        <div class="library-grid">
             @foreach (var book in Model)
             {
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="card h-100 shadow-sm border-0">
-                        <div class="position-relative">
-                            <img src="@book.ImageUrl" class="card-img-top" alt="@book.Name" 
-                                 style="height: 280px; object-fit: cover;">
-                            <div class="position-absolute top-0 end-0 m-2">
-                                <span class="badge bg-success">
-                                    <i class="bi bi-check-circle me-1"></i>Sở hữu
-                                </span>
-                            </div>
+                var progress = await _db.ReadingProgresses
+                    .FirstOrDefaultAsync(r => r.ProductId == book.Id && r.UserId == UserManager.GetUserId(User));
+                var progressPercent = progress?.ProgressPercent ?? 0;
+                
+                <div class="library-card">
+                    <div class="card-image">
+                        <img src="@book.ImageUrl" alt="@book.Name" />
+                        <div class="card-badge">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Sở hữu</span>
                         </div>
-                        <div class="card-body d-flex flex-column">
-                            <h6 class="card-title mb-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; height: 2.8em;">
-                                @book.Name
-                            </h6>
-                            <p class="card-text text-muted small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; height: 2.6em;">
-                                @book.Description
-                            </p>
-                            <div class="mt-auto">
-                                <a asp-action="Read" asp-route-id="@book.Id" class="btn btn-primary w-100">
-                                    <i class="bi bi-book me-2"></i>Đọc ngay
-                                </a>
+                        @if (progressPercent > 0)
+                        {
+                            <div class="progress-circle">
+                                <svg class="progress-ring" viewBox="0 0 60 60">
+                                    <circle class="progress-ring-circle" cx="30" cy="30" r="28"></circle>
+                                    <circle class="progress-ring-progress" cx="30" cy="30" r="28" 
+                                            style="stroke-dashoffset: @(175 - (175 * progressPercent / 100))"></circle>
+                                </svg>
+                                <span class="progress-text">@((int)progressPercent)%</span>
                             </div>
+                        }
+                    </div>
+                    
+                    <div class="card-content">
+                        <h5 class="card-title" title="@book.Name">
+                            @book.Name
+                        </h5>
+                        <p class="card-description" title="@book.Description">
+                            @book.Description
+                        </p>
+                        
+                        @if (progressPercent > 0)
+                        {
+                            <div class="progress-info">
+                                <div class="progress-bar-custom">
+                                    <div class="progress-fill" style="width: @progressPercent%"></div>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="bi bi-clock me-1"></i>
+                                    @((int)progressPercent)% hoàn thành
+                                </small>
+                            </div>
+                        }
+                        
+                        <div class="card-actions">
+                            @if (progressPercent > 0)
+                            {
+                                <a asp-action="Read" asp-route-id="@book.Id" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-play-circle me-1"></i>Tiếp tục đọc
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-action="Read" asp-route-id="@book.Id" class="btn btn-primary btn-sm w-100">
+                                    <i class="bi bi-book me-1"></i>Đọc ngay
+                                </a>
+                            }
                         </div>
                     </div>
                 </div>
@@ -63,20 +118,237 @@
 </div>
 
 <style>
-    .card {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    .library-page {
+        padding: 40px 0;
+        min-height: 60vh;
     }
-    
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+
+    .library-header {
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
     }
-    
-    .card-img-top {
-        transition: transform 0.2s ease-in-out;
+
+    .library-header h1 {
+        font-size: 2rem;
+        color: #333;
     }
-    
-    .card:hover .card-img-top {
-        transform: scale(1.02);
+
+    /* Grid Layout */
+    .library-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+    }
+
+    /* Library Card */
+    .library-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: 1px solid #f0f0f0;
+    }
+
+    .library-card:hover {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-color: #007bff;
+    }
+
+    .card-image {
+        position: relative;
+        height: 300px;
+        overflow: hidden;
+        background: #f8f9fa;
+    }
+
+    .card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background: #f8f9fa;
+    }
+
+    .card-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: rgba(40, 167, 69, 0.95);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .card-badge i {
+        font-size: 1rem;
+    }
+
+    /* Progress Circle */
+    .progress-circle {
+        position: absolute;
+        bottom: 12px;
+        right: 12px;
+        width: 60px;
+        height: 60px;
+    }
+
+    .progress-ring {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+    }
+
+    .progress-ring-circle {
+        fill: none;
+        stroke: rgba(255,255,255,0.3);
+        stroke-width: 4;
+    }
+
+    .progress-ring-progress {
+        fill: none;
+        stroke: #28a745;
+        stroke-width: 4;
+        stroke-dasharray: 175;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 0.35s;
+    }
+
+    .progress-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #28a745;
+    }
+
+    /* Card Content */
+    .card-content {
+        padding: 20px;
+    }
+
+    .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 2.8em;
+    }
+
+    .card-description {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 15px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 2.4em;
+    }
+
+    /* Progress Info */
+    .progress-info {
+        margin-bottom: 15px;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .progress-bar-custom {
+        height: 6px;
+        background: #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 6px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #28a745, #20c997);
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+
+    /* Card Actions */
+    .card-actions {
+        margin-top: auto;
+    }
+
+    .card-actions .btn {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* Empty State */
+    .empty-library {
+        text-align: center;
+        padding: 80px 20px;
+        background: #f8f9fa;
+        border-radius: 16px;
+        border: 2px dashed #dee2e6;
+    }
+
+    .empty-icon {
+        font-size: 5rem;
+        color: #adb5bd;
+        margin-bottom: 20px;
+    }
+
+    .empty-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
+    }
+
+    .empty-text {
+        font-size: 1rem;
+        color: #6c757d;
+        margin-bottom: 30px;
+    }
+
+    /* Responsive */
+    @@media (max-width: 1200px) {
+        .library-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .library-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .library-grid {
+            grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+            gap: 15px;
+        }
+
+        .card-image {
+            height: 250px;
+        }
+
+        .empty-library {
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+        }
     }
 </style>

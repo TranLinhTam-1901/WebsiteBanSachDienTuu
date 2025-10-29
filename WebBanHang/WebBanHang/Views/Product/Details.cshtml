@@ -5,10 +5,18 @@
         <div class="row g-4 align-items-start">
             <!-- ẢNH BÌA SÁCH -->
             <div class="col-md-4 text-center">
-                <img src="@Model.ImageUrl"
-                     alt="@Model.Name"
-                     class="img-fluid rounded shadow-sm mb-3"
-                     style="max-height: 480px; object-fit: contain; width: 100%;" />
+                <div class="product-image-container position-relative">
+                    <img src="@Model.ImageUrl"
+                         alt="@Model.Name"
+                         class="img-fluid rounded shadow-sm mb-3 product-image"
+                         style="max-height: 480px; object-fit: contain; width: 100%; cursor: zoom-in;" 
+                         id="productImage" />
+                    <div class="zoom-overlay" id="zoomOverlay">
+                        <div class="zoom-icon">
+                            <i class="bi bi-zoom-in"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- THÔNG TIN + GIÁ + THỂ LOẠI -->
@@ -20,9 +28,17 @@
                             Tác giả: <span class="fw-semibold text-dark">@Model.Author</span>
                         </p>
 
-                        <p class="text-secondary lh-base mb-3" style="max-width: 700px;">
-                            @Model.Description
-                        </p>
+                        <div class="mb-3" style="max-width: 700px;">
+                            <p class="text-secondary lh-base mb-2 product-description" id="productDescription">
+                                @Model.Description
+                            </p>
+                            <button type="button" class="btn btn-link p-0 text-primary read-more-btn" id="readMoreBtn" style="display: none;">
+                                <i class="bi bi-chevron-down me-1"></i>Đọc thêm
+                            </button>
+                            <button type="button" class="btn btn-link p-0 text-primary read-less-btn" id="readLessBtn" style="display: none;">
+                                <i class="bi bi-chevron-up me-1"></i>Thu gọn
+                            </button>
+                        </div>
 
                         <div class="mb-3">
                             <span class="badge bg-primary fs-6 px-3 py-2">
@@ -59,38 +75,37 @@
                             }
                             else
                             {
-                                <div class="d-flex gap-2">
-                                    <form asp-controller="Checkout" asp-action="BuyNow" method="post" class="flex-fill">
+                                <div class="action-buttons">
+                                    <form asp-controller="Checkout" asp-action="BuyNow" method="post" class="mb-3">
                                         <input type="hidden" name="productId" value="@Model.Id" />
                                         <input type="hidden" name="quantity" value="1" />
-                                        <button type="submit" class="btn btn-warning px-3 py-2 fw-bold shadow-sm w-100" id="buyNowBtn">
+                                        <button type="submit" class="btn btn-buy-now w-100" id="buyNowBtn">
+                                            <i class="bi bi-lightning-fill me-2"></i>
                                             Mua ngay @Model.Price.ToString("N0")đ
                                         </button>
                                         @Html.AntiForgeryToken()
                                     </form>
-                                    <form asp-controller="Cart" asp-action="Add" method="post" class="flex-fill">
-                                        <input type="hidden" name="productId" value="@Model.Id" />
-                                        <input type="hidden" name="quantity" value="1" />
-                                        <button type="submit" class="btn btn-outline-success px-3 py-2 fw-semibold w-100" id="addToCartBtn">
-                                            🛒 Thêm giỏ
-                                        </button>
-                                        @Html.AntiForgeryToken()
-                                    </form>
+                                    <button type="button" class="btn btn-add-cart w-100" id="addToCartBtn">
+                                        <i class="bi bi-cart-plus me-2"></i>
+                                        Thêm vào giỏ hàng
+                                    </button>
                                 </div>
                             }
                         }
                         else
                         {
-                            <div class="d-flex gap-2">
+                            <div class="action-buttons">
                                 <a asp-area="Identity" asp-page="/Account/Login" 
                                    asp-route-returnUrl="@Url.Action("Details", "Product", new { id = Model.Id })"
-                                   class="btn btn-warning px-3 py-2 fw-bold shadow-sm flex-fill">
+                                   class="btn btn-buy-now w-100 mb-3">
+                                    <i class="bi bi-lightning-fill me-2"></i>
                                     Mua ngay @Model.Price.ToString("N0")đ
                                 </a>
                                 <a asp-area="Identity" asp-page="/Account/Login" 
                                    asp-route-returnUrl="@Url.Action("Details", "Product", new { id = Model.Id })"
-                                   class="btn btn-outline-success px-3 py-2 fw-semibold flex-fill">
-                                    🛒 Thêm giỏ
+                                   class="btn btn-add-cart w-100">
+                                    <i class="bi bi-cart-plus me-2"></i>
+                                    Thêm vào giỏ hàng
                                 </a>
                             </div>
                             <div class="mt-2">
@@ -107,34 +122,1290 @@
     </div>
 </div>
 
+<!-- Đánh giá và Bình luận -->
+<div class="container mt-5">
+    <div class="card shadow-sm border-0 rounded-3 p-4 bg-white">
+        <h4 class="mb-4">
+            <i class="bi bi-star-fill me-2 text-warning"></i>
+            Đánh giá & Bình luận
+        </h4>
+        
+        @if (ViewBag.TotalRatings > 0)
+        {
+            <div class="mb-4">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="display-4 fw-bold me-3">@ViewBag.AverageRating</div>
+                    <div>
+                        <div class="star-rating-display">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="bi @(i <= ViewBag.AverageRating ? "bi-star-fill text-warning" : "bi-star text-secondary")"></i>
+                            }
+                        </div>
+                        <small class="text-muted ms-2">(@ViewBag.TotalRatings đánh giá)</small>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="mb-4">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="display-4 fw-bold me-3">0</div>
+                    <div>
+                        <div class="star-rating-display">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="bi bi-star text-secondary"></i>
+                            }
+                        </div>
+                        <small class="text-muted ms-2">(Chưa có đánh giá)</small>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class="mb-4 p-3 bg-light rounded">
+                <h6 class="mb-3">Viết đánh giá của bạn</h6>
+                <form id="reviewForm">
+                    <div class="mb-3">
+                        <label class="form-label">Đánh giá của bạn</label>
+                        <div class="star-input-group">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="bi bi-star star-input" data-rating="@i"></i>
+                            }
+                        </div>
+                        <input type="hidden" id="selectedRating" name="rating" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="reviewComment" class="form-label">Bình luận (tùy chọn)</label>
+                        <textarea class="form-control" id="reviewComment" name="comment" rows="3" placeholder="Chia sẻ suy nghĩ của bạn về sản phẩm này..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send me-2"></i>Gửi đánh giá
+                    </button>
+                    <input type="hidden" id="productId" value="@Model.Id" />
+                    @Html.AntiForgeryToken()
+                </form>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" class="alert-link">Đăng nhập</a> để viết đánh giá
+            </div>
+        }
+
+        @if (ViewBag.Reviews != null)
+        {
+            var reviews = (List<Review>)ViewBag.Reviews;
+            var currentUserId = ViewBag.CurrentUserId as string;
+            
+            if (reviews.Any())
+            {
+                <div class="mt-4">
+                    <h6 class="mb-3">Đánh giá từ khách hàng</h6>
+                    @foreach (var review in reviews)
+                    {
+                        var isOwnReview = !string.IsNullOrEmpty(currentUserId) && review.UserId == currentUserId;
+                        var userName = review.User?.UserName ?? "User";
+                        var displayInitial = userName.Length > 0 ? userName.Substring(0, 1).ToUpper() : "U";
+                        var userFullName = review.User?.FullName ?? review.User?.UserName ?? "Người dùng";
+                        
+                        <div class="review-item mb-3 pb-3 border-bottom" data-review-id="@review.Id">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0 me-3">
+                                    <div class="user-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <strong>@displayInitial</strong>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <strong class="me-2">@userFullName</strong>
+                                        <div class="star-rating-display">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="bi @(i <= review.Rating ? "bi-star-fill text-warning" : "bi-star text-secondary")" style="font-size: 0.9rem;"></i>
+                                            }
+                                        </div>
+                                        <small class="text-muted ms-3">@review.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                        @if (isOwnReview)
+                                        {
+                                            <div class="ms-auto">
+                                                <button class="btn btn-sm btn-outline-primary edit-review-btn" data-review-id="@review.Id" title="Chỉnh sửa">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger delete-review-btn" data-review-id="@review.Id" title="Xóa">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(review.Comment))
+                                    {
+                                        <p class="mb-0 text-secondary" id="comment-text-@review.Id">@review.Comment</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-chat-dots fs-1"></i>
+                    <p class="mt-2">Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!</p>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!-- Modal chỉnh sửa đánh giá -->
+<div class="modal fade" id="editReviewModal" tabindex="-1" aria-labelledby="editReviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editReviewModalLabel">Chỉnh sửa đánh giá</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editReviewForm">
+                    <input type="hidden" id="editReviewId" />
+                    <div class="mb-3">
+                        <label class="form-label">Đánh giá của bạn</label>
+                        <div class="star-input-group-edit">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="bi bi-star star-input-edit" data-rating="@i"></i>
+                            }
+                        </div>
+                        <input type="hidden" id="editSelectedRating" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="editReviewComment" class="form-label">Bình luận (tùy chọn)</label>
+                        <textarea class="form-control" id="editReviewComment" name="comment" rows="3" placeholder="Chia sẻ suy nghĩ của bạn về sản phẩm này..."></textarea>
+                    </div>
+                    @Html.AntiForgeryToken()
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveEditReviewBtn">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sản phẩm cùng thể loại -->
+@if (ViewBag.RelatedProducts != null && ((List<Product>)ViewBag.RelatedProducts).Any())
+{
+    <div class="related-products-section mt-5">
+        <div class="container">
+            <h4 class="section-title mb-3">
+                <i class="bi bi-bookmarks me-2 text-primary"></i>
+                Sản phẩm cùng thể loại
+            </h4>
+            <div class="slider-wrapper">
+                <button class="btn-slider prev" data-slider="relatedSlider" data-direction="left">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="slider-container" id="relatedSlider">
+                <div class="slider-content">
+                    @foreach (var item in (IEnumerable<Product>)ViewBag.RelatedProducts)
+                    {
+                        <div class="slider-item">
+                            <div class="product-card-mini">
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none">
+                                    <div class="product-image-wrapper">
+                                        <img src="@item.ImageUrl" alt="@item.Name" class="product-image-mini" />
+                                    </div>
+                                    <div class="product-info-mini">
+                                        <h6 class="product-name-mini">@item.Name</h6>
+                                        <div class="product-price-mini">
+                                            <span class="price">@item.Price.ToString("N0")₫</span>
+                                        </div>
+                                        <span class="badge bg-secondary badge-category">@item.Category?.Name</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+                </div>
+                <button class="btn-slider next" data-slider="relatedSlider" data-direction="right">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Sản phẩm đã xem -->
+@if (ViewBag.ViewedProducts != null && ((List<Product>)ViewBag.ViewedProducts).Any())
+{
+    <div class="viewed-products-section mt-4">
+        <div class="container">
+            <h4 class="section-title mb-3">
+                <i class="bi bi-clock-history me-2 text-info"></i>
+                Sản phẩm đã xem
+            </h4>
+            <div class="slider-wrapper">
+                <button class="btn-slider prev" data-slider="viewedSlider" data-direction="left">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <div class="slider-container" id="viewedSlider">
+                <div class="slider-content">
+                    @foreach (var item in (IEnumerable<Product>)ViewBag.ViewedProducts)
+                    {
+                        <div class="slider-item">
+                            <div class="product-card-mini">
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none">
+                                    <div class="product-image-wrapper">
+                                        <img src="@item.ImageUrl" alt="@item.Name" class="product-image-mini" />
+                                    </div>
+                                    <div class="product-info-mini">
+                                        <h6 class="product-name-mini">@item.Name</h6>
+                                        <div class="product-price-mini">
+                                            <span class="price">@item.Price.ToString("N0")₫</span>
+                                        </div>
+                                        <span class="badge bg-secondary badge-category">@item.Category?.Name</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+                </div>
+                <button class="btn-slider next" data-slider="viewedSlider" data-direction="right">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Zoom Modal -->
+<div class="zoom-modal" id="zoomModal">
+    <span class="zoom-close" id="zoomClose">&times;</span>
+    <img src="" alt="" id="zoomImage">
+</div>
+
+
+<style>
+
+    /* Read more/less functionality */
+    .product-description {
+    }
+
+    .product-description.truncated {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .read-more-btn, .read-less-btn {
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none !important;
+    }
+
+    .read-more-btn:hover, .read-less-btn:hover {
+        color: #0d6efd !important;
+    }
+
+    /* Image zoom functionality */
+    .product-image-container {
+        overflow: hidden;
+        border-radius: 8px;
+    }
+
+    .product-image {
+        cursor: zoom-in;
+    }
+
+    .zoom-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .product-image-container:hover .zoom-overlay {
+        opacity: 1;
+    }
+
+    .zoom-icon {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #333;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Modal zoom */
+    .zoom-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        cursor: zoom-out;
+    }
+
+    .zoom-modal.show {
+        display: flex;
+    }
+
+    .zoom-modal img {
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .zoom-close {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        color: white;
+        font-size: 30px;
+        cursor: pointer;
+        z-index: 10000;
+    }
+
+    .zoom-close:hover {
+        color: #ccc;
+    }
+
+    /* New button design */
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .btn-buy-now, .btn-add-cart {
+        position: relative;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .btn-buy-now {
+        background: #ff6b35;
+        color: white;
+    }
+
+    .btn-buy-now:hover {
+        background: #e55a2b;
+        color: white;
+    }
+
+    .btn-add-cart {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-add-cart:hover {
+        background: #218838;
+        color: white;
+    }
+
+    .btn-buy-now i, .btn-add-cart i {
+        font-size: 16px;
+        margin-right: 6px;
+    }
+
+    /* Responsive buttons */
+    @@media (max-width: 768px) {
+        .btn-buy-now, .btn-add-cart {
+            padding: 10px 16px;
+            font-size: 13px;
+        }
+    }
+
+    /* Related products section - Compact version */
+    .related-products-section, .viewed-products-section {
+        padding: 15px 0;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .section-title i {
+        font-size: 1.2rem;
+    }
+
+    .product-card-mini {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        height: 100%;
+        border: 1px solid #f0f0f0;
+    }
+
+    .product-card-mini:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        border-color: #ddd;
+    }
+
+    .product-card-mini a {
+        color: inherit;
+        text-decoration: none;
+        display: block;
+    }
+
+    .product-image-wrapper {
+        position: relative;
+        padding-top: 150%;
+        overflow: hidden;
+        background: #f8f9fa;
+    }
+
+    .product-image-mini {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+        background: white;
+    }
+
+    .product-card-mini:hover .product-image-mini {
+        transform: scale(1.05);
+    }
+
+    .product-info-mini {
+        padding: 8px;
+    }
+
+    .product-name-mini {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 4px;
+        line-height: 1.2;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-height: 2.4em;
+    }
+
+    .product-price-mini {
+        margin-bottom: 4px;
+    }
+
+    .product-price-mini .price {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #dc3545;
+    }
+
+    .badge-category {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+        font-weight: 500;
+    }
+
+    /* Slider Widget Styles */
+    .slider-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        overflow: visible;
+    }
+
+    .slider-container {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        flex: 1;
+        mask-image: linear-gradient(to right, transparent, black 10px, black calc(100% - 10px), transparent);
+    }
+
+    .slider-content {
+        display: flex;
+        gap: 12px;
+        overflow-x: scroll;
+        overflow-y: hidden;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        padding: 0 8px;
+    }
+
+    .slider-content::-webkit-scrollbar {
+        display: none;
+    }
+
+    .slider-item {
+        flex: 0 0 auto;
+        width: 180px;
+        min-width: 180px;
+        flex-shrink: 0;
+    }
+
+    .btn-slider {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid #ddd;
+        background: white;
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-slider:hover {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-slider:active {
+        transform: scale(0.95);
+    }
+
+    /* Responsive for product cards */
+    @@media (max-width: 768px) {
+        .related-products-section, .viewed-products-section {
+            padding: 10px 0;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .product-name-mini {
+            font-size: 0.75rem;
+        }
+
+        .product-price-mini .price {
+            font-size: 0.85rem;
+        }
+
+        .product-info-mini {
+            padding: 6px;
+        }
+
+        .slider-item {
+            flex: 0 0 140px;
+            min-width: 120px;
+            max-width: 140px;
+        }
+
+        .btn-slider {
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+        }
+
+        .slider-wrapper {
+            gap: 5px;
+        }
+    }
+
+    /* Star rating styles */
+    .star-input-group {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .star-input {
+        font-size: 2rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .star-input:hover,
+    .star-input.active {
+        color: #ffc107;
+        transform: scale(1.1);
+    }
+
+    .star-rating-display {
+        display: inline-flex;
+        gap: 4px;
+        font-size: 1.2rem;
+    }
+
+    .review-item {
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .user-avatar {
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .review-item .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        margin-left: 0.25rem;
+    }
+
+    .star-input-group-edit {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .star-input-edit {
+        font-size: 2rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .star-input-edit:hover,
+    .star-input-edit.active {
+        color: #ffc107;
+        transform: scale(1.1);
+    }
+</style>
 
 @section Scripts {
     <script>
+        // Slider functionality - attach immediately
+        function initSliders() {
+            // Handle slider buttons
+            const buttons = document.querySelectorAll('.btn-slider');
+            console.log('Found buttons:', buttons.length);
+            
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const sliderId = this.getAttribute('data-slider');
+                    const direction = this.getAttribute('data-direction');
+                    const distance = direction === 'left' ? -280 : 280;
+                    
+                    console.log('Button clicked:', sliderId, direction, distance);
+                    
+                    const slider = document.querySelector(`#${sliderId} .slider-content`);
+                    console.log('Found slider:', slider);
+                    
+                    if (slider) {
+                        const currentScroll = slider.scrollLeft;
+                        const maxScroll = slider.scrollWidth - slider.clientWidth;
+                        console.log('Current scroll:', currentScroll, 'Max scroll:', maxScroll);
+                        
+                        if (maxScroll > 0) {
+                            const newScroll = Math.max(0, Math.min(currentScroll + distance, maxScroll));
+                            console.log('Scrolling to:', newScroll);
+                            slider.scrollTo({
+                                left: newScroll,
+                                behavior: 'smooth'
+                            });
+                        } else {
+                            console.log('No scroll available - all items visible');
+                        }
+                    } else {
+                        console.error('Slider not found for:', sliderId);
+                    }
+                });
+            });
+        }
+
+        // Run on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSliders);
+        } else {
+            initSliders();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Read more/less functionality
+            const description = document.getElementById('productDescription');
+            const readMoreBtn = document.getElementById('readMoreBtn');
+            const readLessBtn = document.getElementById('readLessBtn');
+            
+            if (description && readMoreBtn && readLessBtn) {
+                // Kiểm tra xem mô tả có dài hơn 3 dòng không
+                const lineHeight = parseInt(window.getComputedStyle(description).lineHeight);
+                const maxHeight = lineHeight * 3;
+                
+                if (description.scrollHeight > maxHeight) {
+                    // Thêm class truncated và hiển thị nút "Đọc thêm"
+                    description.classList.add('truncated');
+                    readMoreBtn.style.display = 'inline-block';
+                    
+                    // Xử lý sự kiện click "Đọc thêm"
+                    readMoreBtn.addEventListener('click', function() {
+                        description.classList.remove('truncated');
+                        readMoreBtn.style.display = 'none';
+                        readLessBtn.style.display = 'inline-block';
+                    });
+                    
+                    // Xử lý sự kiện click "Thu gọn"
+                    readLessBtn.addEventListener('click', function() {
+                        description.classList.add('truncated');
+                        readLessBtn.style.display = 'none';
+                        readMoreBtn.style.display = 'inline-block';
+                    });
+                }
+            }
+        });
+
+        // Image zoom functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const productImage = document.getElementById('productImage');
+            const zoomModal = document.getElementById('zoomModal');
+            const zoomImage = document.getElementById('zoomImage');
+            const zoomClose = document.getElementById('zoomClose');
+            
+            if (productImage && zoomModal && zoomImage && zoomClose) {
+                // Click vào ảnh để zoom
+                productImage.addEventListener('click', function() {
+                    zoomImage.src = this.src;
+                    zoomImage.alt = this.alt;
+                    zoomModal.classList.add('show');
+                    document.body.style.overflow = 'hidden'; // Ngăn scroll
+                });
+                
+                // Click vào modal để đóng
+                zoomModal.addEventListener('click', function(e) {
+                    if (e.target === zoomModal) {
+                        zoomModal.classList.remove('show');
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+                
+                // Click vào nút đóng
+                zoomClose.addEventListener('click', function() {
+                    zoomModal.classList.remove('show');
+                    document.body.style.overflow = 'auto';
+                });
+                
+                // Đóng bằng phím ESC
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && zoomModal.classList.contains('show')) {
+                        zoomModal.classList.remove('show');
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            }
+        });
+
         // Hiệu ứng khi mua ngay
-        document.getElementById('buyNowBtn').addEventListener('click', function(e) {
+        document.getElementById('buyNowBtn')?.addEventListener('click', function(e) {
             // Có thể thêm hiệu ứng loading hoặc redirect ngay
+        });
+
+        // Thêm sản phẩm vào giỏ hàng bằng AJAX
+        document.getElementById('addToCartBtn')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const button = this;
+            const originalText = button.innerHTML;
+            button.innerHTML = '⏳ Đang thêm...';
+            button.disabled = true;
+            
+            // Lấy token CSRF
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            
+            fetch('/Cart/Add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token
+                },
+                body: `productId=@Model.Id&quantity=1&__RequestVerificationToken=${token}`
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Chỉ hiển thị 1 thông báo - thành công HOẶC lỗi
+                if (data.success) {
+                    // Thành công
+                    const notificationType = data.isNewItem ? 'success' : 'info';
+                    const notificationTitle = data.isNewItem ? 'Thành công' : 'Thông tin';
+                    
+                    if (typeof NotificationSystem !== 'undefined') {
+                        NotificationSystem.show(data.message, notificationType, notificationTitle);
+                    }
+                    
+                    // Cập nhật cart badge
+                    if (data.cartCount !== undefined && typeof updateCartBadge === 'function') {
+                        updateCartBadge(data.cartCount);
+                    }
+                } else {
+                    // Lỗi từ server
+                    if (typeof NotificationSystem !== 'undefined') {
+                        NotificationSystem.error(data.message || 'Có lỗi xảy ra', 'Lỗi');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Chỉ hiển thị lỗi khi có lỗi thật sự
+                if (typeof NotificationSystem !== 'undefined') {
+                    NotificationSystem.error('Có lỗi xảy ra khi thêm sản phẩm', 'Lỗi');
+                }
+            })
+            .finally(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            });
+        });
+        
+        // Hàm hiển thị thông báo - sử dụng notification system mới
+        function showNotification(message, type) {
+            if (typeof NotificationSystem !== 'undefined' && NotificationSystem.success) {
+                const title = type === 'success' ? 'Thành công' : 'Lỗi';
+                NotificationSystem.show(message, type, title);
+            } else {
+                // Fallback to basic alert
+                const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+                const icon = type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
+                
+                const notification = document.createElement('div');
+                notification.className = `alert ${alertClass} alert-dismissible fade show m-3`;
+                notification.innerHTML = `
+                    <i class="bi ${icon} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                document.body.insertBefore(notification, document.body.firstChild);
+                
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 5000);
+            }
+        }
+
+        // Star rating functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const starInputs = document.querySelectorAll('.star-input');
+            const selectedRatingInput = document.getElementById('selectedRating');
+            
+            if (starInputs.length > 0 && selectedRatingInput) {
+                starInputs.forEach(star => {
+                    star.addEventListener('click', function() {
+                        const rating = parseInt(this.getAttribute('data-rating'));
+                        selectedRatingInput.value = rating;
+                        
+                        // Update all stars
+                        starInputs.forEach((s, index) => {
+                            if (index < rating) {
+                                s.classList.remove('bi-star');
+                                s.classList.add('bi-star-fill', 'active');
+                            } else {
+                                s.classList.remove('bi-star-fill', 'active');
+                                s.classList.add('bi-star');
+                            }
+                        });
+                    });
+
+                    star.addEventListener('mouseenter', function() {
+                        const rating = parseInt(this.getAttribute('data-rating'));
+                        
+                        starInputs.forEach((s, index) => {
+                            if (index < rating) {
+                                s.style.color = '#ffc107';
+                            } else {
+                                s.style.color = '#ddd';
+                            }
+                        });
+                    });
+
+                    star.addEventListener('mouseleave', function() {
+                        const currentRating = parseInt(selectedRatingInput.value) || 0;
+                        
+                        starInputs.forEach((s, index) => {
+                            if (index < currentRating) {
+                                s.style.color = '#ffc107';
+                            } else {
+                                s.style.color = '#ddd';
+                            }
+                        });
+                    });
+                });
+            }
+
+            // Handle review form submission
+            const reviewForm = document.getElementById('reviewForm');
+            if (reviewForm) {
+                reviewForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const productId = document.getElementById('productId').value;
+                    const rating = selectedRatingInput.value;
+                    const comment = document.getElementById('reviewComment').value;
+                    
+                    if (!rating) {
+                        if (typeof NotificationSystem !== 'undefined') {
+                            NotificationSystem.error('Vui lòng chọn số sao đánh giá', 'Lỗi');
+                        } else {
+                            alert('Vui lòng chọn số sao đánh giá');
+                        }
+                        return;
+                    }
+                    
+                    const button = this.querySelector('button[type="submit"]');
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang gửi...';
+                    button.disabled = true;
+                    
+                    // Get CSRF token
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    
+                    fetch('/Product/AddReview', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': token
+                        },
+                        body: `productId=${productId}&rating=${rating}&comment=${encodeURIComponent(comment)}&__RequestVerificationToken=${token}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            if (typeof NotificationSystem !== 'undefined') {
+                                NotificationSystem.show(data.message, 'success', 'Thành công');
+                            } else {
+                                alert(data.message);
+                            }
+                            
+                            // Reload the page after a short delay to show the new review
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            // Show error message
+                            if (typeof NotificationSystem !== 'undefined') {
+                                NotificationSystem.error(data.message || 'Có lỗi xảy ra', 'Lỗi');
+                            } else {
+                                alert(data.message || 'Có lỗi xảy ra');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        if (typeof NotificationSystem !== 'undefined') {
+                            NotificationSystem.error('Có lỗi xảy ra khi gửi đánh giá', 'Lỗi');
+                        } else {
+                            alert('Có lỗi xảy ra khi gửi đánh giá');
+                        }
+                    })
+                    .finally(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    });
+                });
+            }
+
+            // Handle edit review button
+            document.querySelectorAll('.edit-review-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const reviewId = this.getAttribute('data-review-id');
+                    loadReviewForEdit(reviewId);
+                });
+            });
+
+            // Handle delete review button
+            document.querySelectorAll('.delete-review-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const reviewId = this.getAttribute('data-review-id');
+                    deleteReview(reviewId);
+                });
+            });
+
+            // Function to load review data into edit modal
+            function loadReviewForEdit(reviewId) {
+                fetch(`/Product/GetReview?reviewId=${reviewId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('editReviewId').value = reviewId;
+                            document.getElementById('editSelectedRating').value = data.rating;
+                            document.getElementById('editReviewComment').value = data.comment;
+
+                            // Set stars in modal
+                            const editStarInputs = document.querySelectorAll('.star-input-edit');
+                            editStarInputs.forEach((s, index) => {
+                                if (index < data.rating) {
+                                    s.classList.remove('bi-star');
+                                    s.classList.add('bi-star-fill', 'active');
+                                } else {
+                                    s.classList.remove('bi-star-fill', 'active');
+                                    s.classList.add('bi-star');
+                                }
+                            });
+
+                            // Show modal
+                            const modal = new bootstrap.Modal(document.getElementById('editReviewModal'));
+                            modal.show();
+
+                            // Setup star rating for edit modal
+                            setupEditModalStarRating();
+                        } else {
+                            if (typeof NotificationSystem !== 'undefined') {
+                                NotificationSystem.error(data.message || 'Có lỗi xảy ra', 'Lỗi');
+                            } else {
+                                alert(data.message || 'Có lỗi xảy ra');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        if (typeof NotificationSystem !== 'undefined') {
+                            NotificationSystem.error('Có lỗi xảy ra khi tải đánh giá', 'Lỗi');
+                        } else {
+                            alert('Có lỗi xảy ra khi tải đánh giá');
+                        }
+                    });
+            }
+
+            // Function to setup star rating in edit modal
+            function setupEditModalStarRating() {
+                const editStarInputs = document.querySelectorAll('.star-input-edit');
+                const editSelectedRating = document.getElementById('editSelectedRating');
+                
+                editStarInputs.forEach(star => {
+                    star.addEventListener('click', function() {
+                        const rating = parseInt(this.getAttribute('data-rating'));
+                        editSelectedRating.value = rating;
+                        
+                        editStarInputs.forEach((s, index) => {
+                            if (index < rating) {
+                                s.classList.remove('bi-star');
+                                s.classList.add('bi-star-fill', 'active');
+                            } else {
+                                s.classList.remove('bi-star-fill', 'active');
+                                s.classList.add('bi-star');
+                            }
+                        });
+                    });
+
+                    star.addEventListener('mouseenter', function() {
+                        const rating = parseInt(this.getAttribute('data-rating'));
+                        
+                        editStarInputs.forEach((s, index) => {
+                            if (index < rating) {
+                                s.style.color = '#ffc107';
+                            } else {
+                                s.style.color = '#ddd';
+                            }
+                        });
+                    });
+
+                    star.addEventListener('mouseleave', function() {
+                        const currentRating = parseInt(editSelectedRating.value) || 0;
+                        
+                        editStarInputs.forEach((s, index) => {
+                            if (index < currentRating) {
+                                s.style.color = '#ffc107';
+                            } else {
+                                s.style.color = '#ddd';
+                            }
+                        });
+                    });
+                });
+            }
+
+            // Handle save edit review button
+            document.getElementById('saveEditReviewBtn')?.addEventListener('click', function() {
+                const reviewId = document.getElementById('editReviewId').value;
+                const rating = document.getElementById('editSelectedRating').value;
+                const comment = document.getElementById('editReviewComment').value;
+                
+                if (!rating) {
+                    if (typeof NotificationSystem !== 'undefined') {
+                        NotificationSystem.error('Vui lòng chọn số sao đánh giá', 'Lỗi');
+                    } else {
+                        alert('Vui lòng chọn số sao đánh giá');
+                    }
+                    return;
+                }
+                
+                const button = this;
+                const originalText = button.innerHTML;
+                button.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang lưu...';
+                button.disabled = true;
+                
+                const token = document.querySelector('#editReviewForm input[name="__RequestVerificationToken"]').value;
+                
+                fetch('/Product/UpdateReview', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token
+                    },
+                    body: `reviewId=${reviewId}&rating=${rating}&comment=${encodeURIComponent(comment)}&__RequestVerificationToken=${token}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (typeof NotificationSystem !== 'undefined') {
+                            NotificationSystem.show(data.message, 'success', 'Thành công');
+                        } else {
+                            alert(data.message);
+                        }
+                        
+                        // Close modal
+                        const modalElement = bootstrap.Modal.getInstance(document.getElementById('editReviewModal'));
+                        modalElement.hide();
+                        
+                        // Reload page after a short delay
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    } else {
+                        if (typeof NotificationSystem !== 'undefined') {
+                            NotificationSystem.error(data.message || 'Có lỗi xảy ra', 'Lỗi');
+                        } else {
+                            alert(data.message || 'Có lỗi xảy ra');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    if (typeof NotificationSystem !== 'undefined') {
+                        NotificationSystem.error('Có lỗi xảy ra khi cập nhật đánh giá', 'Lỗi');
+                    } else {
+                        alert('Có lỗi xảy ra khi cập nhật đánh giá');
+                    }
+                })
+                .finally(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                });
+            });
+
+            // Function to delete review
+            function deleteReview(reviewId) {
+                if (!confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
+                    return;
+                }
+                
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                
+                fetch('/Product/DeleteReview', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token
+                    },
+                    body: `reviewId=${reviewId}&__RequestVerificationToken=${token}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (typeof NotificationSystem !== 'undefined') {
+                            NotificationSystem.show(data.message, 'success', 'Thành công');
+                        } else {
+                            alert(data.message);
+                        }
+                        
+                        // Remove review from page with animation
+                        const reviewElement = document.querySelector(`[data-review-id="${reviewId}"]`);
+                        if (reviewElement) {
+                            reviewElement.style.opacity = '0';
+                            reviewElement.style.transform = 'translateX(-20px)';
+                            setTimeout(() => {
+                                // Reload page to update review count and average
+                                window.location.reload();
+                            }, 300);
+                        }
+                    } else {
+                        if (typeof NotificationSystem !== 'undefined') {
+                            NotificationSystem.error(data.message || 'Có lỗi xảy ra', 'Lỗi');
+                        } else {
+                            alert(data.message || 'Có lỗi xảy ra');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    if (typeof NotificationSystem !== 'undefined') {
+                        NotificationSystem.error('Có lỗi xảy ra khi xóa đánh giá', 'Lỗi');
+                    } else {
+                        alert('Có lỗi xảy ra khi xóa đánh giá');
+                    }
+                });
+            }
         });
     </script>
 }
-
-<style>
-    /* Hiệu ứng cho nút */
-    .btn {
-        transition: all 0.3s ease;
-    }
-
-    .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Animation cho card */
-    .card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    }
-</style>

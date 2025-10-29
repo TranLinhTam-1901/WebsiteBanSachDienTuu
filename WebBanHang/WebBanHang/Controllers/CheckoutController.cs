@@ -8,7 +8,6 @@ using WebBanHang.Models;
 
 namespace WebBanHang.Controllers
 {
-    [Authorize]
     public class CheckoutController : Controller
     {
         private readonly ApplicationDbContext _db;
@@ -39,6 +38,7 @@ namespace WebBanHang.Controllers
 
         // ✅ Mua ngay - đưa trực tiếp vào trang thanh toán
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> BuyNow(int productId, int quantity = 1)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -132,15 +132,16 @@ namespace WebBanHang.Controllers
 
         // Xử lý khi người dùng đặt hàng
         [HttpPost]
-        public async Task<IActionResult> PlaceOrder(string fullName, string phone, List<int> selectedItems, int? buyNowProductId = null)
+        public async Task<IActionResult> PlaceOrder(string email, string fullName, string phone, List<int> selectedItems, int? buyNowProductId = null)
         {
-            if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(phone))
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(phone))
             {
                 ModelState.AddModelError(string.Empty, "Vui lòng nhập đầy đủ thông tin.");
                 return RedirectToAction(nameof(Index));
             }
 
             var user = await _userManager.GetUserAsync(User);
+            string userId = user?.Id ?? "guest-" + Guid.NewGuid().ToString(); // Tạo ID tạm cho guest
             List<CartItem> itemsToOrder = new List<CartItem>();
 
             // Xử lý trường hợp "Mua ngay"
@@ -153,15 +154,18 @@ namespace WebBanHang.Controllers
                     return RedirectToAction("Index", "Product");
                 }
 
-                // Kiểm tra xem người dùng đã sở hữu sách này chưa
-                bool alreadyOwned = await _db.Orders
-                    .AnyAsync(o => o.UserId == user.Id && o.IsPaid &&
-                                   o.Items.Any(i => i.ProductId == buyNowProductId.Value));
-                
-                if (alreadyOwned)
+                // Kiểm tra xem người dùng đã sở hữu sách này chưa (chỉ check nếu đã đăng nhập)
+                if (user != null)
                 {
-                    TempData["Error"] = "Bạn đã sở hữu sách này trong thư viện của mình.";
-                    return RedirectToAction("Index", "Library");
+                    bool alreadyOwned = await _db.Orders
+                        .AnyAsync(o => o.UserId == user.Id && o.IsPaid &&
+                                       o.Items.Any(i => i.ProductId == buyNowProductId.Value));
+                    
+                    if (alreadyOwned)
+                    {
+                        TempData["Error"] = "Bạn đã sở hữu sách này trong thư viện của mình.";
+                        return RedirectToAction("Index", "Library");
+                    }
                 }
 
                 // Tạo CartItem tạm thời cho mua ngay
@@ -208,8 +212,9 @@ namespace WebBanHang.Controllers
 
             var order = new Order
             {
-                UserId = user.Id,
+                UserId = userId,
                 OrderCode = GenerateOrderCode(),
+                Email = email,
                 FullName = fullName,                
                 Phone = phone,
                 Subtotal = subtotal,
@@ -230,8 +235,8 @@ namespace WebBanHang.Controllers
 
             _db.Orders.Add(order);
 
-            // Nếu là từ giỏ hàng thì xóa sản phẩm đã chọn khỏi giỏ hàng
-            if (!buyNowProductId.HasValue)
+            // Nếu là từ giỏ hàng thì xóa sản phẩm đã chọn khỏi giỏ hàng (chỉ nếu đã đăng nhập)
+            if (!buyNowProductId.HasValue && user != null)
             {
                 var cart = await _db.Carts
                     .Include(c => c.Items)
@@ -246,10 +251,66 @@ namespace WebBanHang.Controllers
 
             await _db.SaveChangesAsync();
 
-            return RedirectToAction("FakePay", "Checkout", new { orderId = order.Id });
+            // Chuyển đến trang chọn ngân hàng để thanh toán
+            return RedirectToAction("ChooseBank", new { orderId = order.Id });
 
         }
 
+        // Hiển thị trang chọn ngân hàng
+        public async Task<IActionResult> ChooseBank(int orderId)
+        {
+            var order = await _db.Orders
+                .Include(o => o.Items)
+                .ThenInclude(i => i.Product)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null) return NotFound();
+
+            return View(order);
+        }
+
+        // Hiển thị QR code của ngân hàng đã chọn
+        public async Task<IActionResult> PayWithBank(int orderId, string bankCode)
+        {
+            var order = await _db.Orders
+                .Include(o => o.Items)
+                .ThenInclude(i => i.Product)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null) return NotFound();
+
+            ViewBag.BankCode = bankCode;
+            return View(order);
+        }
+
+        // Xác nhận đã thanh toán
+        [HttpPost]
+        public async Task<IActionResult> ConfirmPayment(int orderId, string bankCode)
+        {
+            var order = await _db.Orders.FindAsync(orderId);
+            if (order == null) return NotFound();
+
+            // Lưu thông tin thanh toán
+            var payment = new Payment
+            {
+                OrderId = order.Id,
+                Amount = order.Total,
+                Method = "Bank Transfer",
+                Status = "Pending",
+                BankName = bankCode == "TCB" ? "Techcombank" : "MB Bank",
+                TransactionId = Guid.NewGuid().ToString("N").Substring(0, 12)
+            };
+
+            _db.Payments.Add(payment);
+            
+            // KHÔNG set IsPaid = true ở đây, chờ admin xác nhận
+            // Order vẫn ở trạng thái Pending, IsPaid = false
+            // Admin sẽ xác nhận và set IsPaid = true sau khi kiểm tra
+
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Success", new { orderId });
+        }
 
         public async Task<IActionResult> FakePay(int orderId)
         {

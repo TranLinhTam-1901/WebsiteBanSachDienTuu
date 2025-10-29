@@ -1,0 +1,65 @@
+@model WebBanHang.Models.Order
+@{
+    ViewData["Title"] = "Chọn phương thức thanh toán";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h2 class="mb-4 text-center">Chọn ngân hàng để chuyển khoản</h2>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Thông tin đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Mã đơn hàng:</strong> @Model.OrderCode</p>
+                            <p><strong>Tổng tiền:</strong> <span class="text-success fw-bold">@Model.Total.ToString("N0") đ</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Họ tên:</strong> @Model.FullName</p>
+                            <p><strong>Điện thoại:</strong> @Model.Phone</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h5 class="mb-3">Chọn ngân hàng:</h5>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card border h-100" onclick="selectBank('MB', @Model.Id)" style="cursor: pointer;">
+                            <div class="card-body text-center">
+                                <img src="~/Bank/MbBank.jpg" alt="MB Bank" class="img-fluid mb-3" style="max-height: 150px;" />
+                                <h6 class="card-title">Vietnam Maritime Bank</h6>
+                                <p class="text-muted small">Chuyển khoản qua MB Bank</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border h-100" onclick="selectBank('TCB', @Model.Id)" style="cursor: pointer;">
+                            <div class="card-body text-center">
+                                <img src="~/Bank/TechComBank.jpg" alt="TechComBank" class="img-fluid mb-3" style="max-height: 150px;" />
+                                <h6 class="card-title">Techcombank</h6>
+                                <p class="text-muted small">Chuyển khoản qua Techcombank</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function selectBank(bankCode, orderId) {
+            window.location.href = `/Checkout/PayWithBank?orderId=${orderId}&bankCode=${bankCode}`;
+        }
+    </script>
+}
+

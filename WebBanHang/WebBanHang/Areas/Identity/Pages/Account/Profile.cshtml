@@ -1,0 +1,390 @@
+@page
+@model WebBanHang.Areas.Identity.Pages.Account.ProfileModel
+@{
+    ViewData["Title"] = "Quản lý tài khoản";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar menu -->
+        <div class="col-lg-3 col-md-4">
+            <div class="account-sidebar">
+                <div class="sidebar-header">
+                    <div class="user-avatar">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <h5 class="user-name">@Model.Input.FullName</h5>
+                    <p class="user-email">@Model.Input.Email</p>
+                </div>
+                
+                <div class="sidebar-menu">
+                    <a href="#profile" class="menu-item active" data-section="profile">
+                        <span>Thông tin cá nhân</span>
+                    </a>
+                    <a href="#security" class="menu-item" data-section="security">
+                        <span>Bảo mật</span>
+                    </a>
+                    <hr class="my-3">
+                    <a href="#" onclick="logout()" class="menu-item logout-btn w-100 text-start">
+                        <span>Đăng xuất</span>
+                    </a>
+                    
+                    <!-- Hidden logout form -->
+                    <form id="logoutForm" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" style="display: none;">
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main content -->
+        <div class="col-lg-9 col-md-8">
+            <div class="account-content">
+                <!-- Profile Section -->
+                <div id="profile-section" class="content-section active">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            Thông tin cá nhân
+                        </h3>
+                        <p class="section-subtitle">Quản lý thông tin cá nhân của bạn</p>
+                    </div>
+                    
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4">
+                            <form method="post">
+                                @Html.AntiForgeryToken()
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.FullName" class="form-label">
+                                            Họ và tên
+                                        </label>
+                                        <input asp-for="Input.FullName" class="form-control" placeholder="Nhập họ và tên" />
+                                        <span asp-validation-for="Input.FullName" class="text-danger small"></span>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.Email" class="form-label">
+                                            Email
+                                        </label>
+                                        <input asp-for="Input.Email" class="form-control" readonly />
+                                        <small class="text-muted">Email không thể thay đổi</small>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="Input.PhoneNumber" class="form-label">
+                                            Số điện thoại
+                                        </label>
+                                        <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Nhập số điện thoại" />
+                                        <span asp-validation-for="Input.PhoneNumber" class="text-danger small"></span>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">
+                                            Ngày tham gia
+                                        </label>
+                                        <input type="text" class="form-control" value="@Model.Input.JoinDate.ToString("dd/MM/yyyy")" readonly />
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-12">
+                                        <hr class="my-4">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                                Đặt lại
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">
+                                                Cập nhật thông tin
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Section -->
+                <div id="security-section" class="content-section">
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            Bảo mật
+                        </h3>
+                        <p class="section-subtitle">Thay đổi mật khẩu và cài đặt bảo mật</p>
+                    </div>
+                    
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="alert alert-info">
+                                <strong>Thông báo:</strong> Tính năng thay đổi mật khẩu sẽ được phát triển trong phiên bản tiếp theo.
+                            </div>
+                            
+                            <div class="security-info">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <div>
+                                                <h6>Mật khẩu</h6>
+                                                <p class="text-muted mb-0">Đã được thiết lập</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-item">
+                                            <div>
+                                                <h6>Bảo mật</h6>
+                                                <p class="text-muted mb-0">Tài khoản được bảo vệ</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Sidebar styling */
+    .account-sidebar {
+        position: sticky;
+        top: 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid #e9ecef;
+    }
+
+    .sidebar-header {
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
+        margin-bottom: 20px;
+    }
+
+    .user-avatar i {
+        font-size: 4rem;
+        color: #6c757d;
+    }
+
+    .user-name {
+        margin: 10px 0 5px 0;
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .user-email {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .sidebar-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        text-decoration: none;
+        color: #495057;
+        border-radius: 8px;
+        font-weight: 500;
+        border: 1px solid transparent;
+    }
+
+    .menu-item:hover {
+        background-color: #f8f9fa;
+        color: #1976d2;
+        border-color: #e3f2fd;
+    }
+
+    .menu-item.active {
+        background-color: #1976d2;
+        color: white;
+        border-color: #1976d2;
+        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+    }
+
+    .logout-btn {
+        background-color: transparent !important;
+        border: 1px solid transparent !important;
+        color: #dc3545 !important;
+        cursor: pointer;
+        text-decoration: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+
+    .logout-btn:hover {
+        background-color: #f8d7da !important;
+        color: #721c24 !important;
+        border-color: #f5c6cb !important;
+        text-decoration: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+
+    .logout-form {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Content styling */
+    .account-content {
+        min-height: 500px;
+    }
+
+    .content-section {
+        display: none;
+    }
+
+    .content-section.active {
+        display: block;
+    }
+
+    .section-header {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .section-subtitle {
+        color: #6c757d;
+        margin: 0;
+    }
+
+    .card {
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #ced4da;
+        padding: 12px 16px;
+    }
+
+    .form-control:focus {
+        border-color: #1976d2;
+        box-shadow: 0 0 0 0.2rem rgba(25, 118, 210, 0.25);
+    }
+
+    .btn {
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-weight: 500;
+    }
+
+    .btn-primary {
+        background-color: #1976d2;
+        border-color: #1976d2;
+    }
+
+    .btn-primary:hover {
+        background-color: #1565c0;
+        border-color: #1565c0;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+
+    .info-item i {
+        font-size: 2rem;
+    }
+
+    .info-item h6 {
+        margin: 0 0 5px 0;
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .info-item p {
+        margin: 0;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .account-sidebar {
+            position: static;
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-menu {
+            flex-direction: row;
+            overflow-x: auto;
+            gap: 10px;
+        }
+        
+        .menu-item {
+            white-space: nowrap;
+            min-width: 120px;
+            text-align: center;
+            padding: 10px;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // Menu navigation
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all items
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                
+                // Add active class to clicked item
+                this.classList.add('active');
+                
+                // Show corresponding section
+                const sectionId = this.dataset.section + '-section';
+                document.getElementById(sectionId).classList.add('active');
+            });
+        });
+
+        // Reset form function
+        function resetForm() {
+            if (confirm('Bạn có chắc chắn muốn đặt lại tất cả thông tin?')) {
+                location.reload();
+            }
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+                document.getElementById('logoutForm').submit();
+            }
+        }
+    </script>
+}

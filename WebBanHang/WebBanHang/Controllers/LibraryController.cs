@@ -39,6 +39,17 @@ namespace WebBanHang.Controllers
             var product = await _db.Products.FindAsync(id);
             if (product == null) return NotFound();
 
+            // Kiểm tra user có quyền đọc sách này không (phải từ đơn đã thanh toán)
+            var hasAccess = await _db.Orders
+                .AnyAsync(o => o.UserId == user.Id && o.IsPaid && 
+                               o.Items.Any(i => i.ProductId == id));
+            
+            if (!hasAccess)
+            {
+                TempData["Error"] = "Bạn chưa sở hữu sách này hoặc đơn hàng chưa được xác nhận.";
+                return RedirectToAction("Index", "Home");
+            }
+
             var progress = await _db.ReadingProgresses
                 .FirstOrDefaultAsync(r => r.ProductId == id && r.UserId == user.Id);
 

@@ -1,129 +1,268 @@
 ﻿@model WebBanHang.Models.Order
 
-<h2>Chi tiết đơn hàng @(string.IsNullOrEmpty(Model.OrderCode) ? $"#{Model.Id}" : Model.OrderCode)</h2>
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+}
 
-<p><strong>Người đặt:</strong> @Model.FullName</p>
-<p><strong>Email:</strong> @Model.User?.Email</p>
-<p><strong>SĐT:</strong> @Model.Phone</p>
-<p><strong>Ngày đặt:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+<div class="order-details-page">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="mb-0">
+                <i class="bi bi-receipt me-2"></i>
+                Chi tiết đơn hàng
+            </h1>
+            <p class="text-muted mb-0">@(string.IsNullOrEmpty(Model.OrderCode) ? $"#{Model.Id}" : Model.OrderCode)</p>
+        </div>
+        <div>
+            <span class="status-badge badge-@Model.Status.ToLower()">
+                @switch (Model.Status)
+                {
+                    case "Pending":
+                        <i class="bi bi-clock me-1"></i>
+                        <span>Chờ xác nhận</span>
+                        break;
+                    case "Confirmed":
+                        <i class="bi bi-check-circle me-1"></i>
+                        <span>Đã xác nhận</span>
+                        break;
+                    case "Completed":
+                        <i class="bi bi-book me-1"></i>
+                        <span>Hoàn tất</span>
+                        break;
+                    case "Cancelled":
+                    case "Canceled":
+                        <i class="bi bi-x-circle me-1"></i>
+                        <span>Đã hủy</span>
+                        break;
+                }
+            </span>
+        </div>
+    </div>
 
-<p>
-    <strong>Trạng thái:</strong>
-    <span class="badge bg-@(Model.Status switch {
-        "Pending" => "warning text-dark",
-        "Confirmed" => "success",
-        "Completed" => "primary",
-        "Canceled" => "danger",
-        _ => "secondary"
-    })">@Model.Status</span>
-</p>
-
-<hr />
-
-<h5>Sản phẩm trong đơn</h5>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Tên sách</th>
-            <th>Số lượng</th>
-            <th>Đơn giá</th>
-            <th>Thành tiền</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.Items)
-        {
-            <tr>
-                <td>@item.Product?.Name</td>
-                <td>@item.Quantity</td>
-                <td>@item.UnitPrice.ToString("N0") đ</td>
-                <td>@((item.UnitPrice * item.Quantity).ToString("N0")) đ</td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<p class="fw-bold text-end">Tổng cộng: @Model.Total.ToString("N0") đ</p>
-
-<hr/>
-
-<div class="d-flex justify-content-between align-items-center">
-    @* 💳 Nếu đơn hàng đã xác nhận nhưng chưa thanh toán *@
-    @if (Model.Status == "Confirmed" && !Model.IsPaid)
-    {
-        <a asp-controller="Order"
-           asp-action="Index"
-           class="btn btn-outline-primary btn-sm">
-            ← Quay lại danh sách
-        </a>
-
-        <a asp-controller="Checkout"
-           asp-action="FakePay"
-           asp-route-orderId="@Model.Id"
-           class="btn btn-success btn-sm">
-            💳 Thanh toán ngay
-        </a>
-    }
-
-    @* 📖 Nếu đã thanh toán xong *@
-    else if (Model.IsPaid)
-    {
-        <div class="w-100 text-center mt-3">
-            <div class="alert alert-success p-4 shadow-sm" style="max-width: 700px; margin: 0 auto;">
-                <h5>🎉 Cảm ơn bạn đã mua sách!</h5>
-                <p>Sách của bạn đã được thêm vào thư viện cá nhân.</p>
-
-                <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
-                    @if (Model.Items.Any())
-                    {
-                        var firstProduct = Model.Items.First().Product;
-                        if (firstProduct != null)
-                        {
-                            <a asp-controller="Library"
-                               asp-action="Read"
-                               asp-route-id="@firstProduct.Id"
-                               class="btn btn-success px-4">
-                                📖 Đọc ngay
-                            </a>
-                        }
-                    }
-
-                    <a asp-controller="Library"
-                       asp-action="Index"
-                       class="btn btn-outline-secondary px-4">
-                        📚 Về thư viện
-                    </a>
-
-                    <a asp-controller="Order"
-                       asp-action="Index"
-                       class="btn btn-outline-primary px-4">
-                        ← Quay lại danh sách
-                    </a>
+    <div class="row">
+        <!-- Order Info -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Thông tin đơn hàng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="info-row">
+                        <span class="info-label">Người đặt:</span>
+                        <span class="info-value">@Model.FullName</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value">@Model.Email</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">SĐT:</span>
+                        <span class="info-value">@Model.Phone</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Ngày đặt:</span>
+                        <span class="info-value">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Thanh toán:</span>
+                        <span class="payment-badge @(Model.IsPaid ? "paid" : "unpaid")">
+                            @if (Model.IsPaid)
+                            {
+                                <i class="bi bi-check-circle me-1"></i>
+                                <span>Đã thanh toán</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-clock me-1"></i>
+                                <span>Chưa thanh toán</span>
+                            }
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
-    }
-     else if (Model.Status == "Pending")
-    {
-        <div class="w-100 text-center mt-3">
-            <div class="alert alert-warning p-4 shadow-sm" style="max-width: 700px; margin: 0 auto;">
-                <h5>⏳ Đơn hàng của bạn đang chờ xác nhận</h5>
-                <p>Vui lòng quay lại sau khi admin duyệt để tiến hành thanh toán.</p>
-                <a asp-controller="Order"
-                   asp-action="Index"
-                   class="btn btn-outline-primary mt-3">
-                    ← Quay lại danh sách đơn hàng
-                </a>
+
+        <!-- Order Items -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="bi bi-basket me-2"></i>Sản phẩm (@Model.Items.Count)
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="order-item-row">
+                            <img src="@item.Product?.ImageUrl" alt="@item.Product?.Name" class="item-img" />
+                            <div class="item-info">
+                                <h6 class="mb-1">@item.Product?.Name</h6>
+                                <p class="text-muted small mb-0">@item.Product?.Author</p>
+                                <div class="mt-2">
+                                    <span class="badge bg-secondary">SL: @item.Quantity</span>
+                                    <span class="ms-2">@item.UnitPrice.ToString("N0") ₫</span>
+                                </div>
+                            </div>
+                            <div class="item-total">
+                                <strong>@((item.UnitPrice * item.Quantity).ToString("N0")) ₫</strong>
+                            </div>
+                        </div>
+                    }
+                    <div class="order-total">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong>Tổng cộng:</strong>
+                            <strong class="text-success fs-4">@Model.Total.ToString("N0") ₫</strong>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    }
+    </div>
+
+    <!-- Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex gap-2 justify-content-center">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Quay lại
+                </a>
+                @if (Model.Status == "Pending" && !Model.IsPaid)
+                {
+                    <form asp-action="Delete" method="post" class="d-inline" 
+                          onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này?')">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-danger">
+                            <i class="bi bi-x-circle me-2"></i>Hủy đơn
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
 </div>
 
+<style>
+    .order-details-page {
+        padding: 20px 0;
+    }
 
-@* @if (Model.Status == "Pending")
-{
-    <div class="alert alert-warning mt-3 py-2 px-3" style="max-width: 500px; font-size: 0.9rem;">
-        ⏳ Đơn hàng của bạn đang chờ admin xác nhận.<br />
-        Vui lòng quay lại sau khi được duyệt để thanh toán.
-    </div>
-} *@
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .status-badge.badge-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-badge.badge-confirmed {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-badge.badge-completed {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .status-badge.badge-cancelled,
+    .status-badge.badge-canceled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .info-value {
+        color: #6c757d;
+    }
+
+    .payment-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .payment-badge.paid {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .payment-badge.unpaid {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .order-item-row {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .order-item-row:last-of-type {
+        border-bottom: none;
+    }
+
+    .item-img {
+        width: 80px;
+        height: 100px;
+        object-fit: contain;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        margin-right: 20px;
+    }
+
+    .item-info {
+        flex: 1;
+    }
+
+    .item-total {
+        font-size: 1.1rem;
+        color: #28a745;
+    }
+
+    .order-total {
+        background: #f8f9fa;
+        padding: 20px;
+        border-top: 2px solid #e9ecef;
+    }
+
+    @@media (max-width: 768px) {
+        .order-item-row {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .item-img {
+            margin: 0 0 15px 0;
+        }
+    }
+</style>

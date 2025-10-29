@@ -26,6 +26,9 @@ namespace WebBanHang.Controllers
             if (user == null)
                 return RedirectToAction("Login", "Account");
 
+            // Debug: Log user info
+            Console.WriteLine($"OrderController.Index - User ID: {user.Id}, Email: {user.Email}");
+
             // Cập nhật OrderCode cho các đơn hàng chưa có mã
             var ordersWithoutCode = await _context.Orders
                 .Where(o => string.IsNullOrEmpty(o.OrderCode))
@@ -48,6 +51,20 @@ namespace WebBanHang.Controllers
                 .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync();
 
+            // Debug: Log orders count
+            Console.WriteLine($"OrderController.Index - Found {orders.Count} orders for user {user.Id}");
+            foreach (var order in orders)
+            {
+                Console.WriteLine($"Order ID: {order.Id}, OrderCode: {order.OrderCode}, Status: {order.Status}, Total: {order.Total}");
+            }
+
+            // Debug: Check all orders in database
+            var allOrders = await _context.Orders.ToListAsync();
+            Console.WriteLine($"Total orders in database: {allOrders.Count}");
+            foreach (var order in allOrders)
+            {
+                Console.WriteLine($"All Orders - ID: {order.Id}, UserId: {order.UserId}, OrderCode: {order.OrderCode}");
+            }
            
             return View(orders);
         }

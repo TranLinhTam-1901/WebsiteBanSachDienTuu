@@ -21,70 +21,129 @@
             filter: brightness(80%);
         }
 
-/* Phần navbar */
-.navbar-nav .nav-link {
-    font-weight: 500;
-    margin: 0 10px;
-    transition: color 0.3s ease;
+/* Header Full Width - Clean and Modern */
+.header-section {
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    width: 100%;
+    z-index: 1000;
 }
 
-    .navbar-nav .nav-link:hover {
-        color: #0d6efd; /* xanh bootstrap */
-    }
-
-/* Mở dropdown khi hover */
-.nav-item.dropdown:hover .dropdown-menu {
-    display: block;
-    margin-top: 0;
+.header-section .nav-item.dropdown {
+    position: relative;
 }
 
-/* Đổi màu chữ khi hover */
-.navbar .nav-link:hover {
-    color: #ffd700 !important; /* vàng nổi bật */
+.header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 12px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    position: relative;
 }
 
-/* Toàn bộ navbar */
-.navbar {
-    background-color: #222; /* nền tối (bạn có thể đổi màu) */
-    padding: 12px 20px;
+.header-logo {
+    flex-shrink: 0;
 }
 
-/* Căn giữa menu */
-.navbar-nav {
-    gap: 20px; /* khoảng cách giữa các item */
+.header-logo .navbar-brand {
+    color: #333;
+    text-decoration: none;
+    font-size: 1.5rem;
+}
+
+.header-nav {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.header-nav .navbar-nav {
+    gap: 16px;
+    display: flex;
+    flex-direction: row;
+}
+
+.header-nav .nav-link {
     font-size: 16px;
     font-weight: 500;
+    color: #000;
+    padding: 8px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
 }
 
-    /* Link mặc định */
-    .navbar-nav .nav-link {
-        color: white !important;
-        transition: color 0.3s, border-bottom 0.3s;
-        padding: 8px 12px;
-    }
-
-        /* Khi hover */
-        .navbar-nav .nav-link:hover {
-            color: #ffd700 !important; /* màu vàng nổi bật */
-            border-bottom: 2px solid #ffd700;
-        }
+.header-nav .nav-link:hover {
+    background-color: #f8f9fa;
+    color: #1976d2;
+}
 
 /* Dropdown menu */
 .dropdown-menu {
-    background-color: #333;
+    display: none !important;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     border-radius: 8px;
-    overflow: hidden;
+    padding: 4px;
+    margin-top: 8px !important;
+    max-height: 400px;
+    overflow-y: auto;
+    width: 220px;
+    position: absolute !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    z-index: 1050 !important;
+    background-color: #fff !important;
+    top: 100% !important;
 }
 
-    .dropdown-menu .dropdown-item {
-        color: white;
-        transition: background 0.3s;
-    }
+/* Hiển thị menu khi có class show */
+.nav-item.dropdown .dropdown-menu.show {
+    display: block !important;
+}
 
-        .dropdown-menu .dropdown-item:hover {
-            background-color: #444;
-            color: #ffd700;
-        }
+.dropdown-menu .dropdown-item {
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: #495057;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #1976d2;
+}
+
+.dropdown-menu .dropdown-divider {
+    margin: 4px 0;
+}
+
+.dropdown-menu .dropdown-item.text-center {
+    padding: 6px 12px;
+    font-size: 13px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Search Bar */
+.header-search {
+    flex: 1;
+    max-width: 300px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.header-icons {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: transparent;
+}
 
 /* Global tweaks */
 body {
@@ -92,26 +151,18 @@ body {
 }
 
 .top-bar {
-    font-size: 14px;
-}
-
-.navbar-nav .nav-link {
     font-size: 16px;
     font-weight: 500;
-    padding: 8px 14px;
-    transition: 0.3s;
+    color: #000 !important;
 }
 
-.navbar .btn {
-    font-size: 14px;
+.top-bar a {
+    color: #000 !important;
     font-weight: 500;
-    padding: 6px 16px;
-    transition: 0.3s;
 }
 
-.navbar .btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+.top-bar a:hover {
+    color: #000 !important;
 }
 
 /* Card polish */
@@ -131,4 +182,920 @@ body {
 /* Footer */
 footer ul li a:hover {
     color: #0d6efd !important;
+}
+
+/* ===== HEADER STYLE NHƯ HÌNH 1 ===== */
+.header-section {
+    background-color: white !important;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Top Bar - Màu trắng hoàn toàn */
+.top-bar {
+    background-color: white !important;
+    color: #000 !important;
+}
+
+.top-bar a {
+    color: #000 !important;
+}
+
+.top-bar a:hover {
+    color: #000 !important;
+}
+
+/* Search Bar Style */
+.search-form {
+    width: 100%;
+}
+
+.search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    background: transparent;
+    color: #495057;
+}
+
+.search-input::placeholder {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.search-btn {
+    background: #28a745;
+    border: none;
+    color: white;
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-btn:hover {
+    background: #218838;
+}
+
+.search-btn i {
+    font-size: 16px;
+}
+
+/* User Icon Style - Màu đen, không hiệu ứng */
+.user-icon {
+    color: #333 !important;
+    font-size: 24px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-icon:hover {
+    color: #333 !important;
+}
+
+/* Cart Icon Style - Màu đen, không hiệu ứng */
+.cart-icon {
+    color: #333 !important;
+    font-size: 24px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.cart-icon:hover {
+    color: #333 !important;
+}
+
+.cart-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: none; /* Hide by default, show when count > 0 */
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    z-index: 10;
+}
+
+.cart-badge[data-count] {
+    display: flex;
+}
+
+/* Navigation Menu Style - Loại bỏ hoàn toàn hiệu ứng */
+.navbar {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.navbar-light {
+    background-color: transparent !important;
+}
+
+/* Responsive - Header */
+@media (max-width: 1200px) {
+    .header-container {
+        padding: 12px 20px;
+        gap: 15px;
+    }
+    
+    .header-search {
+        max-width: 250px;
+    }
+}
+
+@media (max-width: 992px) {
+    .header-container {
+        flex-wrap: wrap;
+    }
+    
+    .header-nav {
+        order: 3;
+        width: 100%;
+    }
+    
+    .header-search {
+        order: 2;
+        max-width: 200px;
+    }
+    
+    .header-icons {
+        order: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-container {
+        padding: 10px 15px;
+        gap: 10px;
+    }
+    
+    .header-logo .navbar-brand {
+        font-size: 1.25rem;
+    }
+    
+    .header-nav {
+        order: 3;
+        width: 100%;
+        margin-top: 10px;
+    }
+    
+    .header-nav .navbar-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        flex-direction: row;
+        gap: 6px;
+    }
+    
+    .header-nav .nav-link {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+    
+    .header-search {
+        order: 2;
+        max-width: 180px;
+    }
+    
+    .header-icons {
+        order: 2;
+    }
+    
+    .user-icon,
+    .cart-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 20px;
+    }
+}
+
+/* ===== PROFESSIONAL NOTIFICATION SYSTEM ===== */
+.notification-container {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 400px;
+}
+
+.notification-toast {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 0;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    animation: slideInRight 0.4s ease-out;
+    border-left: 4px solid #28a745;
+    transition: all 0.3s ease;
+}
+
+.notification-toast.error {
+    border-left-color: #dc3545;
+}
+
+.notification-toast.warning {
+    border-left-color: #ffc107;
+}
+
+.notification-toast.info {
+    border-left-color: #17a2b8;
+}
+
+.notification-toast.success {
+    border-left-color: #28a745;
+}
+
+.notification-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.notification-toast.error .notification-icon {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.notification-toast.warning .notification-icon {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.notification-toast.info .notification-icon {
+    background: rgba(23, 162, 184, 0.1);
+    color: #17a2b8;
+}
+
+.notification-content {
+    flex: 1;
+    padding: 15px;
+}
+
+.notification-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: #333;
+    margin: 0 0 4px 0;
+}
+
+.notification-message {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+}
+
+.notification-close {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0 10px;
+    transition: color 0.2s;
+}
+
+.notification-close:hover {
+    color: #333;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.notification-toast.fade-out {
+    animation: slideOutRight 0.3s ease-out forwards;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .notification-container {
+        top: 60px;
+        right: 10px;
+        left: 10px;
+        max-width: 100%;
+    }
+    
+    .notification-toast {
+        padding: 0;
+    }
+    
+    .notification-content {
+        padding: 12px;
+    }
+    
+    .notification-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+    }
+}
+
+/* ===== COUPON POPUP STYLES ===== */
+.coupon-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    animation: fadeIn 0.3s ease;
+}
+
+.coupon-popup-content {
+    background: white;
+    border-radius: 20px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+}
+
+.coupon-popup-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 30px;
+    color: #999;
+    cursor: pointer;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.coupon-popup-close:hover {
+    background: #f0f0f0;
+    color: #333;
+    transform: rotate(90deg);
+}
+
+.coupon-popup-body {
+    padding: 40px 30px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 576px) {
+    .coupon-popup-content {
+        width: 95%;
+        border-radius: 15px;
+    }
+    
+    .coupon-popup-body {
+        padding: 30px 20px;
+    }
+    
+    .coupon-popup-close {
+        top: 10px;
+        right: 10px;
+        font-size: 25px;
+        width: 30px;
+        height: 30px;
+    }
+}
+
+/* ===== FLOATING SUPPORT WIDGET ===== */
+.floating-support-widget {
+    position: fixed !important;
+    bottom: 30px !important;
+    right: 30px !important;
+    z-index: 99999 !important;
+    pointer-events: none;
+}
+
+.support-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-end;
+    pointer-events: all;
+}
+
+.support-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.support-btn:hover {
+    opacity: 0.9;
+}
+
+.support-btn:active {
+    opacity: 0.8;
+}
+
+/* Nút chính - Chat */
+#mainSupportBtn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    order: 1;
+}
+
+#mainSupportBtn:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* Nút Chat Zalo */
+#zaloBtn {
+    background: linear-gradient(135deg, #0084FF 0%, #0068CC 100%);
+    order: 2;
+}
+
+#zaloBtn:hover {
+    background: linear-gradient(135deg, #0068CC 0%, #0084FF 100%);
+}
+
+/* Nút Telegram */
+#telegramBtn {
+    background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
+    order: 3;
+}
+
+#telegramBtn:hover {
+    background: linear-gradient(135deg, #006699 0%, #0088cc 100%);
+}
+
+/* Nút Gọi điện */
+#phoneBtn {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    order: 4;
+}
+
+#phoneBtn:hover {
+    background: linear-gradient(135deg, #128C7E 0%, #25D366 100%);
+}
+
+/* Nút Chat Widget */
+#chatWidgetBtn {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    order: 5;
+}
+
+#chatWidgetBtn:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #007bff 100%);
+}
+
+/* Ban đầu chỉ hiển thị nút chính */
+.support-buttons:not(.expanded) button:not(#mainSupportBtn) {
+    display: none;
+}
+
+/* Khi mở rộng */
+.support-buttons.expanded button:not(#mainSupportBtn) {
+    display: flex !important;
+}
+
+/* Animation cho icon khi đổi */
+#mainSupportIcon {
+}
+
+/* Tooltip */
+.support-btn::after {
+    content: attr(title);
+    position: absolute;
+    right: 80px;
+    background: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.support-btn:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .floating-support-widget {
+        bottom: 20px;
+        right: 20px;
+    }
+    
+    .support-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .support-btn::after {
+        font-size: 12px;
+        padding: 6px 10px;
+        right: 70px;
+    }
+}
+
+/* ===== CHAT WIDGET STYLES ===== */
+.chat-widget {
+    position: fixed;
+    bottom: 30px;
+    right: 120px;
+    width: 380px;
+    height: 540px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+    display: none;
+    flex-direction: column;
+    z-index: 10000;
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.chat-header-info i {
+    font-size: 20px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.chat-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 5px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.chat-close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.chat-body {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: linear-gradient(180deg, #f5f7fa 0%, #ffffff 100%);
+    max-height: 400px;
+}
+
+/* Custom scrollbar */
+.chat-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-body::-webkit-scrollbar-thumb {
+    background: #d0d0d0;
+    border-radius: 3px;
+}
+
+.chat-body::-webkit-scrollbar-thumb:hover {
+    background: #b0b0b0;
+}
+
+.chat-message {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    animation: messageSlide 0.3s ease-out;
+}
+
+@keyframes messageSlide {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-message.sent {
+    align-items: flex-end;
+}
+
+.chat-message.received {
+    align-items: flex-start;
+}
+
+.message-bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: 20px;
+    word-wrap: break-word;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s;
+}
+
+.message-bubble:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.message-bubble.user-bubble {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.message-bubble.admin-bubble {
+    background: #f8f9fa;
+    color: #333;
+    border: 1px solid #e9ecef;
+    border-bottom-left-radius: 4px;
+}
+
+/* Improve readability */
+.message-bubble {
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+.message-time {
+    font-size: 0.7rem;
+    color: #999;
+    margin-top: 6px;
+    padding: 0 4px;
+    font-weight: 400;
+}
+
+.chat-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #e5e5e5;
+    display: flex;
+    gap: 10px;
+    background: white;
+}
+
+.chat-footer input[type="text"] {
+    flex: 1;
+    padding: 12px 18px;
+    border: 2px solid #e5e5e5;
+    border-radius: 25px;
+    outline: none;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.chat-footer input[type="text"]:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.chat-footer button {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+}
+
+.chat-footer button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+}
+
+.chat-footer button:active {
+    transform: scale(0.95);
+}
+
+/* Chat image button */
+#chatImageBtn {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+#chatImageBtn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
+}
+
+/* Chat image display */
+.chat-image {
+    max-width: 250px;
+    max-height: 300px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chat-image:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Image Modal */
+.chat-image-modal {
+    display: none;
+    position: fixed;
+    z-index: 100000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.chat-image-modal img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.chat-image-modal-close {
+    position: absolute;
+    top: 30px;
+    right: 50px;
+    color: white;
+    font-size: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+    z-index: 100001;
+}
+
+.chat-image-modal-close:hover {
+    transform: scale(1.1);
+}
+
+/* Chat widget button improvement */
+.support-btn.chat-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.support-btn.chat-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+@media (max-width: 768px) {
+    .chat-widget {
+        width: calc(100vw - 40px);
+        height: calc(100vh - 200px);
+        right: 140px;
+        bottom: 20px;
+    }
+    
+    .floating-support-widget {
+        bottom: 20px;
+        right: 20px;
+    }
 }

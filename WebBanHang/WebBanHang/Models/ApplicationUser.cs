@@ -11,6 +11,7 @@ namespace WebBanHang.Models
         public String? Address { get; set; }
         public String? Age { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime JoinDate { get; set; } = DateTime.Now;
         
     }
 }

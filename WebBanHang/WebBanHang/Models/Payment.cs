@@ -22,6 +22,9 @@ namespace WebBanHang.Models
 
         public string? TransactionId { get; set; }
 
+        [StringLength(100)]
+        public string? BankName { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

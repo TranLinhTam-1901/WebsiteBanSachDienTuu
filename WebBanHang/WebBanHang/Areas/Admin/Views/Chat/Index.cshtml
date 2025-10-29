@@ -1,0 +1,288 @@
+@{
+    ViewData["Title"] = "Quản lý Chat";
+}
+
+<div class="container-fluid">
+    <h2><i class="bi bi-chat-dots me-2"></i>Quản lý Chat</h2>
+
+    <div class="row">
+        <!-- Danh sách conversations -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Cuộc trò chuyện</h5>
+                </div>
+                <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                    @if (ViewBag.Conversations != null)
+                    {
+                        var conversations = ViewBag.Conversations as dynamic;
+                        
+                        <div id="conversationList">
+                            @foreach (var conv in conversations)
+                            {
+                                var unreadCount = (int)(conv.UnreadCount ?? 0);
+                                var hasUnread = unreadCount > 0;
+                                
+                                <div class="conversation-item @(hasUnread ? "unread" : "")" 
+                                     data-conversation-id="@conv.Id"
+                                     data-user-id="@conv.UserId"
+                                     style="cursor: pointer; padding: 12px; margin-bottom: 8px; border-radius: 8px; background: @(hasUnread ? "#e3f2fd" : "white"); border: 1px solid #e0e0e0;"
+                                     onclick="loadConversation(@conv.Id)">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong>@(conv.UserFullName ?? conv.UserName ?? "Khách hàng")</strong>
+                                            <p class="text-muted mb-0 small" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                                                @(conv.LastMessage ?? "")
+                                            </p>
+                                        </div>
+                                        @if (hasUnread)
+                                        {
+                                            <span class="badge bg-danger">@unreadCount</span>
+                                        }
+                                    </div>
+                                    <small class="text-muted">@((DateTime)conv.LastMessageAt)</small>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat messages -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header" id="conversationHeader">
+                    <h5>Chọn cuộc trò chuyện để bắt đầu</h5>
+                </div>
+                <div class="card-body">
+                    <div id="chatArea" style="display: none;">
+                        <div id="chatMessages" style="max-height: 500px; overflow-y: auto; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <!-- Messages will be loaded here -->
+                        </div>
+                        <div class="mt-3">
+                            <div class="input-group">
+                                <input type="text" id="adminMessageInput" class="form-control" placeholder="Nhập tin nhắn...">
+                                <button class="btn btn-primary" id="adminSendBtn">
+                                    <i class="bi bi-send"></i> Gửi
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="noConversation" style="text-align: center; padding: 50px; color: #999;">
+                        <i class="bi bi-chat-dots fs-1"></i>
+                        <p>Chọn một cuộc trò chuyện để xem tin nhắn</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal for Admin -->
+<div id="adminImageModal" style="display: none; position: fixed; z-index: 100000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); justify-content: center; align-items: center;">
+    <span id="adminImageModalClose" style="position: absolute; top: 30px; right: 50px; color: white; font-size: 50px; font-weight: bold; cursor: pointer;">&times;</span>
+    <img id="adminModalImage" src="" alt="Hình ảnh" style="max-width: 90%; max-height: 90%; border-radius: 10px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);" />
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script>
+        let currentConversationId = null;
+        let currentUserId = null;
+        let connection = null;
+        
+        // Get current admin ID
+        const currentAdminId = '@(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "")';
+
+        // Initialize SignalR for Admin
+        connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chathub")
+            .build();
+
+        connection.start()
+            .then(() => {
+                console.log('Admin SignalR Connected');
+                connection.invoke("JoinAdminGroup");
+            })
+            .catch(err => console.error('SignalR Error:', err));
+
+        // Listen for new messages
+        connection.on("ReceiveMessage", function (senderId, message, messageId, createdAt, imageUrl) {
+            if (currentConversationId && senderId === currentUserId) {
+                displayMessage(message, senderId, createdAt, imageUrl);
+            }
+            console.log('Admin received message:', message);
+        });
+
+        // Display message in chat
+        function displayMessage(message, senderId, createdAt, imageUrl = null) {
+            const chatMessages = document.getElementById('chatMessages');
+            const isFromAdmin = senderId === currentAdminId;
+            const bubbleClass = isFromAdmin ? 'sent' : 'received';
+            const messageBubble = isFromAdmin ? 'admin-bubble' : 'user-bubble';
+            
+            let content = '';
+            if (imageUrl) {
+                content = `<img src="${imageUrl}" class="chat-image" alt="Hình ảnh" style="max-width: 200px; max-height: 200px; border-radius: 8px; cursor: pointer;" />`;
+            }
+            if (message) {
+                content += `<div class="message-bubble ${messageBubble}">${message}</div>`;
+            }
+            
+            const messageHtml = `
+                <div class="chat-message ${bubbleClass}">
+                    ${content}
+                    <small class="message-time">${new Date(createdAt).toLocaleString()}</small>
+                </div>
+            `;
+            chatMessages.innerHTML += messageHtml;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Load conversation messages
+        async function loadConversation(conversationId) {
+            currentConversationId = conversationId;
+            
+            // Get user ID from conversation
+            const convItem = document.querySelector(`[data-conversation-id="${conversationId}"]`);
+            currentUserId = convItem.getAttribute('data-user-id');
+            
+            // Update header
+            const userName = convItem.querySelector('strong').textContent;
+            document.getElementById('conversationHeader').innerHTML = `<h5>Chat với ${userName}</h5>`;
+            
+            // Show chat area
+            document.getElementById('chatArea').style.display = 'block';
+            document.getElementById('noConversation').style.display = 'none';
+            
+            // Load messages
+            const response = await fetch(`/Admin/Chat/GetMessages?conversationId=${conversationId}`);
+            const messages = await response.json();
+            
+            // Display messages
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+            
+            messages.forEach(msg => {
+                displayMessage(msg.content, msg.senderId, msg.createdAt, msg.imageUrl || null);
+            });
+            
+            // Mark as read
+            fetch(`/Admin/Chat/MarkAsRead?conversationId=${conversationId}`, { method: 'POST' });
+            
+            // Update UI
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                item.style.background = 'white';
+                item.classList.remove('unread');
+            });
+            convItem.style.background = '#f0f0f0';
+            
+            // Remove unread badge
+            const unreadBadge = convItem.querySelector('.badge');
+            if (unreadBadge) {
+                unreadBadge.remove();
+            }
+        }
+
+        // Send message
+        document.getElementById('adminSendBtn')?.addEventListener('click', async function() {
+            const input = document.getElementById('adminMessageInput');
+            const message = input.value.trim();
+            
+            if (!message || !currentConversationId || !currentUserId) return;
+            
+            try {
+                // Send via SignalR
+                await connection.invoke("SendAdminReply", currentUserId, message, currentAdminId);
+                displayMessage(message, currentAdminId, new Date(), null);
+                input.value = '';
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
+        });
+
+        // Image modal for admin
+        function initImageModal() {
+            const chatMessages = document.getElementById('chatMessages');
+            
+            chatMessages.addEventListener('click', function(e) {
+                if (e.target.classList.contains('chat-image')) {
+                    const modal = document.getElementById('adminImageModal');
+                    const modalImage = document.getElementById('adminModalImage');
+                    modalImage.src = e.target.src;
+                    modal.style.display = 'flex';
+                }
+            });
+
+            const modal = document.getElementById('adminImageModal');
+            const closeBtn = document.getElementById('adminImageModalClose');
+            
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+            }
+
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        initImageModal();
+    </script>
+    
+    <style>
+        .chat-message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-message.sent {
+            align-items: flex-end;
+        }
+        
+        .chat-message.received {
+            align-items: flex-start;
+        }
+        
+        .message-bubble {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+        
+        .admin-bubble {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .user-bubble {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+        
+        .conversation-item:hover {
+            background: #f5f5f5 !important;
+        }
+        
+        .conversation-item.unread {
+            font-weight: 600;
+        }
+    </style>
+}
