@@ -1,45 +1,416 @@
 ﻿@model WebBanHang.Models.Order
+@using WebBanHang.Models
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext _db
 @{
     ViewData["Title"] = "Thanh toán thành công";
 }
 
-<div class="alert alert-success mt-3 text-center p-4 shadow-sm" style="max-width: 700px; margin: 0 auto;">
-    <h2>✅ Thanh toán thành công!</h2>
-    <p><b>Mã đơn hàng:</b> @(string.IsNullOrEmpty(Model.OrderCode) ? $"#{Model.Id}" : Model.OrderCode)</p>
-    <p><b>Mã giao dịch:</b> <code>@Model.TransactionId</code></p>
-    <p class="mt-3">
-        🎉 Cảm ơn bạn đã mua sách tại <strong>3T-Books</strong>!
-        Sách của bạn đã được thêm vào thư viện cá nhân.
-    </p>
-</div>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Success Header -->
+            <div class="success-header text-center mb-5">
+                @if (Model.IsPaid)
+                {
+                    <div class="success-icon" style="color: #28a745;">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <h1 class="success-title" style="color: #28a745;">🎉 Đơn hàng đã được xác nhận!</h1>
+                    <p class="success-subtitle">Cảm ơn bạn đã mua sách tại <strong>3T-Books</strong>!</p>
+                }
+                else
+                {
+                    <div class="success-icon" style="color: #ffc107;">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <h1 class="success-title" style="color: #ffc107;">⏳ Đang chờ xử lý!</h1>
+                    <p class="success-subtitle">Cảm ơn bạn đã đặt hàng tại <strong>3T-Books</strong>!</p>
+                }
+            </div>
 
-<h4 class="mt-4">📚 Danh sách sách đã mua:</h4>
-<ul class="list-group mb-4">
-    @foreach (var item in Model.Items)
-    {
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <span><b>@item.Product.Name</b></span>
-            <div>
-                <a asp-controller="Library"
-                   asp-action="Read"
-                   asp-route-id="@item.Product.Id"
-                   class="btn btn-success btn-sm me-2">
-                    📖 Đọc ngay
-                </a>
-                <a asp-controller="Library"
-                   asp-action="Index"
-                   class="btn btn-outline-secondary btn-sm">
-                    📚 Về thư viện
+            <!-- Order Summary Card -->
+            <div class="order-summary-card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-receipt me-2"></i>
+                        Thông tin đơn hàng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label>Mã đơn hàng:</label>
+                                <span class="order-code">@(string.IsNullOrEmpty(Model.OrderCode) ? $"#{Model.Id}" : Model.OrderCode)</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label>Email:</label>
+                                <span>@(Model.Email ?? "N/A")</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label>Mã giao dịch:</label>
+                                <span class="transaction-id">@(Model.TransactionId ?? "Chưa có")</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label>Tổng tiền:</label>
+                                <span class="total-amount">@Model.Total.ToString("N0") ₫</span>
+                            </div>
+                        </div>
+                        @{
+                            var payment = await _db.Payments.FirstOrDefaultAsync(p => p.OrderId == Model.Id);
+                        }
+                        @if (payment != null && !string.IsNullOrEmpty(payment.BankName))
+                        {
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <label>Phương thức thanh toán:</label>
+                                    <span class="text-primary">Chuyển khoản - @payment.BankName</span>
+                                </div>
+                            </div>
+                        }
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label>Trạng thái:</label>
+                                @if (Model.IsPaid)
+                                {
+                                    <span class="status-badge completed">
+                                        <i class="bi bi-check-circle me-1"></i>Đã xác nhận
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge pending">
+                                        <i class="bi bi-clock me-1"></i>Chờ xác nhận
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Books List -->
+            <div class="books-list-card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-book me-2"></i>
+                        Sách đã mua (@Model.Items.Count sách)
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="books-list">
+                        @foreach (var item in Model.Items)
+                        {
+                            <div class="book-item">
+                                <div class="book-image">
+                                    <img src="@item.Product.ImageUrl" alt="@item.Product.Name" 
+                                         class="book-thumbnail">
+                                </div>
+                                <div class="book-details">
+                                    <h6 class="book-name">@item.Product.Name</h6>
+                                    <p class="book-author">@item.Product.Author</p>
+                                    <div class="book-price">
+                                        <span class="price">@item.UnitPrice.ToString("N0") ₫</span>
+                                        <span class="quantity">x @item.Quantity</span>
+                                    </div>
+                                </div>
+                                <div class="book-actions">
+                                    @if (Model.IsPaid)
+                                    {
+                                        <a asp-controller="Library" asp-action="Read" asp-route-id="@item.Product.Id" 
+                                           class="btn btn-success btn-sm">
+                                            <i class="bi bi-book me-1"></i>Đọc ngay
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-warning btn-sm" disabled>
+                                            <i class="bi bi-clock me-1"></i>Đang chờ xác nhận
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (!Model.IsPaid)
+            {
+                <!-- Notice for pending orders -->
+                <div class="alert alert-info mt-4">
+                    <h6 class="alert-heading"><i class="bi bi-info-circle me-2"></i>Lưu ý quan trọng</h6>
+                    <hr>
+                    <p class="mb-1"><strong>Đơn hàng của bạn đang chờ admin xác nhận.</strong></p>
+                    <p class="mb-1">Vui lòng kiểm tra thư viện sau khi admin xác nhận đơn hàng.</p>
+                    <p class="mb-0"><small>Sách sẽ được thêm vào thư viện của bạn tự động sau khi đơn hàng được xử lý.</small></p>
+                </div>
+            }
+
+            <!-- Action Buttons -->
+            <div class="action-buttons text-center">
+                @if (Model.IsPaid)
+                {
+                    <a asp-controller="Library" asp-action="Index" class="btn btn-primary btn-lg me-3">
+                        <i class="bi bi-collection me-2"></i>Về thư viện
+                    </a>
+                }
+                <a asp-controller="Order" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-receipt me-2"></i>Xem đơn hàng
                 </a>
             </div>
-        </li>
-    }
-</ul>
-
-<div class="text-center">
-    <a asp-controller="Order"
-       asp-action="Index"
-       class="btn btn-outline-primary">
-        ← Quay lại danh sách đơn hàng
-    </a>
+        </div>
+    </div>
 </div>
+
+<style>
+    /* Success Header */
+    .success-header {
+        padding: 40px 0;
+    }
+
+    .success-icon {
+        font-size: 5rem;
+        color: #28a745;
+        margin-bottom: 20px;
+    }
+
+    .success-title {
+        color: #28a745;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .success-subtitle {
+        color: #6c757d;
+        font-size: 1.2rem;
+    }
+
+    /* Order Summary Card */
+    .order-summary-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+    }
+
+    .order-summary-card .card-header {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 20px;
+        border: none;
+    }
+
+    .order-summary-card .card-body {
+        padding: 25px;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-item label {
+        font-weight: 600;
+        color: #495057;
+        margin: 0;
+    }
+
+    .info-item span {
+        color: #6c757d;
+        text-align: right;
+    }
+
+    .order-code {
+        font-weight: 700;
+        color: #1976d2 !important;
+        font-family: 'Courier New', monospace;
+    }
+
+    .transaction-id {
+        font-family: 'Courier New', monospace;
+        background: #f8f9fa;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .total-amount {
+        font-weight: 700;
+        color: #28a745 !important;
+        font-size: 1.1rem;
+    }
+
+    /* Books List Card */
+    .books-list-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+        overflow: hidden;
+    }
+
+    .books-list-card .card-header {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        padding: 20px;
+        border: none;
+    }
+
+    .books-list {
+        padding: 20px;
+    }
+
+    .book-item {
+        display: flex;
+        align-items: center;
+        padding: 20px 0;
+        border-bottom: 1px solid #f1f3f4;
+    }
+
+    .book-item:last-child {
+        border-bottom: none;
+    }
+
+    .book-image {
+        margin-right: 20px;
+    }
+
+    .book-thumbnail {
+        width: 80px;
+        height: 100px;
+        object-fit: contain;
+        border-radius: 8px;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+    }
+
+    .book-details {
+        flex: 1;
+    }
+
+    .book-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #495057;
+        margin: 0 0 5px 0;
+    }
+
+    .book-author {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0 0 10px 0;
+    }
+
+    .book-price {
+        display: flex;
+        gap: 15px;
+    }
+
+    .price {
+        color: #28a745;
+        font-weight: 600;
+    }
+
+    .quantity {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .book-actions {
+        text-align: right;
+    }
+
+    /* Status Badge */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-badge.completed {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .status-badge.pending {
+        background: linear-gradient(135deg, #ffc107, #ff9800);
+        color: white;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        padding: 30px 0;
+    }
+
+    .action-buttons .btn {
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .action-buttons .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .success-icon {
+            font-size: 4rem;
+        }
+
+        .success-title {
+            font-size: 1.8rem;
+        }
+
+        .book-item {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .book-image {
+            margin-right: 0;
+            margin-bottom: 15px;
+        }
+
+        .book-details {
+            margin-bottom: 15px;
+        }
+
+        .book-actions {
+            text-align: center;
+        }
+
+        .action-buttons .btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .action-buttons .btn:last-child {
+            margin-bottom: 0;
+        }
+    }
+</style>

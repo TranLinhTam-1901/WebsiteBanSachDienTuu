@@ -5,104 +5,126 @@
     Layout = "_LayoutAdmin";
 }
 
-<h2 class="mb-4"><i class="fa fa-wrench"></i> Quản lý đơn hàng</h2>
+<div class="container-fluid py-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0 fw-bold">Danh sách đơn hàng</h5>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-secondary" id="orderCount" data-total="@Model.Count()">@Model.Count() đơn</span>
+            <div class="input-group" style="width: 350px;">
+                <input type="text" id="orderSearch" class="form-control" 
+                       placeholder="Tìm theo mã đơn/email..." />
+                <button class="btn btn-outline-primary" type="button" id="searchBtn">
+                    <i class="bi bi-search"></i> Tìm
+                </button>
+                <button class="btn btn-outline-danger" type="button" id="clearSearchBtn" style="display: none;">
+                    <i class="bi bi-x-lg"></i> Xóa
+                </button>
+            </div>
+        </div>
+    </div>
 
-<!-- Bỏ thông báo admin -->
-
-<table class="table table-hover align-middle">
-    <thead class="table-dark">
-        <tr>
-            <th>ID</th>
-            <th>Người dùng</th>
-            <th>Tổng tiền</th>
-            <th>Ngày tạo</th>
-            <th>Trạng thái</th>
-            <th>Thanh toán</th> <!-- ⚠️ [CHỈNH 2] Thêm cột thanh toán -->
-            <th class="text-center">Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var order in Model)
-        {
-            <tr>
-                <td>@(string.IsNullOrEmpty(order.OrderCode) ? $"#{order.Id}" : order.OrderCode)</td>
-                <td>@order.User?.FullName</td>
-                <td>@order.Total.ToString("N0") đ</td>
-                <td>@order.CreatedAt.ToString("dd/MM/yyyy")</td>
-                <td>
-                    @if (order.Status == "Pending")
+    @if (!Model.Any())
+    {
+        <div class="text-center text-muted py-5">
+            <small>Không có đơn hàng nào</small>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">Mã đơn</th>
+                        <th style="width: 150px;">Ngày</th>
+                        <th>Email</th>
+                        <th style="width: 120px;">Trạng thái</th>
+                        <th style="width: 100px;" class="text-end">Tổng</th>
+                        <th style="width: 100px;" class="text-center">Thanh toán</th>
+                        <th style="width: 280px;" class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
                     {
-                        <span class="badge bg-warning text-dark">Chờ xác nhận</span>
+                        <tr>
+                            <td class="fw-bold text-primary">@(string.IsNullOrEmpty(order.OrderCode) ? $"#{order.Id}" : order.OrderCode)</td>
+                            <td class="small text-muted">@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="small">@order.User?.Email</td>
+                            <td>
+                                @switch (order.Status)
+                                {
+                                    case "Pending":
+                                        <span class="badge bg-warning text-dark">Chờ xác nhận</span>
+                                        break;
+                                    case "Confirmed":
+                                        <span class="badge bg-info">Đã xác nhận</span>
+                                        break;
+                                    case "Completed":
+                                        <span class="badge bg-success">Hoàn tất</span>
+                                        break;
+                                    case "Cancelled":
+                                        <span class="badge bg-danger">Đã hủy</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">N/A</span>
+                                        break;
+                                }
+                            </td>
+                            <td class="text-end fw-bold text-success">@order.Total.ToString("N0") đ</td>
+                            <td class="text-center">
+                                @if (order.IsPaid)
+                                {
+                                    <span class="badge bg-success">Đã thanh toán</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Chưa thanh toán</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                            onclick="showOrderDetails(@order.Id)">
+                                        <i class="bi bi-eye"></i> Chi tiết
+                                    </button>
+                                    
+                                    @if (order.Status == "Pending")
+                                    {
+                                        <form asp-action="Confirm" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@order.Id" />
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                <i class="bi bi-check"></i> Xác nhận
+                                            </button>
+                                        </form>
+                                        <form asp-action="Cancel" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@order.Id" />
+                                            <button type="submit" class="btn btn-sm btn-danger"
+                                                    onclick="return confirm('Xác nhận hủy đơn hàng này?')">
+                                                <i class="bi bi-x"></i> Hủy
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (order.Status == "Confirmed")
+                                    {
+                                        <form asp-action="Complete" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@order.Id" />
+                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-check-circle"></i> Hoàn tất
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
                     }
-                    else if (order.Status == "Confirmed")
-                    {
-                        <span class="badge bg-success">Đã xác nhận</span>
-                    }
-                    else if (order.Status == "Canceled")
-                    {
-                        <span class="badge bg-danger">Đã hủy</span>
-                    }
-                    else if (order.Status == "Completed")
-                    {
-                        <span class="badge bg-primary">Hoàn tất</span>
-                    }
-                </td>
-                <td>
-                    <!-- ⚠️ [CHỈNH 3] Hiển thị rõ trạng thái thanh toán -->
-                    @if (order.IsPaid)
-                    {
-                        <span class="badge bg-success">Đã TT</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary">Chưa TT</span>
-                    }
-                </td>
-                <td class="text-center">
-                    <div class="d-flex justify-content-center gap-2">
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
 
-                        <!-- Nút xem chi tiết -->
-                        <button class="btn btn-sm btn-info" onclick="showOrderDetails(@order.Id)">
-                            <i class="fa fa-eye"></i> Xem
-                        </button>
-
-                        <!-- ⚠️ [CHỈNH 4] Admin chỉ được xác nhận / hủy nếu đơn đang chờ -->
-                        @if (order.Status == "Pending")
-                        {
-                            <form asp-action="Confirm" method="post" class="d-inline">
-                                <input type="hidden" name="id" value="@order.Id" />
-                                <button class="btn btn-sm btn-success" type="submit">
-                                    <i class="fa fa-check"></i> Xác nhận
-                                </button>
-                            </form>
-
-                            <form asp-action="Cancel" method="post" class="d-inline">
-                                <input type="hidden" name="id" value="@order.Id" />
-                                <button class="btn btn-sm btn-danger" type="submit">
-                                    <i class="fa fa-times"></i> Hủy
-                                </button>
-                            </form>
-                        }
-
-                        <!-- ⚠️ [CHỈNH 5] Nếu đơn đã xác nhận mà chưa thanh toán -->
-                        @if (order.Status == "Confirmed" && !order.IsPaid)
-                        {
-                            <span class="badge bg-info">Đang chờ thanh toán</span>
-                        }
-
-                        <!-- ⚠️ [CHỈNH 6] Nếu đơn đã thanh toán -->
-                        @if (order.IsPaid && order.Status == "Completed")
-                        {
-                            <span class="badge bg-primary">Hoàn tất</span>
-                        }
-                    </div>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<!-- Modal hiển thị chi tiết đơn -->
+<!-- Order Details Modal -->
 <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
@@ -140,5 +162,93 @@
                         <div class="alert alert-danger">Không thể tải chi tiết đơn hàng.</div>`;
                 });
         }
+
+        // Search functionality
+        const searchInput = document.getElementById('orderSearch');
+        const searchBtn = document.getElementById('searchBtn');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const orderCount = document.getElementById('orderCount');
+        const tbody = document.querySelector('tbody');
+
+        // Get all original rows
+        const allRows = Array.from(document.querySelectorAll('tbody tr'));
+        const totalOrders = parseInt(orderCount.getAttribute('data-total'));
+
+        function performSearch() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                // Show all rows
+                allRows.forEach(row => {
+                    row.style.display = '';
+                });
+                orderCount.textContent = `${totalOrders} đơn`;
+                clearSearchBtn.style.display = 'none';
+                return;
+            }
+
+            // Filter rows
+            let visibleCount = 0;
+            allRows.forEach(row => {
+                const orderCode = row.querySelector('td:first-child')?.textContent?.toLowerCase() || '';
+                const email = row.querySelector('td:nth-child(3)')?.textContent?.toLowerCase() || '';
+                
+                if (orderCode.includes(searchTerm) || email.includes(searchTerm)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            orderCount.textContent = `${visibleCount} đơn`;
+            clearSearchBtn.style.display = visibleCount < totalOrders ? 'block' : 'none';
+
+            // Show message if no results
+            if (visibleCount === 0) {
+                const noResultsRow = document.getElementById('noResultsRow');
+                if (!noResultsRow) {
+                    const row = document.createElement('tr');
+                    row.id = 'noResultsRow';
+                    row.innerHTML = `
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="bi bi-search"></i><br>
+                            Không tìm thấy đơn hàng nào
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                } else {
+                    noResultsRow.style.display = '';
+                }
+            } else {
+                const noResultsRow = document.getElementById('noResultsRow');
+                if (noResultsRow) {
+                    noResultsRow.style.display = 'none';
+                }
+            }
+        }
+
+        // Search on button click
+        searchBtn.addEventListener('click', performSearch);
+
+        // Search on Enter key
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // Clear search
+        clearSearchBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            performSearch();
+        });
+
+        // Real-time search as you type (optional)
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(performSearch, 300);
+        });
     </script>
 }

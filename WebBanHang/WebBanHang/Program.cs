@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using WebBanHang.Data;
 using WebBanHang.Models;
 using WebBanHang.Repositories;
+using WebBanHang.Hubs;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,6 +51,17 @@ builder.Services.AddControllersWithViews()
 
 builder.Services.AddScoped<IProductRepository, EFProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, EFCategoryRepository>();
+
+// Add SignalR
+builder.Services.AddSignalR();
+
+// Configure Session
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -66,6 +78,7 @@ app.UseRouting();
 
 // Đặt sau app.UseRouting()
 
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapStaticAssets();
@@ -82,6 +95,9 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 app.MapRazorPages();
+
+// Map SignalR Hub
+app.MapHub<ChatHub>("/chathub");
 
 using (var scope = app.Services.CreateScope())
 {

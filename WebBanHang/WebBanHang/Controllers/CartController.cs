@@ -44,6 +44,30 @@ namespace WebBanHang.Controllers
             return View(cart);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetCount()
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                {
+                    return Json(new { count = 0 });
+                }
+
+                var cart = await _db.Carts
+                    .Include(c => c.Items)
+                    .FirstOrDefaultAsync(c => c.UserId == user.Id);
+
+                var count = cart?.Items?.Sum(i => i.Quantity) ?? 0;
+                return Json(new { count });
+            }
+            catch
+            {
+                return Json(new { count = 0 });
+            }
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(int productId, int quantity = 1)
@@ -55,16 +79,20 @@ namespace WebBanHang.Controllers
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                 {
-                    TempData["Error"] = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
-                    return RedirectToAction("Login", "Account", new { area = "Identity" });
+                    return Json(new { 
+                        success = false,
+                        message = "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+                    });
                 }
 
                 var cart = await GetOrCreateCart();
                 var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == productId);
                 if (product == null) 
                 {
-                    TempData["Error"] = "Không tìm thấy sản phẩm.";
-                    return RedirectToAction("Index", "Product");
+                    return Json(new { 
+                        success = false,
+                        message = "Không tìm thấy sản phẩm."
+                    });
                 }
 
                 bool alreadyOwned = await _db.Orders
@@ -72,17 +100,18 @@ namespace WebBanHang.Controllers
                                    o.Items.Any(i => i.ProductId == productId));
                 if (alreadyOwned)
                 {
-                    TempData["Error"] = "Bạn đã sở hữu sách này trong thư viện của mình.";
-                    return RedirectToAction("Index", "Library");
+                    return Json(new { 
+                        success = false,
+                        message = "Bạn đã sở hữu sách này trong thư viện của mình."
+                    });
                 }
 
                 // Kiểm tra sản phẩm đã có trong giỏ hàng chưa
                 var existingItem = cart.Items.FirstOrDefault(i => i.ProductId == productId);
-                if (existingItem != null)
-                {
-                    TempData["Info"] = $"Sản phẩm '{product.Name}' đã có trong giỏ hàng.";
-                }
-                else
+                bool isNewItem = existingItem == null;
+                
+                // Thêm sản phẩm vào giỏ nếu chưa có
+                if (existingItem == null)
                 {
                     cart.Items.Add(new CartItem
                     {
@@ -90,24 +119,35 @@ namespace WebBanHang.Controllers
                         Quantity = 1,
                         UnitPrice = product.Price
                     });
-                    TempData["Success"] = $"Đã thêm '{product.Name}' vào giỏ hàng.";
+                    await _db.SaveChangesAsync();
                 }
 
-                await _db.SaveChangesAsync();
-
-                //// Chỉ hiển thị thông báo, không redirect về giỏ hàng
-                //if (!string.IsNullOrEmpty(Request.Headers["Referer"]))
-                //{
-                //    return Redirect(Request.Headers["Referer"].ToString());
-                //}
-                //return RedirectToAction("Index", "Product");
-                return RedirectToAction("Index", "Cart");
-
+                // Cập nhật lại cart để lấy count mới nhất
+                var updatedCart = await _db.Carts
+                    .Include(c => c.Items)
+                    .FirstOrDefaultAsync(c => c.UserId == user.Id);
+                    
+                var cartCount = updatedCart?.Items?.Sum(i => i.Quantity) ?? 0;
+                
+                // Luôn trả về success=true để hiển thị notification đúng cách
+                // Chỉ khác nhau ở message
+                return Json(new { 
+                    success = true,
+                    isNewItem = isNewItem,
+                    message = isNewItem 
+                        ? $"Đã thêm '{product.Name}' vào giỏ hàng." 
+                        : $"Sản phẩm '{product.Name}' đã có trong giỏ hàng.",
+                    cartCount = cartCount,
+                    productName = product.Name
+                });
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.";
-                return RedirectToAction("Index", "Product");
+                // Trả về JSON lỗi thay vì redirect
+                return Json(new { 
+                    success = false,
+                    message = "Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng."
+                });
             }
         }
 
@@ -148,6 +188,11 @@ namespace WebBanHang.Controllers
 
             _db.CartItems.Remove(item);
             await _db.SaveChangesAsync();
+            
+            // Cập nhật localStorage
+            var cartCount = cart.Items.Count - 1;
+            TempData["CartCount"] = cartCount;
+            
             return RedirectToAction(nameof(Index));
         }
 
@@ -159,6 +204,10 @@ namespace WebBanHang.Controllers
             var cart = await GetOrCreateCart();
             _db.CartItems.RemoveRange(cart.Items);
             await _db.SaveChangesAsync();
+            
+            // Clear localStorage
+            TempData["CartCount"] = 0;
+            
             return RedirectToAction(nameof(Index));
         }
     }

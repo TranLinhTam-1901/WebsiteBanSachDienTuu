@@ -94,8 +94,14 @@
                     </div>
                 </div>
 
-                <!-- PHẦN 5: NỘI DUNG PDF -->
-                <h5 class="fw-bold text-dark mb-3">📂 File nội dung sách (PDF)</h5>
+                <!-- PHẦN 5: NỘI DUNG SÁCH -->
+                <h5 class="fw-bold text-dark mb-3">📂 Nội dung sách (PDF)</h5>
+                <div class="alert alert-info d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-info-circle"></i>
+                    <small>
+                        💡 <strong>Mẹo:</strong> Sử dụng <a asp-area="Admin" asp-controller="BookEditor" asp-action="Index" class="alert-link fw-bold">Công cụ soạn sách</a> để viết và quản lý từng chương, sau đó áp dụng vào đây!
+                    </small>
+                </div>
                 <div class="bg-white p-4 border rounded shadow-sm mb-4">
                     <label for="PdfFile" class="form-label fw-semibold text-dark">Chọn file PDF</label>
                     <input type="file" name="PdfFile" accept="application/pdf" class="form-control shadow-sm" id="PdfFile" />
@@ -138,6 +144,20 @@
             } else {
                 coverPreview.style.display = 'none';
                 coverText.style.display = 'block';
+            }
+        });
+
+        // Tự động load nội dung từ BookEditor
+        window.addEventListener('DOMContentLoaded', function() {
+            const bookContentForProduct = localStorage.getItem('bookContentForProduct');
+            if (bookContentForProduct) {
+                // Hiển thị thông báo
+                if (typeof NotificationSystem !== 'undefined') {
+                    NotificationSystem.success('Đã tải nội dung từ Công cụ soạn sách! Upload PDF để sử dụng.', 'Thành công');
+                }
+                
+                // Xóa localStorage sau khi hiển thị thông báo
+                setTimeout(() => localStorage.removeItem('bookContentForProduct'), 1000);
             }
         });
     </script>
@@ -194,4 +214,9 @@
         background-color: #f1f1f1;
         transition: 0.2s;
     }
+
+    .alert-info {
+        border-left: 4px solid #0dcaf0;
+    }
 </style>
+

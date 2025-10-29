@@ -12,11 +12,13 @@ namespace WebBanHang.Areas.Admin.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ApplicationDbContext _context;
 
-        public CustomerController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public CustomerController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, ApplicationDbContext context)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _context = context;
         }
 
         public async Task<IActionResult> Index()
@@ -51,9 +53,70 @@ namespace WebBanHang.Areas.Admin.Controllers
         public async Task<IActionResult> Delete(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
-            if (user == null) return NotFound();
+            if (user == null)
+            {
+                TempData["Error"] = "Không tìm thấy user!";
+                return RedirectToAction(nameof(Index));
+            }
 
-            await _userManager.DeleteAsync(user);
+            // Kiểm tra nếu user là Admin hiện tại đang đăng nhập
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (user.Id == currentUser?.Id)
+            {
+                TempData["Error"] = "Không thể xóa tài khoản của chính mình!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Kiểm tra nếu user là Admin khác
+            var roles = await _userManager.GetRolesAsync(user);
+            if (roles.Contains(SD.Role_Admin))
+            {
+                TempData["Error"] = "Không thể xóa tài khoản Admin!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                // Xóa Reviews của user
+                var reviews = _context.Reviews.Where(r => r.UserId == id);
+                _context.Reviews.RemoveRange(reviews);
+
+                // Xóa ReadingProgress của user
+                var readingProgresses = _context.ReadingProgresses.Where(r => r.UserId == id);
+                _context.ReadingProgresses.RemoveRange(readingProgresses);
+
+                // Xóa Conversations và Messages liên quan
+                var conversations = _context.Conversations
+                    .Include(c => c.Messages)
+                    .Where(c => c.UserId == id)
+                    .ToList();
+
+                foreach (var conversation in conversations)
+                {
+                    _context.Messages.RemoveRange(conversation.Messages);
+                    _context.Conversations.Remove(conversation);
+                }
+
+                // Lưu thay đổi về conversations, reviews và reading progress
+                await _context.SaveChangesAsync();
+
+                // Xóa user (Orders và Cart sẽ được xóa tự động do Cascade Delete)
+                var result = await _userManager.DeleteAsync(user);
+                
+                if (result.Succeeded)
+                {
+                    TempData["Success"] = "Đã xóa tài khoản thành công!";
+                }
+                else
+                {
+                    TempData["Error"] = "Không thể xóa tài khoản. Lỗi: " + string.Join(", ", result.Errors.Select(e => e.Description));
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Lỗi khi xóa tài khoản: " + ex.Message;
+            }
+
             return RedirectToAction(nameof(Index));
         }
 

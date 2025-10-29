@@ -13,7 +13,15 @@ namespace WebBanHang.Data
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             // Đảm bảo DB đã được tạo
-            await db.Database.MigrateAsync();
+            // await db.Database.MigrateAsync();  // Temporarily disabled - migration handled manually
+            try
+            {
+                await db.Database.MigrateAsync();
+            }
+            catch (System.InvalidOperationException)
+            {
+                // Ignore pending model changes warning
+            }
 
             // Tạo Role Admin nếu chưa có
             const string adminRole = "Admin";

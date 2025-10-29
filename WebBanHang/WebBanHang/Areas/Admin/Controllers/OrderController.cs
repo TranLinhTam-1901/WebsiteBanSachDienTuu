@@ -78,15 +78,53 @@ namespace WebBanHang.Areas.Admin.Controllers
                 return RedirectToAction("Manage");
             }
 
-
-
+            // Khi admin xác nhận -> đánh dấu đã thanh toán và chuyển trạng thái
             order.Status = "Confirmed";
+            order.IsPaid = true;
+            order.TransactionId = Guid.NewGuid().ToString("N").Substring(0, 12);
+            
+            // Tạo payment record
+            _context.Payments.Add(new Payment
+            {
+                OrderId = order.Id,
+                Amount = order.Total,
+                Method = "Bank Transfer",
+                Status = "Success",
+                TransactionId = order.TransactionId
+            });
+            
             await _context.SaveChangesAsync();
-            // Bỏ thông báo admin
+            
+            TempData["Success"] = "Đơn hàng đã được xác nhận thành công!";
             return RedirectToAction("Manage");
         }
 
         
+        [HttpPost]
+        public async Task<IActionResult> Complete(int id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null) return NotFound();
+
+            if (!order.IsPaid)
+            {
+                TempData["Error"] = "Đơn hàng chưa được thanh toán, không thể hoàn tất.";
+                return RedirectToAction("Manage");
+            }
+
+            if (order.Status == "Completed")
+            {
+                TempData["Error"] = "Đơn này đã hoàn tất rồi.";
+                return RedirectToAction("Manage");
+            }
+
+            order.Status = "Completed";
+            await _context.SaveChangesAsync();
+            
+            TempData["Success"] = "Đơn hàng đã hoàn tất!";
+            return RedirectToAction("Manage");
+        }
+
         [HttpPost]
         public async Task<IActionResult> Cancel(int id)
         {
@@ -99,7 +137,7 @@ namespace WebBanHang.Areas.Admin.Controllers
                 return RedirectToAction("Manage");
             }
 
-            order.Status = "Canceled";
+            order.Status = "Cancelled";
             await _context.SaveChangesAsync();
             // Bỏ thông báo admin
             return RedirectToAction("Manage");
