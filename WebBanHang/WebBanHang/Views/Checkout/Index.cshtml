@@ -21,7 +21,7 @@
     <div class="col-lg-7">
         <div class="card shadow-sm">
             <div class="card-body">
-                <h5 class="card-title mb-3">Thông tin giao hàng</h5>
+                <h5 class="card-title mb-3">Thông tin đơn hàng</h5>
                 <form asp-action="PlaceOrder" method="post" class="row g-3">
                     @Html.AntiForgeryToken()
                     
@@ -38,7 +38,7 @@
                             <input type="hidden" name="selectedItems" value="@item.Id" />
                         }
                     }
-                    
+
                     <div class="col-md-12">
                         <label class="form-label">Email</label>
                         <input type="email" name="email" class="form-control" 
@@ -60,9 +60,15 @@
                                required />
                     </div>
 
+                    @* <div class="col-12">
+                        <label class="form-label">Ghi chú</label>
+                        <textarea name="note" class="form-control" rows="2" placeholder="Ví dụ: Giao giờ hành chính, liên hệ trước khi gửi..."></textarea>
+                    </div> *@
+
                     <div class="col-12 d-grid">
                         <button type="submit" class="btn btn-success btn-lg">Xác nhận đặt hàng</button>
                     </div>
+
                 </form>
             </div>
         </div>

@@ -2,22 +2,27 @@
 
 @{
     ViewData["Title"] = "Chi tiết đơn hàng";
-    Layout = null; // ⚠️ [CHỈNH 1] Modal partial không cần layout
+    Layout = null; 
 }
 
-<div>
-    <p><strong>Mã đơn hàng:</strong> @(string.IsNullOrEmpty(Model.OrderCode) ? $"#{Model.Id}" : Model.OrderCode)</p>
-    <p><strong>Khách hàng:</strong> @Model.User?.Email</p>
+<div class="p-3">
+
+    <!-- 🧩 Thông tin người đặt -->
+    <h6 class="fw-bold mb-3 text-secondary">
+        👤 Thông tin người đặt
+    </h6>
+    <p><strong>Người đặt:</strong> @Model.FullName</p>
+    <p><strong>Email:</strong> @Model.User?.Email</p>
     <p><strong>SĐT:</strong> @Model.Phone</p>
+    <p><strong>Ngày đặt:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
 
     <p>
-        <strong>Trạng thái:</strong>
-        <!-- ⚠️ [CHỈNH 2] Badge trạng thái rõ ràng -->
+        <strong>Trạng thái đơn hàng:</strong>
         <span class="badge bg-@(Model.Status switch {
             "Pending" => "warning text-dark",
-            "Confirmed" => "success",
+            "Confirmed" => "info text-dark",
+            "Completed" => "success",
             "Canceled" => "danger",
-            "Completed" => "primary",
             _ => "secondary"
         })">
             @Model.Status
@@ -25,8 +30,7 @@
     </p>
 
     <p>
-        <strong>Thanh toán:</strong>
-        <!-- ⚠️ [CHỈNH 3] Hiển thị trạng thái thanh toán riêng -->
+        <strong>Trạng thái thanh toán:</strong>
         @if (Model.IsPaid)
         {
             <span class="badge bg-success">Đã thanh toán</span>
@@ -37,10 +41,11 @@
         }
     </p>
 
-    <hr />
+    <hr class="my-3" />
 
-    <h6>Danh sách sản phẩm</h6>
-    <table class="table table-bordered table-sm">
+    <!-- 📚 Danh sách sản phẩm -->
+    <h6 class="fw-bold mb-2 text-secondary">📦 Danh sách sản phẩm</h6>
+    <table class="table table-bordered table-sm align-middle">
         <thead class="table-light">
             <tr>
                 <th>Tên sách</th>
@@ -62,5 +67,8 @@
         </tbody>
     </table>
 
-    <p class="fw-bold text-end">Tổng cộng: @Model.Total.ToString("N0") đ</p>
+    <p class="fw-bold text-end fs-5 mt-3">
+        Tổng cộng: <span class="text-danger">@Model.Total.ToString("N0") đ</span>
+    </p>
+
 </div>

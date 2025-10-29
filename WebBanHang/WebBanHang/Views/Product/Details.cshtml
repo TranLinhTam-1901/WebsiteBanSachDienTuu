@@ -45,6 +45,36 @@
                                 Thể loại: @Model.Category?.Name
                             </span>
                         </div>
+                        <!-- ⭐ ĐÁNH GIÁ TRUNG BÌNH -->
+                        @if (ViewBag.ReviewCount > 0)
+                        {
+                            <div class="mb-3 d-flex align-items-center">
+                                <span class="text-warning fs-5 me-2">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= Math.Round((double)ViewBag.AvgRating))
+                                        {
+                                            <i class="bi bi-star-fill"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star"></i>
+                                        }
+                                    }
+                                </span>
+                                <span class="text-secondary">
+                                    <strong>@ViewBag.AvgRating.ToString("0.0")</strong>/5
+                                    (<span>@ViewBag.ReviewCount</span> đánh giá)
+                                </span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mb-3 text-muted fst-italic">
+                                ⭐ Chưa có đánh giá nào
+                            </div>
+                        }
+
                     </div>
 
                     <!-- GIÁ + NÚT MUA -->
@@ -57,12 +87,10 @@
 
                         @if (User.Identity.IsAuthenticated)
                         {
-                            // Kiểm tra xem người dùng đã sở hữu sách này chưa
                             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
                             bool alreadyOwned = false;
                             if (!string.IsNullOrEmpty(userId))
                             {
-                                // Kiểm tra trong database (có thể cache lại để tối ưu)
                                 alreadyOwned = ViewBag.AlreadyOwned ?? false;
                             }
 
@@ -101,7 +129,7 @@
                                     <i class="bi bi-lightning-fill me-2"></i>
                                     Mua ngay @Model.Price.ToString("N0")đ
                                 </a>
-                                <a asp-area="Identity" asp-page="/Account/Login" 
+                                <a asp-area="Identity" asp-page="/Account/Login"
                                    asp-route-returnUrl="@Url.Action("Details", "Product", new { id = Model.Id })"
                                    class="btn btn-add-cart w-100">
                                     <i class="bi bi-cart-plus me-2"></i>
@@ -120,7 +148,6 @@
             </div>
         </div>
     </div>
-</div>
 
 <!-- Đánh giá và Bình luận -->
 <div class="container mt-5">

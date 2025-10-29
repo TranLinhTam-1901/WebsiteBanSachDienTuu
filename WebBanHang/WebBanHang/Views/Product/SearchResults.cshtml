@@ -1,13 +1,7 @@
 ﻿@model IEnumerable<WebBanHang.Models.Product>
+
 @{
-    ViewData["Title"] = "Tìm kiếm nâng cao";
-}
-@if (ViewBag.ErrorMessage != null)
-{
-    <div class="alert alert-warning text-center fw-semibold mt-3">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        @ViewBag.ErrorMessage
-    </div>
+    ViewData["Title"] = "Kết quả tìm kiếm";
 }
 
 <div class="container py-4">
@@ -68,7 +62,9 @@
 
     @if (ViewBag.Message != null)
     {
-        <p class="text-muted mb-3">@ViewBag.Message</p>
+        <div class="alert alert-info text-center shadow-sm mb-4">
+            @Html.Raw(ViewBag.Message)
+        </div>
     }
 
     <div class="row g-4">
@@ -84,9 +80,15 @@
                         <a asp-action="Details" asp-route-id="@product.Id" class="stretched-link"></a>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
+            }
+        </div>
+    }
+    @* else
+    {
+        <div class="alert alert-warning text-center fw-semibold shadow-sm">
+            <i class="bi bi-exclamation-circle"></i> Không tìm thấy sản phẩm phù hợp.
+        </div>
+    } *@
 </div>
 
 <style>
@@ -109,8 +111,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         line-height: 1.4;
-        max-height: 2.8em; /* 2 dòng x 1.4 line-height */
-        word-wrap: break-word;
+        min-height: 2.8em;
     }
 
     /* Advanced search form styling */
@@ -177,18 +178,3 @@
         font-weight: 500;
     }
 </style>
-
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const display = document.getElementById("priceDisplay");
-        const hidden = document.getElementById("maxPrice");
-
-        display.addEventListener("input", () => {
-            // Xóa ký tự không phải số
-            let raw = display.value.replace(/\D/g, "");
-            hidden.value = raw; // gán lại giá trị thực gửi về server
-            // Format hiển thị: 1.000.000
-            display.value = new Intl.NumberFormat("vi-VN").format(raw);
-        });
-    });
-</script>

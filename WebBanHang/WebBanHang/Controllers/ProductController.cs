@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using WebBanHang.Models;
+using WebBanHang.Helpers;
+
 
 namespace WebBanHang.Controllers
 {
@@ -13,6 +15,7 @@ namespace WebBanHang.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationDbContext _context;
         public ProductController(ApplicationDbContext db, UserManager<ApplicationUser> userManager, ApplicationDbContext context)
         {
             _context = context;
@@ -70,11 +73,25 @@ namespace WebBanHang.Controllers
         {
             var product = await _db.Products
                 .Include(p => p.Category)
+                 .Include(p => p.Reviews)            
+                    .ThenInclude(r => r.User)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
                 return NotFound();
+
+            // ✅ Tính trung bình rating
+            double averageRating = 0;
+            int reviewCount = 0;
+            if (product.Reviews != null && product.Reviews.Any())
+            {
+                averageRating = product.Reviews.Average(r => r.Rating);
+                reviewCount = product.Reviews.Count();
+            }
+
+            ViewBag.AvgRating = averageRating;
+            ViewBag.ReviewCount = reviewCount;
 
             var user = await _userManager.GetUserAsync(User);
             bool alreadyOwned = false;
@@ -168,77 +185,87 @@ namespace WebBanHang.Controllers
         }
 
 
-        private readonly ApplicationDbContext _context;
-
         [HttpGet]
         public IActionResult Search(string keyword, decimal? minPrice, decimal? maxPrice, int? categoryId, string author, bool? inStock)
         {
-            // ⚠️ Nếu không nhập từ khóa hoặc chọn bộ lọc nào
+            // ✅ Lấy danh mục để hiển thị dropdown
+            ViewBag.Categories = _context.Categories.ToList();
+
+            // ✅ Nếu không nhập gì
             if (string.IsNullOrWhiteSpace(keyword)
                 && !minPrice.HasValue && !maxPrice.HasValue
                 && !categoryId.HasValue && string.IsNullOrWhiteSpace(author)
                 && !inStock.HasValue)
             {
-                ViewBag.ErrorMessage = " Vui lòng nhập từ khóa hoặc chọn bộ lọc tìm kiếm.";
-                ViewBag.Categories = _context.Categories.ToList();
-                return View("SearchResults", new List<Product>()); // ✅ KHÔNG redirect
+                ViewBag.ErrorMessage = "Vui lòng nhập từ khóa hoặc chọn bộ lọc tìm kiếm.";
+                return View("SearchResults", new List<Product>());
             }
 
-            // ✅ Nếu có dữ liệu, tiếp tục tìm kiếm
-            var query = _context.Products.AsQueryable();
+            // ✅ Khởi tạo query
+            var query = _context.Products
+                .Include(p => p.Category)
+                .AsQueryable();
 
+            // ✅ 1. Tìm kiếm theo từ khóa
             if (!string.IsNullOrWhiteSpace(keyword))
             {
-                query = query.Where(p =>
-                    p.Name.Contains(keyword) ||
-                    p.Description.Contains(keyword) ||
-                    p.Author.Contains(keyword));
-                ViewBag.Keyword = keyword;
+                var normalizedKeyword = TextHelper.NormalizeText(keyword);
+
+                // ❌ Loại bỏ lọc SQL (vì EF không hiểu NormalizeText)
+                // ✅ Lấy toàn bộ ra bộ nhớ trước
+                var allProducts = query
+                    .Include(p => p.Category)
+                    .AsNoTracking()
+                    .ToList();
+
+                // ✅ Lọc trong RAM — NormalizeText hoạt động chuẩn
+                query = allProducts
+                    .Where(p =>
+                        TextHelper.NormalizeText(p.Name).Contains(normalizedKeyword) ||
+                        TextHelper.NormalizeText(p.Description).Contains(normalizedKeyword) ||
+                        TextHelper.NormalizeText(p.Author).Contains(normalizedKeyword) ||
+                        TextHelper.NormalizeText(p.Category?.Name ?? "")
+                            .Contains(normalizedKeyword))
+                    .AsQueryable();
             }
 
+
+
+            // ✅ 2. Lọc giá
             if (minPrice.HasValue)
-            {
                 query = query.Where(p => p.Price >= minPrice.Value);
-                ViewBag.MinPrice = minPrice;
-            }
 
             if (maxPrice.HasValue)
-            {
                 query = query.Where(p => p.Price <= maxPrice.Value);
-                ViewBag.MaxPrice = maxPrice;
-            }
 
+            // ✅ 3. Lọc theo thể loại
             if (categoryId.HasValue && categoryId.Value > 0)
-            {
                 query = query.Where(p => p.CategoryId == categoryId.Value);
-                ViewBag.CategoryId = categoryId;
-            }
 
+            // ✅ 4. Lọc theo tác giả (không phân biệt hoa thường)
             if (!string.IsNullOrWhiteSpace(author))
-            {
-                query = query.Where(p => p.Author.Contains(author));
-                ViewBag.Author = author;
-            }
+                query = query.Where(p => EF.Functions.Like(p.Author.ToLower(), $"%{author.ToLower()}%"));
 
+            // ✅ 5. Lọc tồn kho
             if (inStock.HasValue)
+                query = query.Where(p => inStock.Value ? p.StockQuantity > 0 : p.StockQuantity <= 0);
+
+            // ✅ 6. Trả kết quả
+            var products = query.OrderBy(p => p.Name).ToList();
+            ViewBag.Keyword = keyword?.Trim();
+
+            // Thông báo tìm kiếm
+            if (products.Any())
             {
-                if (inStock.Value)
-                    query = query.Where(p => p.StockQuantity > 0);
-                else
-                    query = query.Where(p => p.StockQuantity <= 0);
-                ViewBag.InStock = inStock;
+                ViewBag.Message = $"🔍 Tìm thấy <strong>{products.Count}</strong> kết quả phù hợp.";
+            }
+            else
+            {
+                ViewBag.Message = $"❌ Không tìm thấy sản phẩm nào khớp với từ khóa \"{keyword}\".";
             }
 
-            var products = query.OrderBy(p => p.Name).ToList();
-            ViewBag.Categories = _context.Categories.ToList();
-
-            if (!products.Any())
-                ViewBag.Message = "Không tìm thấy sản phẩm phù hợp.";
-            else
-                ViewBag.Message = $"Tìm thấy {products.Count} kết quả.";
-
+            // Gửi kết quả về view
             return View("SearchResults", products);
-        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
